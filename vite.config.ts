@@ -4,9 +4,6 @@ import { defineConfig, PluginOption } from "vite";
 
 import sparkPlugin from "@github/spark/spark-vite-plugin";
 import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
-import { resolve } from 'path'
-
-const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -19,7 +16,23 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': resolve(projectRoot, 'src')
+      '@': new URL('./src', import.meta.url).pathname
     }
   },
+  build: {
+    // Optimize for production
+    minify: 'esbuild', // Changed from terser to esbuild for faster builds
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // Manual chunks for better caching
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-tabs'],
+        },
+      },
+    },
+  },
+  // Ensure proper base path for Cloudflare Pages
+  base: '/',
 });

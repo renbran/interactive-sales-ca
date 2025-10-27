@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Clock, User, Phone, Microphone } from '@phosphor-icons/react';
+import { CheckCircle, Clock, User, Phone, ArrowRight, Target, Microphone } from '@phosphor-icons/react';
 import { CallRecord } from '@/lib/types';
 import { formatDuration } from '@/lib/callUtils';
 import { cn } from '@/lib/utils';
+import { ollamaService, checkOllamaHealth } from '@/lib/ollamaService';
 
 interface PostCallSummaryProps {
   open: boolean;
@@ -17,6 +18,10 @@ interface PostCallSummaryProps {
 
 export default function PostCallSummary({ open, callRecord, onSave }: PostCallSummaryProps) {
   const [notes, setNotes] = useState('');
+  const [aiSummary, setAiSummary] = useState('');
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
 
   const getOutcomeColor = () => {
     switch (callRecord.outcome) {
@@ -45,9 +50,44 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
   };
 
   const handleSave = () => {
-    onSave(notes);
+    const finalNotes = aiSummary ? `${aiSummary}\n\nAdditional Notes:\n${notes}` : notes;
+    onSave(finalNotes);
     setNotes('');
+    setAiSummary('');
+    setFollowUpSuggestions([]);
   };
+
+  const generateAISummary = async () => {
+    setIsGeneratingAI(true);
+    try {
+      const summary = await ollamaService.generateCallSummary({
+        prospectInfo: callRecord.prospectInfo,
+        duration: callRecord.duration || 0,
+        outcome: callRecord.outcome,
+        qualification: callRecord.qualification,
+        scriptPath: callRecord.scriptPath,
+      });
+      setAiSummary(summary);
+
+      const suggestions = await ollamaService.generateFollowUpSuggestions({
+        prospectInfo: callRecord.prospectInfo,
+        outcome: callRecord.outcome,
+        qualification: callRecord.qualification,
+      });
+      setFollowUpSuggestions(suggestions);
+    } catch (error) {
+      console.error('Failed to generate AI summary:', error);
+      // Show a user-friendly error message
+    }
+    setIsGeneratingAI(false);
+  };
+
+  // Check if Ollama is available when component opens
+  useEffect(() => {
+    if (open) {
+      checkOllamaHealth().then(setAiEnabled);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -170,6 +210,61 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
                 <div>✅ Reminder day before demo</div>
                 <div>✅ Meeting link 1 hour before</div>
               </div>
+            </div>
+          )}
+
+          {/* AI-Powered Summary Section */}
+          {aiEnabled && (
+            <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-medium text-blue-900">🤖 AI Call Analysis</div>
+                <Button
+                  onClick={generateAISummary}
+                  disabled={isGeneratingAI}
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-700 border-blue-300 hover:bg-blue-100"
+                >
+                  {isGeneratingAI ? (
+                    <span className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+                      Analyzing...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <ArrowRight className="h-4 w-4" />
+                      Generate Summary
+                    </span>
+                  )}
+                </Button>
+              </div>
+
+              {aiSummary && (
+                <div className="space-y-3">
+                  <div>
+                    <div className="font-medium text-sm text-blue-900 mb-2">Call Summary:</div>
+                    <div className="text-sm text-blue-800 bg-white rounded p-3 border border-blue-100">
+                      {aiSummary}
+                    </div>
+                  </div>
+
+                  {followUpSuggestions.length > 0 && (
+                    <div>
+                      <div className="font-medium text-sm text-blue-900 mb-2">AI Follow-up Suggestions:</div>
+                      <div className="text-sm text-blue-800 bg-white rounded p-3 border border-blue-100">
+                        <ul className="space-y-1">
+                          {followUpSuggestions.map((suggestion, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <Target className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
+                              <span>{suggestion}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

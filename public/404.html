@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Page not found · Scholarix</title>
+  </head>
+  <body>
+    <script>
+      // SPA fallback for static hosts (Cloudflare Pages, Netlify, etc.)
+      // This will load the built index.html and preserve the current URL path.
+      (async function() {
+        try {
+          const resp = await fetch('/index.html');
+          const html = await resp.text();
+          document.open();
+          document.write(html);
+          // Replace the history entry so client router sees the original path
+          history.replaceState({}, '', location.pathname + location.search + location.hash);
+          document.close();
+        } catch (e) {
+          // On failure, redirect home as a fallback
+          location.replace('/');
+        }
+      })();
+    </script>
+  </body>
+</html>

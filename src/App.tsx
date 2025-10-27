@@ -11,6 +11,7 @@ import QualificationChecklist from '@/components/QualificationChecklist';
 import PostCallSummary from '@/components/PostCallSummary';
 import CallHistory from '@/components/CallHistory';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import ObjectionHandler from '@/components/ObjectionHandler';
 import { CallRecord, ProspectInfo, CallObjective, QualificationStatus } from '@/lib/types';
 import { scholarixScript, determineOutcome } from '@/lib/scholarixScript';
 import { calculateMetrics } from '@/lib/callUtils';
@@ -228,8 +229,9 @@ function App() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+          <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
             <TabsTrigger value="call">Live Call</TabsTrigger>
+            <TabsTrigger value="ai-helper">AI Helper</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -297,6 +299,22 @@ function App() {
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="ai-helper">
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+                <h2 className="text-xl font-bold text-blue-900 mb-2">🤖 AI Sales Assistant</h2>
+                <p className="text-blue-700 text-sm">
+                  Get AI-powered suggestions for handling objections and improving your sales conversations.
+                </p>
+              </div>
+              
+              <ObjectionHandler 
+                industry={activeCall?.prospectInfo.industry || 'real-estate'}
+                prospectName={activeCall?.prospectInfo.name}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="history">
