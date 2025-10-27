@@ -1,27 +1,22 @@
-# Railway Ollama Deployment
 FROM ollama/ollama:latest
 
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# Set environment variables
+# Set environment variables for Railway
 ENV OLLAMA_HOST=0.0.0.0
 ENV OLLAMA_ORIGINS=*
-ENV OLLAMA_MODELS=/app/models
 
-# Create directory for models
-RUN mkdir -p /app/models
-
-# Copy startup script
-COPY start-ollama.sh /start-ollama.sh
-RUN chmod +x /start-ollama.sh
-
-# Expose port
+# Expose the port
 EXPOSE 11434
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:11434/api/tags || exit 1
+# Create startup script inline
+RUN echo '#!/bin/bash\n\
+# Start ollama in background\n\
+ollama serve &\n\
+# Wait for server to be ready\n\
+sleep 15\n\
+# Pull a smaller, faster model for Railway\n\
+ollama pull llama3.2:3b\n\
+# Keep container running\n\
+wait' > /start.sh && chmod +x /start.sh
 
-# Start Ollama
-CMD ["/start-ollama.sh"]
+# Start the service
+CMD ["/start.sh"]
