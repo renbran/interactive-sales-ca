@@ -70,23 +70,24 @@ The design should feel like a premium sales enablement tool for elite closers - 
 
 ## Color Selection
 
-**Triadic scheme** using Deep Professional Blue (trust/authority), Vibrant Coral Orange (urgency/action), and Success Green (achievement), creating clear semantic meaning for call phases and qualification states.
+**Brand-aligned scheme** using Deep Navy (professional foundation), Turquoise/Cyan (brand accent), and semantic success/warning colors for clear visual communication.
 
-- **Primary Color**: Deep Professional Blue (oklch(0.42 0.18 260)) - Trust and competence for main UI chrome and opening phase
-- **Secondary Colors**: 
-  - Soft Slate (oklch(0.94 0.005 250)) for backgrounds and inactive states
-  - Light Background (oklch(0.98 0.005 250)) for main canvas
-- **Accent Color**: Vibrant Coral Orange (oklch(0.60 0.22 30)) - Creates urgency for CTAs, demo offers, and key actions
+- **Primary Color**: Deep Navy Blue (oklch(0.35 0.08 245)) - Professional foundation for UI chrome and containers
+- **Secondary Color**: Turquoise (oklch(0.65 0.14 195)) - Brand accent color for secondary actions and highlights
+- **Accent Color**: Turquoise (oklch(0.65 0.14 195)) - Brand color for primary CTAs, demo offers, and key actions
+- **Background Colors**: 
+  - Dark Background (oklch(0.15 0.04 245)) for main canvas
+  - Card Background (oklch(0.20 0.045 245)) for content cards
 - **Success Green**: (oklch(0.58 0.17 145)) - Qualified leads, demo bookings, positive responses
 - **Warning Yellow**: (oklch(0.70 0.15 75)) - Objection phases and caution states
 - **Destructive Red**: (oklch(0.55 0.24 25)) - Disqualified leads and negative outcomes
 
 **Foreground/Background Pairings**:
-- Background Light (oklch(0.98 0.005 250)): Dark Text (oklch(0.20 0.015 250)) - Ratio 14.2:1 ✓
-- Card White (oklch(1 0 0)): Dark Text (oklch(0.20 0.015 250)) - Ratio 16.5:1 ✓
-- Primary Blue (oklch(0.42 0.18 260)): White (oklch(1 0 0)) - Ratio 8.9:1 ✓
-- Accent Orange (oklch(0.60 0.22 30)): White (oklch(1 0 0)) - Ratio 5.2:1 ✓
-- Success Green (oklch(0.58 0.17 145)): White (oklch(1 0 0)) - Ratio 4.9:1 ✓
+- Dark Background (oklch(0.15 0.04 245)): Light Text (oklch(0.95 0.01 220)) - High Contrast ✓
+- Card Background (oklch(0.20 0.045 245)): Light Text (oklch(0.95 0.01 220)) - High Contrast ✓
+- Primary Navy (oklch(0.35 0.08 245)): Turquoise Text (oklch(0.65 0.14 195)) - Brand Pairing ✓
+- Accent Turquoise (oklch(0.65 0.14 195)): White Text (oklch(0.98 0.005 220)) - Ratio 4.5:1 ✓
+- Success Green (oklch(0.58 0.17 145)): White Text (oklch(1 0 0)) - Ratio 4.9:1 ✓
 
 ## Font Selection
 

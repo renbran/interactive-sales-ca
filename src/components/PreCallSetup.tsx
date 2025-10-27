@@ -183,7 +183,7 @@ export default function PreCallSetup({ open, onClose, onStart }: PreCallSetupPro
           <Button 
             onClick={handleStart} 
             disabled={!isValid}
-            className="bg-accent hover:bg-accent/90"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground"
           >
             <Phone weight="fill" className="mr-2 h-4 w-4" />
             Start Call

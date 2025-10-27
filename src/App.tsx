@@ -184,7 +184,7 @@ function App() {
             {!activeCall && (
               <Button 
                 size="lg" 
-                className="bg-accent hover:bg-accent/90 h-12 px-6"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground h-12 px-6"
                 onClick={() => setShowPreCallSetup(true)}
               >
                 <Phone weight="fill" className="mr-2 h-5 w-5" />
@@ -242,7 +242,7 @@ function App() {
                 </p>
                 <Button 
                   size="lg"
-                  className="bg-accent hover:bg-accent/90 h-12 px-6"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground h-12 px-6"
                   onClick={() => setShowPreCallSetup(true)}
                 >
                   <Phone weight="fill" className="mr-2 h-5 w-5" />

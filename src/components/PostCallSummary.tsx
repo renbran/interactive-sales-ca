@@ -162,7 +162,7 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
           <div className="flex gap-3 justify-end">
             <Button
               onClick={handleSave}
-              className="bg-accent hover:bg-accent/90"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground"
               size="lg"
             >
               Save Call
