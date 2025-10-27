@@ -1,168 +1,166 @@
-# Sales Call Assistant - Product Requirements Document
+# Scholarix Telesales System - Product Requirements Document
 
-An interactive sales call assistant that transforms cold calling from static script-reading into a dynamic, guided experience with real-time decision support and qualification tracking.
+A production-ready telesales web application implementing the complete Scholarix World-Class Telesales Script - "The No-Escape System" designed to turn cold calls into committed demos in under 5 minutes.
 
-**Experience Qualities**:
-1. **Confident** - The interface provides clear guidance at every decision point, eliminating hesitation and empowering sales reps to navigate calls smoothly
-2. **Focused** - Visual hierarchy and spatial design keep attention on the current script and next action, reducing cognitive load during high-pressure conversations
-3. **Responsive** - Instant feedback to every interaction creates a sense of control and momentum throughout the call process
+**Target Market**: UAE Decision-Makers in Real Estate, Consulting, Retail, Trading, and Logistics
+**Objective**: Achieve 40%+ demo booking rate with 3-5 minute average call duration
+**Value Proposition**: Odoo + AI automation deployment in 14 days at 40% below market price (limited to 40 slots)
 
-**Complexity Level**: Light Application (multiple features with basic state)
-This is a guided workflow tool with state management for call progress, qualification tracking, and analytics - but doesn't require authentication or complex backend systems in this implementation.
+## Experience Qualities
+
+1. **Confident** - The interface eliminates hesitation by providing world-class scripts with built-in objection handlers and exact phrasing at every decision point
+2. **Focused** - Visual hierarchy keeps attention on the current script phase and next action, reducing cognitive load during high-pressure conversations
+3. **Empowering** - Real-time qualification tracking and pro tips position the sales rep as an elite closer, not a script reader
+
+## Complexity Level
+
+**Light Application** (multiple features with basic state)  
+Interactive workflow tool with call state management, SPIN-based qualification tracking, and performance analytics. No authentication required in initial version - focuses purely on the telesales methodology execution.
 
 ## Essential Features
 
-### 1. Pre-Call Setup
-- **Functionality**: Form to capture prospect information and select call objective before starting
-- **Purpose**: Ensures reps are prepared and all necessary context is captured before engaging
-- **Trigger**: User clicks "New Call" from dashboard
-- **Progression**: Dashboard → Setup Form (prospect info + objective) → Review talking points → Start Call button → Live call interface
-- **Success criteria**: All required fields validated, call timer starts, script loads for selected objective
+### 1. Pre-Call Intelligence Gathering
+- **Functionality**: Structured form capturing prospect name, title, company, industry, phone, email, WhatsApp, and call objective
+- **Purpose**: Ensures reps have complete intel before engaging, with industry-specific pain points auto-loaded into scripts
+- **Trigger**: User clicks "Start New Call" button
+- **Progression**: Dashboard → Pre-Call Setup Modal → Industry selection → Auto-load pain points → Mental frame reminder → Start Call → Live interface
+- **Success criteria**: All required fields validated, industry pain points displayed, scripts personalized with prospect data
 
-### 2. Interactive Call Flow with Decision Buttons
-- **Functionality**: Large, color-coded script sections with prominent response buttons that dynamically update the conversation path
-- **Purpose**: Guides reps through qualification without requiring memorization, adapting in real-time to client responses
-- **Trigger**: Call starts or user clicks a response button
-- **Progression**: Display script question → User clicks client response (Yes/No/Unsure) → Script updates to appropriate next section → Qualification checklist auto-updates → Repeat until call concludes
-- **Success criteria**: Response buttons trigger script changes within 100ms, qualification status updates automatically, conversation flows logically to conclusion
+### 2. Dynamic Scholarix Script Flow
+- **Functionality**: Phase-based script display with response buttons that adapt conversation path based on SPIN methodology (Situation, Problem, Implication, Need-Payoff)
+- **Purpose**: Guides reps through proven conversion methodology without memorization, handling objections with world-class responses
+- **Trigger**: Call starts or user selects prospect response
+- **Progression**: Opening → Permission Hook → Discovery (SPIN) → Teaching Moment → Demo Offer → Objection Handling → Close/Follow-up
+- **Success criteria**: Scripts update within 100ms, prospect info auto-fills placeholders, response buttons clearly indicate positive/negative/objection paths
 
-### 3. Real-Time Qualification Tracking
-- **Functionality**: Live checklist showing qualification criteria completion with progress visualization
-- **Purpose**: Provides instant visibility into whether prospect meets criteria, preventing wasted time on unqualified leads
-- **Trigger**: Automatically updates as response buttons are clicked
-- **Progression**: Checklist starts empty → Each decision point marks criteria complete/incomplete → Progress bar fills → Status changes color (red/yellow/green) → Final qualification determined
-- **Success criteria**: Checklist updates synchronously with script progression, clear visual distinction between qualified/unqualified states
+### 3. Real-Time SPIN Qualification
+- **Functionality**: Six-point checklist tracking: Uses Manual Process, Pain Point Identified, Pain Quantified, Value Acknowledged, Time Committed, Demo Booked
+- **Purpose**: Provides instant visibility into deal quality and qualification progress using proven SPIN selling criteria
+- **Trigger**: Automatically updates as script progresses and responses selected
+- **Progression**: Empty checkist → Items check off as qualification criteria met → Progress bar fills → Status changes (Just Started → In Progress → Strong Lead → Demo Booked)
+- **Success criteria**: Qualification updates synchronously with script, clear visual distinction between qualified/unqualified/in-progress states
 
-### 4. Call Recording Interface
-- **Functionality**: Browser-based audio recording with waveform visualization, timer, and playback controls
-- **Purpose**: Creates accountability, enables coaching, and provides reference for follow-up actions
-- **Trigger**: Auto-starts when call begins (or manual start)
-- **Progression**: Click record → Audio capture begins → Waveform displays → Timer counts → Stop recording → Audio saved with call metadata → Available for playback in call history
-- **Success criteria**: Clean audio capture, recording persists with call data, playback works with timestamp markers
+### 4. Post-Call Follow-Up System
+- **Functionality**: Call outcome classification with notes capture and automated follow-up reminders based on Scholarix methodology
+- **Purpose**: Ensures proper follow-through on demo bookings (calendar invite within 1 hour, WhatsApp confirmation, etc.)
+- **Trigger**: User clicks "End Call"
+- **Progression**: Call ends → Summary modal displays outcome + qualification + duration → Add notes → Save → Reminder for follow-up actions → Return to analytics
+- **Success criteria**: Call data persists with useKV, demo bookings trigger specific follow-up checklist, all data searchable in history
 
-### 5. Post-Call Summary & Analytics
-- **Functionality**: Automatic call outcome classification, captured information display, and aggregated performance metrics
-- **Purpose**: Eliminates manual logging, provides coaching insights, tracks conversion rates across qualification stages
-- **Trigger**: User clicks "End Call" 
-- **Progression**: Call ends → Summary screen displays outcome + key data → Notes can be added → Save to history → Return to dashboard with updated analytics
-- **Success criteria**: Call data persists, analytics dashboard shows accurate metrics, historical calls are searchable and reviewable
+### 5. Performance Analytics Dashboard
+- **Functionality**: Aggregated metrics showing total calls, demos booked, conversion rate, average duration, and qualification breakdown
+- **Purpose**: Tracks progress toward 40%+ booking rate target, identifies improvement areas
+- **Trigger**: User navigates to Analytics tab
+- **Progression**: Dashboard loads → Display key metrics → Show qualification funnel → Highlight conversion rate vs 40% target → Present call history trends
+- **Success criteria**: Metrics calculate accurately from call history, conversion rate prominently displayed, visual indicators for meeting/missing 40% target
 
 ## Edge Case Handling
 
-- **Mid-call navigation away** - Auto-save call progress and prompt to resume or discard on return
-- **Recording failure** - Display warning banner, allow call to continue without recording, log error
-- **Rapid button clicking** - Debounce response buttons to prevent state conflicts
-- **No microphone permission** - Gracefully disable recording features, show clear message about permission requirement
-- **Long calls (>1 hour)** - Chunk recordings for browser memory management, display extended timer format
-- **Qualification dead-end** - Provide "Back" button to revise previous responses if rep realizes they made an error
-- **Empty call history** - Show helpful empty state with "Make your first call" prompt and feature overview
+- **Mid-call browser refresh** - useKV auto-saves active call state; prompt to resume on page load
+- **Missing prospect data during script** - Placeholders display [NAME], [COMPANY] if not provided; rep fills verbally
+- **Rapid response clicking** - Debounce buttons 300ms to prevent state conflicts
+- **No calls in history** - Display empty state with "Make your first call" CTA and methodology overview
+- **Demo booked without contact info** - Warning modal: "Add email/WhatsApp for follow-up reminders"
+- **Long objection loops** - Breadcrumb trail shows script path; "Go Back" option if rep realizes wrong turn
+- **Conversion rate below 20%** - Analytics dashboard shows warning banner with methodology review prompts
 
 ## Design Direction
 
-The design should feel professional, focused, and confidence-inspiring - like a mission control dashboard for sales conversations. The interface should project calm authority with clean typography, generous spacing, and purposeful use of color to communicate status and guide attention. This is a tool for high-stakes conversations, so every element must be instantly readable and unambiguous. Minimal interface that gets out of the way during calls, revealing detailed data only when needed for analysis.
+The design should feel like a premium sales enablement tool for elite closers - professional, focused, and confidence-inspiring. Think mission control meets luxury car dashboard: clean lines, purposeful color coding for call phases, generous whitespace that doesn't distract during live conversations. The interface should project calm authority with typography that's instantly readable under pressure. Minimal chrome, maximum clarity - every element earns its place by directly supporting the close.
 
 ## Color Selection
 
-Triadic color scheme using blue (trust/professionalism), green (success/qualified), and coral (urgency/attention) to create clear semantic meaning throughout the interface.
+**Triadic scheme** using Deep Professional Blue (trust/authority), Vibrant Coral Orange (urgency/action), and Success Green (achievement), creating clear semantic meaning for call phases and qualification states.
 
-- **Primary Color**: Deep Professional Blue (oklch(0.45 0.15 250)) - Communicates trust and competence, used for main actions and script display
+- **Primary Color**: Deep Professional Blue (oklch(0.42 0.18 260)) - Trust and competence for main UI chrome and opening phase
 - **Secondary Colors**: 
-  - Soft Slate (oklch(0.55 0.02 250)) for supporting UI elements and inactive states
-  - Light Background (oklch(0.97 0.01 250)) for content areas
-- **Accent Color**: Vibrant Coral (oklch(0.65 0.19 25)) - Creates urgency for key actions like "Start Call" and warning states
-- **Success Green**: (oklch(0.65 0.15 150)) - Indicates qualified leads and positive outcomes
-- **Warning Yellow**: (oklch(0.75 0.13 85)) - Shows objection handling and caution states
-- **Foreground/Background Pairings**:
-  - Background Light (oklch(0.97 0.01 250)): Dark Text (oklch(0.25 0.02 250)) - Ratio 10.2:1 ✓
-  - Card (oklch(1 0 0)): Dark Text (oklch(0.25 0.02 250)) - Ratio 12.8:1 ✓
-  - Primary Blue (oklch(0.45 0.15 250)): White (oklch(1 0 0)) - Ratio 8.1:1 ✓
-  - Accent Coral (oklch(0.65 0.19 25)): White (oklch(1 0 0)) - Ratio 4.6:1 ✓
-  - Success Green (oklch(0.65 0.15 150)): White (oklch(1 0 0)) - Ratio 4.8:1 ✓
-  - Muted Slate (oklch(0.92 0.01 250)): Medium Text (oklch(0.45 0.02 250)) - Ratio 5.2:1 ✓
+  - Soft Slate (oklch(0.94 0.005 250)) for backgrounds and inactive states
+  - Light Background (oklch(0.98 0.005 250)) for main canvas
+- **Accent Color**: Vibrant Coral Orange (oklch(0.60 0.22 30)) - Creates urgency for CTAs, demo offers, and key actions
+- **Success Green**: (oklch(0.58 0.17 145)) - Qualified leads, demo bookings, positive responses
+- **Warning Yellow**: (oklch(0.70 0.15 75)) - Objection phases and caution states
+- **Destructive Red**: (oklch(0.55 0.24 25)) - Disqualified leads and negative outcomes
+
+**Foreground/Background Pairings**:
+- Background Light (oklch(0.98 0.005 250)): Dark Text (oklch(0.20 0.015 250)) - Ratio 14.2:1 ✓
+- Card White (oklch(1 0 0)): Dark Text (oklch(0.20 0.015 250)) - Ratio 16.5:1 ✓
+- Primary Blue (oklch(0.42 0.18 260)): White (oklch(1 0 0)) - Ratio 8.9:1 ✓
+- Accent Orange (oklch(0.60 0.22 30)): White (oklch(1 0 0)) - Ratio 5.2:1 ✓
+- Success Green (oklch(0.58 0.17 145)): White (oklch(1 0 0)) - Ratio 4.9:1 ✓
 
 ## Font Selection
 
-The typeface should be highly legible under pressure with clear numerical distinction for metrics. Inter provides the professional clarity and excellent screen readability required for scanning scripts mid-conversation, while maintaining a modern, approachable character.
+**Inter** provides the professional clarity and excellent screen readability required for high-pressure sales calls, with clear numerical distinction for metrics and excellent multilingual support for UAE market (Arabic names, English scripts).
 
 - **Typographic Hierarchy**:
-  - H1 (Dashboard Title): Inter SemiBold/32px/tight tracking/-0.02em
-  - H2 (Section Headers): Inter SemiBold/24px/tight tracking/-0.01em
-  - H3 (Card Titles): Inter Medium/18px/normal tracking
-  - Script Display: Inter Regular/22px/relaxed line-height 1.6 (highly readable during calls)
-  - Body Text: Inter Regular/15px/normal line-height 1.5
-  - Small Text (Metadata): Inter Regular/13px/normal tracking/muted color
-  - Buttons: Inter Medium/15px/normal tracking
-  - Metrics (Large): Inter SemiBold/48px/tight tracking (dashboard stats)
+  - H1 (App Title): Inter SemiBold/32px/-0.02em tracking
+  - H2 (Phase Headers): Inter SemiBold/24px/-0.01em tracking
+  - H3 (Card Titles): Inter SemiBold/20px/normal
+  - Script Display: Inter Medium/18px/1.6 line-height (highly readable during calls)
+  - Response Buttons: Inter Medium/15px/normal
+  - Body Text: Inter Regular/15px/1.5 line-height
+  - Small Text (Metadata): Inter Regular/13px/muted color
+  - Metrics (Large): Inter SemiBold/48px/tight (dashboard stats)
 
 ## Animations
 
-Motion should feel immediate and purposeful - like flipping to the next page in a playbook rather than elaborate transitions. The overall feeling is efficient progression with subtle celebratory moments for achievements.
+Motion should feel immediate and purposeful - like advancing through a playbook, not waiting for transitions. Efficiency with moments of celebration for demo bookings.
 
-- **Purposeful Meaning**: Animations communicate state changes (script advancing, qualification updating) and provide satisfying feedback for successful outcomes (demo booked)
+- **Purposeful Meaning**: Script transitions communicate forward progress in the sales funnel; qualification checks provide satisfying feedback for hitting milestones
 - **Hierarchy of Movement**:
-  - Script transitions: Quick fade + subtle slide (200ms) - highest priority for seamless conversation flow
-  - Button feedback: Immediate scale press (100ms) + color change - instant tactile response
-  - Qualification checklist items: Check animation (300ms) with subtle bounce - satisfying progress indicator
-  - Dashboard metrics: Count-up animation on mount (800ms) - draws attention to performance numbers
-  - Call outcome celebration: Confetti burst for demo bookings - memorable positive reinforcement
+  - Script phase changes: Quick crossfade (150ms) - instant feel, no waiting
+  - Response button press: Immediate scale (100ms) + ripple effect - tactile confirmation
+  - Qualification items checking: Checkmark scale + subtle bounce (250ms) - satisfying progress
+  - Demo booking celebration: Confetti burst + success modal scale-in (400ms) - memorable win moment
+  - Metric count-ups on dashboard: Animate from 0 (600ms) - draws attention to performance
 
 ## Component Selection
 
 - **Components**:
-  - **Card** - Primary container for script display, prospect info, call controls (with subtle shadow for depth)
-  - **Button** - Decision responses with size='lg' and full width, primary variant for positive actions, outline for secondary
-  - **Progress** - Qualification percentage visualization in header
-  - **Badge** - Qualification status indicators with color variants (destructive/warning/success)
-  - **Separator** - Visual division between major interface sections
-  - **Tabs** - Dashboard navigation between Live Call / History / Analytics
-  - **Dialog** - Pre-call setup modal, post-call summary overlay
-  - **Textarea** - Post-call notes input
-  - **Input** - Prospect information forms
-  - **Select** - Call objective picker
-  - **Checkbox** - Qualification criteria checklist items (custom styled with animations)
-  - **ScrollArea** - Call history list and script content overflow
-  - **Alert** - Recording status indicators and error messages
+  - **Card** - Primary container for script, prospect info, call controls (subtle shadow for depth, rounded corners per --radius)
+  - **Button** - Response selection with size='lg' and full width, color-coded by response type (positive=green, negative=muted, objection=warning)
+  - **Progress** - Qualification percentage with color transitions (muted → warning → success as progress increases)
+  - **Badge** - Call phase indicators (color-coded: opening=blue, discovery=orange, teaching=yellow, close=green, objection=red)
+  - **Separator** - Visual division between script sections and metadata
+  - **Tabs** - Dashboard navigation (Live Call / History / Analytics)
+  - **Dialog** - Pre-call setup and post-call summary modals with backdrop
+  - **Textarea** - Post-call notes capture
+  - **Input** - Prospect information forms with clear labels
+  - **Select** - Industry and call objective pickers with searchable options
+  - **ScrollArea** - Script content and call history lists
+  - **Toaster (Sonner)** - Success notifications for demo bookings and call saves
 
 - **Customizations**:
-  - Custom waveform visualization component for audio recording (Canvas-based)
-  - Large response button group component with keyboard shortcuts overlay
-  - Call timer component with hours:minutes:seconds format
-  - Confetti animation component for demo bookings (canvas-based particle system)
-  - Interactive decision tree visualization for analytics
+  - Call timer component with real-time seconds counter (MM:SS format, prominent display)
+  - Industry pain point auto-display based on selection (Real Estate → deal tracking chaos, etc.)
+  - Script phase progress indicator showing Opening → Discovery → Teaching → Close flow
+  - Demo booking celebration with confetti particles (canvas-based, 2-second burst)
+  - Conversion rate gauge with 40% target line and color coding (red <20%, yellow 20-39%, green 40%+)
 
 - **States**:
-  - Buttons: Clear hover elevation, active press scale (0.98), disabled opacity with cursor-not-allowed
-  - Response buttons: Selected state with border accent and checkmark icon, hover with subtle scale (1.02)
-  - Recording button: Pulsing red dot when active, static when paused
-  - Qualification items: Pending (gray), Complete (green with check), Failed (red with x), animated transitions
+  - Buttons: Clear hover lift (2px), active press scale (0.97), disabled opacity (0.5) with cursor-not-allowed
+  - Response buttons: Selected state with border glow and checkmark icon before transition
+  - Call phase badges: Pulsing animation on active phase, muted on completed phases
+  - Qualification items: Pending (gray circle), Complete (green checkmark with fill), Failed (red X with fill)
 
-- **Icon Selection**:
-  - Phone (call start/active): Represents calling action
-  - PhoneDisconnect (end call): Clear call termination
-  - Record (recording): Universal recording symbol
-  - Pause/Play (recording controls): Standard media controls
-  - CheckCircle (qualification complete): Positive progress
-  - XCircle (disqualified): Negative indicator
-  - Clock (call timer): Time representation
-  - User (prospect info): Person identifier
-  - ChartBar (analytics): Data visualization
-  - ListChecks (qualification checklist): Criteria tracking
-  - ArrowRight (script progression): Forward movement
-  - ArrowLeft (go back): Correction option
-  - SpeakerHigh (playback): Audio indicator
+- **Icon Selection** (Phosphor Icons):
+  - Phone (call start/active), PhoneDisconnect (end call), Clock (timer), User (prospect)
+  - CheckCircle (qualification complete), XCircle (disqualified), Circle (pending)
+  - Target (qualification section), ChartBar (analytics), ClockCounterClockwise (history)
+  - Lightbulb (pro tips), ArrowRight (script progression), Warning (objection phase)
+  - Confetti (demo booked celebration)
 
 - **Spacing**: 
-  - Dashboard grid gap: 6 (24px) for major sections
-  - Card internal padding: 6 (24px) for comfortable reading
-  - Button group gaps: 3 (12px) for clear separation
-  - Qualification checklist items: 2 (8px) for compact list
-  - Script paragraphs: 4 (16px) for clear thought separation
+  - Dashboard grid: gap-6 (24px) for major sections
+  - Card padding: p-6 (24px) for comfortable reading
+  - Script paragraphs: space-y-4 (16px) for clear thought separation
+  - Response button grid: gap-2 (8px) for compact but clear selection
+  - Qualification checklist: space-y-3 (12px) for scannable list
 
 - **Mobile**:
-  - Stack three-column layout vertically: Script → Controls → Checklist
-  - Prospect info collapses to accordion at top
-  - Response buttons remain large and thumb-friendly (min 48px height)
-  - Dashboard metrics switch to 1-column grid
-  - Call history table becomes card list
-  - Waveform visualization scales down but remains visible
-  - Reduce script font size to 18px for mobile, maintain readability
+  - Stack three-column layout vertically: Script (top) → Qualification (middle) → Controls (bottom, sticky)
+  - Prospect info collapses to compact header bar with expand toggle
+  - Response buttons remain large and thumb-friendly (min 48px height, full width)
+  - Dashboard metrics switch to 1-column grid with larger touch targets
+  - Script font size scales to 16px on mobile while maintaining 1.6 line-height
+  - Call history switches from table to card-based list with swipe actions

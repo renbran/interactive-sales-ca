@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Clock } from '@phosphor-icons/react';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle, Clock, User, Phone } from '@phosphor-icons/react';
 import { CallRecord } from '@/lib/types';
 import { formatDuration } from '@/lib/callUtils';
 import { cn } from '@/lib/utils';
@@ -16,158 +16,160 @@ interface PostCallSummaryProps {
 }
 
 export default function PostCallSummary({ open, callRecord, onSave }: PostCallSummaryProps) {
-  const [notes, setNotes] = useState(callRecord.notes || '');
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [notes, setNotes] = useState('');
 
-  useEffect(() => {
-    if (open && callRecord.outcome === 'demo-booked') {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
-  }, [open, callRecord.outcome]);
-
-  const getOutcomeConfig = () => {
+  const getOutcomeColor = () => {
     switch (callRecord.outcome) {
       case 'demo-booked':
-        return {
-          label: 'Demo Booked! 🎉',
-          variant: 'default' as const,
-          className: 'bg-success hover:bg-success/90',
-          icon: CheckCircle
-        };
-      case 'follow-up':
-        return {
-          label: 'Follow-up Required',
-          variant: 'secondary' as const,
-          className: '',
-          icon: Clock
-        };
-      case 'disqualified':
-        return {
-          label: 'Disqualified',
-          variant: 'destructive' as const,
-          className: '',
-          icon: XCircle
-        };
+        return 'bg-success text-success-foreground';
+      case 'follow-up-scheduled':
+        return 'bg-warning text-warning-foreground';
+      case 'not-interested':
+        return 'bg-destructive text-destructive-foreground';
       default:
-        return {
-          label: callRecord.outcome,
-          variant: 'outline' as const,
-          className: '',
-          icon: Clock
-        };
+        return 'bg-secondary text-secondary-foreground';
     }
   };
 
-  const outcome = getOutcomeConfig();
-  const OutcomeIcon = outcome.icon;
+  const getOutcomeLabel = () => {
+    switch (callRecord.outcome) {
+      case 'demo-booked':
+        return '🎉 Demo Booked!';
+      case 'follow-up-scheduled':
+        return '📅 Follow-Up Scheduled';
+      case 'not-interested':
+        return '❌ Not Interested';
+      default:
+        return 'Call Completed';
+    }
+  };
+
+  const handleSave = () => {
+    onSave(notes);
+    setNotes('');
+  };
 
   return (
-    <>
-      <Dialog open={open}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Call Summary</DialogTitle>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">Call Summary</DialogTitle>
+          <DialogDescription>
+            Review the call outcome and add any notes before saving
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div>
-                <div className="font-semibold text-lg">{callRecord.prospectInfo.name}</div>
-                <div className="text-sm text-muted-foreground">{callRecord.prospectInfo.company}</div>
-              </div>
-              <Badge variant={outcome.variant} className={cn('text-sm', outcome.className)}>
-                <OutcomeIcon weight="fill" className="mr-2 h-4 w-4" />
-                {outcome.label}
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Call Duration</div>
-                <div className="font-semibold">{formatDuration(callRecord.duration || 0)}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Objective</div>
-                <div className="font-semibold capitalize">{callRecord.objective.replace('-', ' ')}</div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Qualification Results</div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
-                  <span>Right Person</span>
-                  {callRecord.qualification.rightPerson === true ? (
-                    <CheckCircle weight="fill" className="h-4 w-4 text-success" />
-                  ) : callRecord.qualification.rightPerson === false ? (
-                    <XCircle weight="fill" className="h-4 w-4 text-destructive" />
-                  ) : (
-                    <span className="text-muted-foreground">N/A</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
-                  <span>Using Excel</span>
-                  {callRecord.qualification.usingExcel === true ? (
-                    <CheckCircle weight="fill" className="h-4 w-4 text-success" />
-                  ) : callRecord.qualification.usingExcel === false ? (
-                    <XCircle weight="fill" className="h-4 w-4 text-destructive" />
-                  ) : (
-                    <span className="text-muted-foreground">N/A</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
-                  <span>Has Authority</span>
-                  {callRecord.qualification.hasAuthority === true ? (
-                    <CheckCircle weight="fill" className="h-4 w-4 text-success" />
-                  ) : callRecord.qualification.hasAuthority === false ? (
-                    <XCircle weight="fill" className="h-4 w-4 text-destructive" />
-                  ) : (
-                    <span className="text-muted-foreground">N/A</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-2 bg-muted rounded">
-                  <span>Pain Level</span>
-                  {callRecord.qualification.painLevel !== null ? (
-                    <span className="font-semibold text-primary">{callRecord.qualification.painLevel}/10</span>
-                  ) : (
-                    <span className="text-muted-foreground">N/A</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">Call Notes</Label>
-              <Textarea
-                id="notes"
-                placeholder="Add any additional notes about the call..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={4}
-              />
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <Badge className={cn('text-lg px-4 py-2', getOutcomeColor())}>
+              {getOutcomeLabel()}
+            </Badge>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm">{formatDuration(callRecord.duration || 0)}</span>
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <div className="font-medium">{callRecord.prospectInfo.name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {callRecord.prospectInfo.company} • {callRecord.prospectInfo.industry}
+                </div>
+                {callRecord.prospectInfo.phone && (
+                  <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                    <Phone className="h-3 w-3" />
+                    {callRecord.prospectInfo.phone}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <div className="font-medium mb-2">Qualification Status</div>
+            <div className="grid grid-cols-2 gap-2">
+              {callRecord.qualification.usesManualProcess && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle weight="fill" className="h-4 w-4 text-success" />
+                  <span>Uses Manual Process</span>
+                </div>
+              )}
+              {callRecord.qualification.painPointIdentified && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle weight="fill" className="h-4 w-4 text-success" />
+                  <span>Pain Identified</span>
+                </div>
+              )}
+              {callRecord.qualification.painQuantified && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle weight="fill" className="h-4 w-4 text-success" />
+                  <span>Pain Quantified</span>
+                </div>
+              )}
+              {callRecord.qualification.valueAcknowledged && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle weight="fill" className="h-4 w-4 text-success" />
+                  <span>Value Acknowledged</span>
+                </div>
+              )}
+              {callRecord.qualification.timeCommitted && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle weight="fill" className="h-4 w-4 text-success" />
+                  <span>Time Committed</span>
+                </div>
+              )}
+              {callRecord.qualification.demoBooked && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle weight="fill" className="h-4 w-4 text-success" />
+                  <span>Demo Booked</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {callRecord.outcome === 'demo-booked' && (
+            <div className="rounded-lg bg-success/10 border border-success/20 p-4">
+              <div className="font-medium text-success mb-2">📋 Next Steps (Critical!)</div>
+              <div className="text-sm text-foreground/80 space-y-1">
+                <div>✅ Send calendar invite within 1 hour</div>
+                <div>✅ WhatsApp confirmation today evening</div>
+                <div>✅ Reminder day before demo</div>
+                <div>✅ Meeting link 1 hour before</div>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="notes" className="font-medium mb-2 block">
+              Call Notes
+            </label>
+            <Textarea
+              id="notes"
+              placeholder="Add any important notes, pain points mentioned, objections, or follow-up actions..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+            />
+          </div>
+
+          <div className="flex gap-3 justify-end">
             <Button
+              onClick={handleSave}
+              className="bg-accent hover:bg-accent/90"
               size="lg"
-              className="flex-1 bg-primary hover:bg-primary/90"
-              onClick={() => onSave(notes)}
             >
-              Save & Continue
+              Save Call
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl animate-bounce">🎉</div>
-          </div>
         </div>
-      )}
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }

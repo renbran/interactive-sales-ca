@@ -12,11 +12,11 @@ import PostCallSummary from '@/components/PostCallSummary';
 import CallHistory from '@/components/CallHistory';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { CallRecord, ProspectInfo, CallObjective, QualificationStatus } from '@/lib/types';
-import { callScript, determineOutcome } from '@/lib/callScript';
+import { scholarixScript, determineOutcome } from '@/lib/scholarixScript';
 import { calculateMetrics } from '@/lib/callUtils';
 
 function App() {
-  const [callHistory, setCallHistory] = useKV<CallRecord[]>('call-history', []);
+  const [callHistory, setCallHistory] = useKV<CallRecord[]>('scholarix-call-history', []);
   
   const [showPreCallSetup, setShowPreCallSetup] = useState(false);
   const [activeCall, setActiveCall] = useState<{
@@ -43,11 +43,11 @@ function App() {
       currentNodeId: 'start',
       scriptPath: ['start'],
       qualification: {
-        rightPerson: null,
-        usingExcel: null,
-        painLevel: null,
-        hasAuthority: null,
-        budgetDiscussed: null,
+        usesManualProcess: null,
+        painPointIdentified: null,
+        painQuantified: null,
+        valueAcknowledged: null,
+        timeCommitted: null,
         demoBooked: null
       },
       isRecording: true,
@@ -57,18 +57,18 @@ function App() {
     setActiveCall(newCall);
     setShowPreCallSetup(false);
     setActiveTab('call');
-    toast.success('Call started');
+    toast.success('Call started - follow the script!');
   };
 
   const handleResponse = (nextNodeId: string) => {
     if (!activeCall) return;
 
-    const nextNode = callScript[nextNodeId];
+    const nextNode = scholarixScript[nextNodeId];
     if (!nextNode) return;
 
     let updatedQualification = { ...activeCall.qualification };
     
-    const currentNode = callScript[activeCall.currentNodeId];
+    const currentNode = scholarixScript[activeCall.currentNodeId];
     const selectedResponse = currentNode.responses?.find(r => r.nextNodeId === nextNodeId);
     
     if (selectedResponse?.qualificationUpdate) {
@@ -87,7 +87,7 @@ function App() {
     });
 
     if (nextNode.responses?.length === 0 || !nextNode.responses) {
-      if (nextNodeId.startsWith('end-') || nextNodeId === 'confirm-demo') {
+      if (nextNodeId.startsWith('end-')) {
         setTimeout(() => {
           endCall();
         }, 2000);
@@ -130,7 +130,7 @@ function App() {
     setCompletedCall(null);
     
     if (updatedCall.outcome === 'demo-booked') {
-      toast.success('🎉 Demo booked and saved!');
+      toast.success('🎉 Demo booked! Remember: Send calendar invite within 1 hour!');
     } else {
       toast.success('Call saved to history');
     }
@@ -158,34 +158,44 @@ function App() {
   };
 
   const metrics = calculateMetrics(callHistory || []);
-  const currentNode = activeCall ? callScript[activeCall.currentNodeId] : null;
+  const currentNode = activeCall ? scholarixScript[activeCall.currentNodeId] : null;
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-right" />
       
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4 max-w-[1600px]">
         <header className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[32px] font-semibold tracking-tight mb-1">Sales Call Assistant</h1>
-              <p className="text-muted-foreground">Guide your conversations to demo bookings</p>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-[32px] font-semibold tracking-tight">Scholarix Telesales System</h1>
+                <span className="px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded-full">
+                  UAE Edition
+                </span>
+              </div>
+              <p className="text-muted-foreground">
+                The No-Escape System: Turn cold calls into committed demos in under 5 minutes
+              </p>
+              <p className="text-sm text-accent font-medium mt-1">
+                Target: 40%+ demo booking rate | 14-day deployment | 40 slots available
+              </p>
             </div>
             {!activeCall && (
               <Button 
                 size="lg" 
-                className="bg-accent hover:bg-accent/90"
+                className="bg-accent hover:bg-accent/90 h-12 px-6"
                 onClick={() => setShowPreCallSetup(true)}
               >
                 <Phone weight="fill" className="mr-2 h-5 w-5" />
-                New Call
+                Start New Call
               </Button>
             )}
           </div>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
             <TabsTrigger value="call">Live Call</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -209,7 +219,7 @@ function App() {
                 <div className="lg:col-span-6">
                   <ScriptDisplay
                     currentNode={currentNode}
-                    prospectName={activeCall.prospectInfo.name}
+                    prospectInfo={activeCall.prospectInfo}
                     onResponse={handleResponse}
                   />
                 </div>
@@ -220,19 +230,38 @@ function App() {
               </div>
             ) : (
               <div className="text-center py-20">
-                <Phone className="h-20 w-20 mx-auto mb-6 text-muted-foreground" />
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-accent/10 mb-6">
+                  <Phone className="h-12 w-12 text-accent" weight="fill" />
+                </div>
                 <h2 className="text-2xl font-semibold mb-3">No Active Call</h2>
-                <p className="text-muted-foreground mb-6">
-                  Start a new call to begin guiding your sales conversation
+                <p className="text-muted-foreground mb-2 max-w-md mx-auto">
+                  Ready to transform cold prospects into committed demos?
+                </p>
+                <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                  Stand up, smile, and start a new call to begin the Scholarix methodology.
                 </p>
                 <Button 
                   size="lg"
-                  className="bg-accent hover:bg-accent/90"
+                  className="bg-accent hover:bg-accent/90 h-12 px-6"
                   onClick={() => setShowPreCallSetup(true)}
                 >
                   <Phone weight="fill" className="mr-2 h-5 w-5" />
-                  New Call
+                  Start New Call
                 </Button>
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto text-left">
+                  <div className="p-4 rounded-lg bg-card border">
+                    <div className="font-medium mb-1">⚡ 14-Day Deployment</div>
+                    <div className="text-sm text-muted-foreground">Not 6 months. Deploy in 14 days.</div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-card border">
+                    <div className="font-medium mb-1">💰 40% Below Market</div>
+                    <div className="text-sm text-muted-foreground">2,499 AED/month. Limited slots.</div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-card border">
+                    <div className="font-medium mb-1">🎯 40%+ Conversion</div>
+                    <div className="text-sm text-muted-foreground">Follow the script. Book demos.</div>
+                  </div>
+                </div>
               </div>
             )}
           </TabsContent>
@@ -249,6 +278,7 @@ function App() {
 
       <PreCallSetup
         open={showPreCallSetup}
+        onClose={() => setShowPreCallSetup(false)}
         onStart={startCall}
       />
 

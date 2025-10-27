@@ -10,10 +10,10 @@ export const calculateMetrics = (calls: CallRecord[]): CallMetrics => {
       conversionRate: 0,
       avgCallDuration: 0,
       qualificationBreakdown: {
-        rightPerson: 0,
-        usingExcel: 0,
-        hasAuthority: 0,
-        budgetDiscussed: 0,
+        usesManualProcess: 0,
+        painPointIdentified: 0,
+        painQuantified: 0,
+        valueAcknowledged: 0,
       },
     };
   }
@@ -25,10 +25,10 @@ export const calculateMetrics = (calls: CallRecord[]): CallMetrics => {
   const avgCallDuration = totalDuration / totalCalls;
 
   const qualificationBreakdown = {
-    rightPerson: calls.filter(c => c.qualification.rightPerson === true).length,
-    usingExcel: calls.filter(c => c.qualification.usingExcel === true).length,
-    hasAuthority: calls.filter(c => c.qualification.hasAuthority === true).length,
-    budgetDiscussed: calls.filter(c => c.qualification.budgetDiscussed === true).length,
+    usesManualProcess: calls.filter(c => c.qualification.usesManualProcess === true).length,
+    painPointIdentified: calls.filter(c => c.qualification.painPointIdentified === true).length,
+    painQuantified: calls.filter(c => c.qualification.painQuantified === true).length,
+    valueAcknowledged: calls.filter(c => c.qualification.valueAcknowledged === true).length,
   };
 
   return {

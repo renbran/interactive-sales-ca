@@ -1,23 +1,32 @@
-export type CallObjective = 'cold-call' | 'follow-up' | 'demo-booking';
+export type Industry = 'real-estate' | 'retail' | 'trading' | 'logistics' | 'consulting';
 
-export type CallOutcome = 'demo-booked' | 'follow-up' | 'disqualified' | 'no-answer' | 'in-progress';
+export type CallObjective = 'cold-call' | 'follow-up' | 'demo-confirmation';
+
+export type CallOutcome = 'demo-booked' | 'follow-up-scheduled' | 'not-interested' | 'no-answer' | 'in-progress';
 
 export type ResponseType = 'positive' | 'negative' | 'neutral' | 'objection';
 
+export type CallPhase = 'opening' | 'discovery' | 'teaching' | 'demo-offer' | 'objection' | 'close';
+
 export interface ProspectInfo {
   name: string;
+  title: string;
   company: string;
-  industry: string;
+  industry: Industry;
   phone: string;
+  email?: string;
+  whatsapp?: string;
 }
 
 export interface ScriptNode {
   id: string;
+  phase: CallPhase;
   text: string;
-  type: 'question' | 'statement' | 'objection' | 'close';
+  type: 'question' | 'statement' | 'objection-handler' | 'close';
   responses?: ScriptResponse[];
   qualificationUpdate?: Partial<QualificationStatus>;
   nextNodeId?: string;
+  tips?: string;
 }
 
 export interface ScriptResponse {
@@ -28,11 +37,11 @@ export interface ScriptResponse {
 }
 
 export interface QualificationStatus {
-  rightPerson: boolean | null;
-  usingExcel: boolean | null;
-  painLevel: number | null;
-  hasAuthority: boolean | null;
-  budgetDiscussed: boolean | null;
+  usesManualProcess: boolean | null;
+  painPointIdentified: boolean | null;
+  painQuantified: boolean | null;
+  valueAcknowledged: boolean | null;
+  timeCommitted: boolean | null;
   demoBooked: boolean | null;
 }
 
@@ -56,9 +65,9 @@ export interface CallMetrics {
   conversionRate: number;
   avgCallDuration: number;
   qualificationBreakdown: {
-    rightPerson: number;
-    usingExcel: number;
-    hasAuthority: number;
-    budgetDiscussed: number;
+    usesManualProcess: number;
+    painPointIdentified: number;
+    painQuantified: number;
+    valueAcknowledged: number;
   };
 }
