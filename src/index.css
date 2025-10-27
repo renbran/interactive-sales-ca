@@ -7,7 +7,7 @@
   }
   
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   }
 }
 
@@ -24,13 +24,13 @@
   --primary: oklch(0.42 0.18 260);
   --primary-foreground: oklch(1 0 0);
   
-  --secondary: oklch(0.94 0.005 250);
+  --secondary: oklch(74.6% 0.16 232.661);
   --secondary-foreground: oklch(0.42 0.015 250);
   
   --muted: oklch(0.94 0.005 250);
   --muted-foreground: oklch(0.50 0.010 250);
   
-  --accent: oklch(0.60 0.22 30);
+  --accent: oklch(28.2% 0.091 267.935);
   --accent-foreground: oklch(1 0 0);
   
   --success: oklch(0.58 0.17 145);
@@ -46,7 +46,9 @@
   --input: oklch(0.90 0.005 250);
   --ring: oklch(0.42 0.18 260);
   
-  --radius: 0.625rem;
+  --radius: 0.5rem;
+  
+  --font-sans: Raleway;
 }
 
 @theme {
