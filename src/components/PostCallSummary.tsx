@@ -8,7 +8,7 @@ import { CheckCircle, Clock, User, Phone, ArrowRight, Target, Microphone } from 
 import { CallRecord } from '@/lib/types';
 import { formatDuration } from '@/lib/callUtils';
 import { cn } from '@/lib/utils';
-import { ollamaService, checkOllamaHealth } from '@/lib/ollamaService';
+import { aiService, checkAIHealth } from '@/lib/openaiService';
 
 interface PostCallSummaryProps {
   open: boolean;
@@ -60,7 +60,7 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
   const generateAISummary = async () => {
     setIsGeneratingAI(true);
     try {
-      const summary = await ollamaService.generateCallSummary({
+      const summary = await aiService.generateCallSummary({
         prospectInfo: callRecord.prospectInfo,
         duration: callRecord.duration || 0,
         outcome: callRecord.outcome,
@@ -69,7 +69,7 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
       });
       setAiSummary(summary);
 
-      const suggestions = await ollamaService.generateFollowUpSuggestions({
+      const suggestions = await aiService.generateFollowUpSuggestions({
         prospectInfo: callRecord.prospectInfo,
         outcome: callRecord.outcome,
         qualification: callRecord.qualification,
@@ -85,7 +85,7 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
   // Check if Ollama is available when component opens
   useEffect(() => {
     if (open) {
-      checkOllamaHealth().then(setAiEnabled);
+      checkAIHealth().then(setAiEnabled);
     }
   }, [open]);
 

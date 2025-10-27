@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Lightbulb } from '@phosphor-icons/react';
-import { ollamaService, checkOllamaHealth } from '@/lib/ollamaService';
+import { aiService, checkAIHealth } from '@/lib/openaiService';
 import { Industry } from '@/lib/types';
 
 interface ObjectionHandlerProps {
@@ -19,7 +19,7 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
   const [aiEnabled, setAiEnabled] = useState(false);
 
   useState(() => {
-    checkOllamaHealth().then(setAiEnabled);
+    checkAIHealth().then(setAiEnabled);
   });
 
   const commonObjections = [
@@ -36,7 +36,7 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
 
     setIsGenerating(true);
     try {
-      const aiResponse = await ollamaService.generateObjectionResponse(objection, {
+      const aiResponse = await aiService.generateObjectionResponse(objection, {
         industry,
         painPoint: 'Manual processes and inefficiencies',
       });
@@ -69,7 +69,7 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
               Connect to Ollama to get AI-powered objection handling suggestions.
             </p>
             <p className="text-xs mt-2 text-blue-600">
-              Make sure Ollama is running at {import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434'}
+              Make sure your OpenAI API key is configured in environment variables
             </p>
           </div>
         </CardContent>
