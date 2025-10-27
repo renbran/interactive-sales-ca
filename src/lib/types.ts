@@ -56,7 +56,8 @@ export interface CallRecord {
   qualification: QualificationStatus;
   notes: string;
   scriptPath: string[];
-  recordingData?: string;
+  recordingUrl?: string;
+  recordingDuration?: number;
 }
 
 export interface CallMetrics {

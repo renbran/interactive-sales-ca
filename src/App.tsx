@@ -14,9 +14,11 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { CallRecord, ProspectInfo, CallObjective, QualificationStatus } from '@/lib/types';
 import { scholarixScript, determineOutcome } from '@/lib/scholarixScript';
 import { calculateMetrics } from '@/lib/callUtils';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 
 function App() {
   const [callHistory, setCallHistory] = useKV<CallRecord[]>('scholarix-call-history', []);
+  const audioRecorder = useAudioRecorder();
   
   const [showPreCallSetup, setShowPreCallSetup] = useState(false);
   const [activeCall, setActiveCall] = useState<{
@@ -27,8 +29,6 @@ function App() {
     currentNodeId: string;
     scriptPath: string[];
     qualification: QualificationStatus;
-    isRecording: boolean;
-    isPaused: boolean;
   } | null>(null);
   const [showPostCallSummary, setShowPostCallSummary] = useState(false);
   const [completedCall, setCompletedCall] = useState<CallRecord | null>(null);
@@ -49,15 +49,20 @@ function App() {
         valueAcknowledged: null,
         timeCommitted: null,
         demoBooked: null
-      },
-      isRecording: true,
-      isPaused: false
+      }
     };
     
     setActiveCall(newCall);
     setShowPreCallSetup(false);
     setActiveTab('call');
-    toast.success('Call started - follow the script!');
+    
+    audioRecorder.startRecording().then(success => {
+      if (success) {
+        toast.success('Call started - Recording audio locally!');
+      } else {
+        toast.warning('Call started but audio recording failed. Check microphone permissions.');
+      }
+    });
   };
 
   const handleResponse = (nextNodeId: string) => {
@@ -95,12 +100,27 @@ function App() {
     }
   };
 
-  const endCall = () => {
+  const endCall = async () => {
     if (!activeCall) return;
 
     const endTime = Date.now();
     const duration = Math.floor((endTime - activeCall.startTime) / 1000);
     const outcome = determineOutcome(activeCall.currentNodeId);
+
+    let recordingUrl: string | undefined;
+    let recordingDuration: number | undefined;
+
+    if (audioRecorder.isRecording) {
+      try {
+        const recording = await audioRecorder.stopRecording();
+        recordingUrl = recording.url;
+        recordingDuration = recording.duration;
+        toast.success('Audio recording saved locally');
+      } catch (error) {
+        console.error('Failed to save recording:', error);
+        toast.error('Failed to save audio recording');
+      }
+    }
 
     const callRecord: CallRecord = {
       id: activeCall.id,
@@ -112,7 +132,9 @@ function App() {
       outcome,
       qualification: activeCall.qualification,
       notes: '',
-      scriptPath: activeCall.scriptPath
+      scriptPath: activeCall.scriptPath,
+      recordingUrl,
+      recordingDuration
     };
 
     setCompletedCall(callRecord);
@@ -140,21 +162,32 @@ function App() {
 
   const toggleRecording = () => {
     if (!activeCall) return;
-    setActiveCall({
-      ...activeCall,
-      isRecording: !activeCall.isRecording,
-      isPaused: false
-    });
-    toast.info(activeCall.isRecording ? 'Recording stopped' : 'Recording started');
+    
+    if (audioRecorder.isRecording) {
+      audioRecorder.stopRecording().then(() => {
+        toast.info('Recording stopped');
+      });
+    } else {
+      audioRecorder.startRecording().then(success => {
+        if (success) {
+          toast.info('Recording started');
+        } else {
+          toast.error('Failed to start recording');
+        }
+      });
+    }
   };
 
   const togglePause = () => {
-    if (!activeCall) return;
-    setActiveCall({
-      ...activeCall,
-      isPaused: !activeCall.isPaused
-    });
-    toast.info(activeCall.isPaused ? 'Recording resumed' : 'Recording paused');
+    if (!activeCall || !audioRecorder.isRecording) return;
+    
+    if (audioRecorder.isPaused) {
+      audioRecorder.resumeRecording();
+      toast.info('Recording resumed');
+    } else {
+      audioRecorder.pauseRecording();
+      toast.info('Recording paused');
+    }
   };
 
   const metrics = calculateMetrics(callHistory || []);
@@ -208,8 +241,8 @@ function App() {
                   <CallControls
                     prospectInfo={activeCall.prospectInfo}
                     startTime={activeCall.startTime}
-                    isRecording={activeCall.isRecording}
-                    isPaused={activeCall.isPaused}
+                    isRecording={audioRecorder.isRecording}
+                    isPaused={audioRecorder.isPaused}
                     onEndCall={endCall}
                     onToggleRecording={toggleRecording}
                     onTogglePause={togglePause}

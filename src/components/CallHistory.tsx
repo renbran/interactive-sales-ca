@@ -1,16 +1,20 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Phone, Clock, User, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Phone, Clock, User, CheckCircle, Microphone, Download } from '@phosphor-icons/react';
 import { CallRecord } from '@/lib/types';
 import { formatDuration } from '@/lib/callUtils';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface CallHistoryProps {
   calls: CallRecord[];
 }
 
 export default function CallHistory({ calls }: CallHistoryProps) {
+  const [playingCallId, setPlayingCallId] = useState<string | null>(null);
+
   const getOutcomeColor = (outcome: string) => {
     switch (outcome) {
       case 'demo-booked':
@@ -35,6 +39,15 @@ export default function CallHistory({ calls }: CallHistoryProps) {
       default:
         return outcome;
     }
+  };
+
+  const downloadRecording = (call: CallRecord) => {
+    if (!call.recordingUrl) return;
+    
+    const a = document.createElement('a');
+    a.href = call.recordingUrl;
+    a.download = `${call.prospectInfo.name}-${new Date(call.startTime).toISOString()}.webm`;
+    a.click();
   };
 
   if (calls.length === 0) {
@@ -114,6 +127,32 @@ export default function CallHistory({ calls }: CallHistoryProps) {
                 <div className="text-sm bg-muted/50 rounded p-3 mt-3">
                   <div className="font-medium mb-1">Notes:</div>
                   <div className="text-muted-foreground whitespace-pre-wrap">{call.notes}</div>
+                </div>
+              )}
+
+              {call.recordingUrl && (
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground flex-1">
+                    <Microphone weight="fill" className="h-4 w-4" />
+                    <span>Recording available ({formatDuration(call.recordingDuration || 0)})</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <audio
+                      src={call.recordingUrl}
+                      controls
+                      className="h-8"
+                      onPlay={() => setPlayingCallId(call.id)}
+                      onPause={() => setPlayingCallId(null)}
+                      onEnded={() => setPlayingCallId(null)}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => downloadRecording(call)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </Card>

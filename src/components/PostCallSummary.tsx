@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Clock, User, Phone } from '@phosphor-icons/react';
+import { CheckCircle, Clock, User, Phone, Microphone } from '@phosphor-icons/react';
 import { CallRecord } from '@/lib/types';
 import { formatDuration } from '@/lib/callUtils';
 import { cn } from '@/lib/utils';
@@ -91,6 +91,33 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
           </div>
 
           <Separator />
+
+          {callRecord.recordingUrl && (
+            <>
+              <div>
+                <div className="font-medium mb-3 flex items-center gap-2">
+                  <Microphone weight="fill" className="h-5 w-5" />
+                  Call Recording
+                </div>
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">
+                      Duration: {formatDuration(callRecord.recordingDuration || 0)}
+                    </span>
+                  </div>
+                  <audio
+                    src={callRecord.recordingUrl}
+                    controls
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Recording saved locally in your browser
+                  </p>
+                </div>
+              </div>
+              <Separator />
+            </>
+          )}
 
           <div>
             <div className="font-medium mb-2">Qualification Status</div>
