@@ -131,13 +131,17 @@ export default function CallApp() {
     
     audioRecorder.startRecording().then(success => {
       if (success) {
-        toast.success('Call started - Recording audio locally!');
+        toast.success('📞 Call started with audio recording!');
       } else {
-        toast.warning('Call started but audio recording failed. Please check:\n• Microphone permissions in browser settings\n• Microphone is connected and working\n• No other app is using the microphone');
+        toast('📞 Call started (recording unavailable - check microphone permissions)', {
+          duration: 4000,
+        });
       }
     }).catch(error => {
       console.error('Recording start error:', error);
-      toast.error('Failed to start recording. Call will continue without audio.');
+      toast('📞 Call started without recording', {
+        duration: 3000,
+      });
     });
   };
 
