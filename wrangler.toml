@@ -44,6 +44,7 @@ CORS_ORIGIN = "https://scholarix-crm.pages.dev"
 # ROUTES (Connect to Cloudflare Pages)
 # =====================================================
 routes = [
+  { pattern = "scholarix-crm.pages.dev/api/*", zone_name = "pages.dev" },
   { pattern = "interactive-sales-ca.pages.dev/api/*", zone_name = "pages.dev" }
 ]
 

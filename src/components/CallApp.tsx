@@ -43,11 +43,16 @@ export default function CallApp() {
   // Load call history from backend on mount
   useEffect(() => {
     const loadCallHistory = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log('No user logged in, using local storage only');
+        return;
+      }
 
       try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
         const token = await getToken();
+        
+        console.log('Loading call history from:', API_BASE_URL);
         
         const response = await fetch(`${API_BASE_URL}/calls?limit=50`, {
           headers: {
@@ -57,6 +62,8 @@ export default function CallApp() {
 
         if (response.ok) {
           const data = await response.json();
+          
+          console.log('Raw API response:', data);
           
           // Transform backend calls to CallRecord format
           const transformedCalls: CallRecord[] = data.calls.map((call: any) => ({
@@ -85,10 +92,14 @@ export default function CallApp() {
           }));
 
           setCallHistory(transformedCalls);
-          console.log(`Loaded ${transformedCalls.length} calls from backend`);
+          console.log(`✅ Loaded ${transformedCalls.length} calls from backend`);
+        } else {
+          const errorText = await response.text();
+          console.error('Failed to load calls:', response.status, errorText);
         }
       } catch (error) {
         console.error('Error loading call history:', error);
+        toast.error('Failed to load call history from server. Using local storage.');
         // Keep using local storage if backend fails
       }
     };
@@ -230,48 +241,98 @@ export default function CallApp() {
     
     // Save to backend database
     try {
-      const leadId = localStorage.getItem('current-lead-id');
+      if (!user) {
+        console.warn('No user logged in, skipping backend save');
+        toast.warning('Call saved locally. Sign in to sync across devices.');
+        setShowPostCallSummary(false);
+        setCompletedCall(null);
+        return;
+      }
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+      const token = await getToken();
       
-      if (leadId && user) {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-        const token = await getToken();
-        
-        const response = await fetch(`${API_BASE_URL}/calls`, {
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('User authenticated:', !!user);
+      
+      let leadId = localStorage.getItem('current-lead-id');
+      
+      // If no lead ID, create a lead first
+      if (!leadId) {
+        console.log('No lead ID found, creating lead from prospect info...');
+        const leadResponse = await fetch(`${API_BASE_URL}/leads`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
-            lead_id: parseInt(leadId),
-            status: 'completed',
-            started_at: new Date(updatedCall.startTime).toISOString(),
-            duration: updatedCall.duration,
-            outcome: updatedCall.outcome,
-            qualification_score: calculateQualificationScore(updatedCall.qualification),
-            notes: notes,
-            next_steps: updatedCall.outcome === 'demo-booked' ? 'Send calendar invite' : '',
+            name: completedCall.prospectInfo.name,
+            email: completedCall.prospectInfo.email,
+            phone: completedCall.prospectInfo.phone,
+            company: completedCall.prospectInfo.company,
+            status: 'contacted',
+            source: 'call-app',
           }),
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to save call to backend');
+        if (leadResponse.ok) {
+          const leadData = await leadResponse.json();
+          leadId = leadData.lead.id.toString();
+          if (leadId) {
+            localStorage.setItem('current-lead-id', leadId);
+            console.log('Lead created with ID:', leadId);
+          }
+        } else {
+          const errorText = await leadResponse.text();
+          console.error('Failed to create lead:', leadResponse.status, errorText);
+          throw new Error(`Failed to create lead: ${leadResponse.status}`);
         }
-
-        console.log('Call saved to backend successfully');
       }
-    } catch (error) {
+      
+      if (!leadId) {
+        throw new Error('Unable to create or retrieve lead ID');
+      }
+      
+      console.log('Saving call with lead ID:', leadId);
+      
+      const response = await fetch(`${API_BASE_URL}/calls`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          lead_id: parseInt(leadId),
+          status: 'completed',
+          started_at: new Date(updatedCall.startTime).toISOString(),
+          duration: updatedCall.duration,
+          outcome: updatedCall.outcome,
+          qualification_score: calculateQualificationScore(updatedCall.qualification),
+          notes: notes,
+          next_steps: updatedCall.outcome === 'demo-booked' ? 'Send calendar invite' : '',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', response.status, errorText);
+        throw new Error(`Failed to save call to backend: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Call saved to backend successfully:', result);
+      toast.success('Call saved and synced to cloud!');
+    } catch (error: any) {
       console.error('Error saving call to backend:', error);
-      toast.error('Call saved locally but failed to sync to server');
+      toast.error(`Call saved locally but failed to sync: ${error.message || 'Network error'}`);
     }
     
     setShowPostCallSummary(false);
     setCompletedCall(null);
     
     if (updatedCall.outcome === 'demo-booked') {
-      toast.success('🎉 Demo booked! Remember: Send calendar invite within 1 hour!');
-    } else {
-      toast.success('Call saved successfully');
+      toast('🎉 Demo booked! Remember: Send calendar invite within 1 hour!');
     }
     
     setActiveTab('analytics');
