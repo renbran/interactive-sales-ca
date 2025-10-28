@@ -125,6 +125,7 @@ callRoutes.post('/', async (c) => {
       outcome,
       notes,
       recording_url,
+      recording_duration,
       script_used,
       sentiment,
       next_action,
@@ -152,8 +153,8 @@ callRoutes.post('/', async (c) => {
     const result = await c.env.DB.prepare(`
       INSERT INTO calls (
         lead_id, user_id, call_date, duration, outcome, notes,
-        recording_url, script_used, sentiment, next_action
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        recording_url, recording_duration, script_used, sentiment, next_action
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       lead_id,
       auth.userId,
@@ -162,6 +163,7 @@ callRoutes.post('/', async (c) => {
       outcome,
       notes || null,
       recording_url || null,
+      recording_duration || null,
       script_used || null,
       sentiment || null,
       next_action || null

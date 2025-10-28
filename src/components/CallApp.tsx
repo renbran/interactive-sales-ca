@@ -201,8 +201,14 @@ export default function CallApp() {
           activeCall.prospectInfo.name
         );
         
+        // Store the blob for later upload to backend
         recordingUrl = recording.url;
         recordingDuration = recording.duration;
+        
+        // Save blob to state for upload when saving call
+        // We'll store it temporarily with the call record
+        (window as any).__pendingRecordingBlob = recording.blob;
+        (window as any).__pendingRecordingType = recording.blob.type;
         
         // Save metadata and handle auto-download
         audioRecordingManager.saveRecordingMetadata(recordingData, activeCall.id);
@@ -300,6 +306,45 @@ export default function CallApp() {
       
       console.log('Saving call with lead ID:', leadId);
       
+      // Upload recording if available
+      let recordingUrl = updatedCall.recordingUrl;
+      const recordingBlob = (window as any).__pendingRecordingBlob;
+      const recordingType = (window as any).__pendingRecordingType || 'audio/webm';
+      
+      if (recordingBlob) {
+        try {
+          console.log('Uploading recording to R2...');
+          const formData = new FormData();
+          formData.append('recording', recordingBlob, `recording-${leadId}-${Date.now()}.webm`);
+          formData.append('lead_id', leadId);
+          formData.append('call_id', updatedCall.id);
+          
+          const uploadResponse = await fetch(`${API_BASE_URL}/recordings/upload`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+          
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json();
+            recordingUrl = uploadResult.url;
+            console.log('Recording uploaded successfully:', recordingUrl);
+            
+            // Clean up temporary storage
+            delete (window as any).__pendingRecordingBlob;
+            delete (window as any).__pendingRecordingType;
+          } else {
+            console.error('Failed to upload recording:', await uploadResponse.text());
+            toast.warning('Recording saved locally but not uploaded to cloud');
+          }
+        } catch (uploadError) {
+          console.error('Error uploading recording:', uploadError);
+          toast.warning('Recording saved locally but not uploaded to cloud');
+        }
+      }
+      
       const response = await fetch(`${API_BASE_URL}/calls`, {
         method: 'POST',
         headers: {
@@ -312,6 +357,8 @@ export default function CallApp() {
           started_at: new Date(updatedCall.startTime).toISOString(),
           duration: updatedCall.duration,
           outcome: updatedCall.outcome,
+          recording_url: recordingUrl,
+          recording_duration: updatedCall.recordingDuration,
           qualification_score: calculateQualificationScore(updatedCall.qualification),
           notes: notes,
           next_steps: updatedCall.outcome === 'demo-booked' ? 'Send calendar invite' : '',

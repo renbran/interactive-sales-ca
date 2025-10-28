@@ -16,9 +16,9 @@ database_id = "ffdec392-b118-45ac-9fbe-f1bb7737b7f6"
 # =====================================================
 # R2 STORAGE BINDING (For call recordings)
 # =====================================================
-# [[r2_buckets]]
-# binding = "RECORDINGS"
-# bucket_name = "scholarix-recordings"
+[[r2_buckets]]
+binding = "RECORDINGS"
+bucket_name = "scholarix-recordings"
 # Create with: wrangler r2 bucket create scholarix-recordings
 # Note: R2 needs to be enabled in Cloudflare dashboard first
 
