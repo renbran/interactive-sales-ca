@@ -6,12 +6,23 @@ Our new Scholarix Interactive Sales Call Assistant is live and ready for your te
 
 🌐 Access: https://scholarix-crm.pages.dev
 
-🎯 What to Test:
+�️ **NEW: Recording Issues FIXED!**
+We just deployed a critical fix for audio recording failures. Please test the recording feature thoroughly!
+
+�🎯 What to Test:
 ✅ Lead Management - Create, search, update leads
 ✅ Call Management - Start calls, follow scripts, complete summaries
+✅ **AUDIO RECORDING** - Test recording during calls (PRIORITY!)
 ✅ Data Persistence - Complete a call, refresh browser, verify it's still there
 ✅ Analytics - Review call history and metrics
 ✅ Mobile Experience - Test on your phone
+
+🎙️ Recording Test Steps:
+1. Grant microphone permission when prompted
+2. Start a call and speak for 10+ seconds
+3. Complete the call
+4. Check if recording downloaded successfully
+5. Report any "Recording Failed" errors with browser console logs (F12)
 
 ⏰ Please test and provide feedback by 31-October 2025
 
