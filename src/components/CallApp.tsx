@@ -129,16 +129,22 @@ export default function CallApp() {
     setShowPreCallSetup(false);
     setActiveTab('call');
     
+    // Start recording with detailed logging
+    console.log('Attempting to start audio recording...');
     audioRecorder.startRecording().then(success => {
+      console.log('Recording start result:', success);
       if (success) {
+        console.log('✅ Audio recording started successfully');
         toast.success('📞 Call started with audio recording!');
       } else {
+        console.warn('⚠️ Recording failed to start');
         toast('📞 Call started (recording unavailable - check microphone permissions)', {
           duration: 4000,
         });
       }
     }).catch(error => {
-      console.error('Recording start error:', error);
+      console.error('❌ Recording start error:', error);
+      console.error('Error details:', error.message, error.name);
       toast('📞 Call started without recording', {
         duration: 3000,
       });
