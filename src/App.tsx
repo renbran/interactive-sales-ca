@@ -1,46 +1,84 @@
-// Main application with routing and authentication
-import { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import LoginPage from '@/pages/LoginPage';
+// Main application with routing and authentication using Clerk
+import { useState } from 'react';
+import { 
+  SignedIn, 
+  SignedOut, 
+  SignInButton, 
+  UserButton, 
+  useUser,
+  RedirectToSignIn
+} from '@clerk/clerk-react';
 import CallApp from '@/components/CallApp';
 import LeadManagement from '@/pages/LeadManagement';
 import AdminPanel from '@/pages/AdminPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Toaster } from 'sonner';
 import { 
   PhoneCall,
   Users,
   Shield,
-  SignOut,
   User as UserIcon
 } from '@phosphor-icons/react';
 
-// Protected layout component
-function ProtectedLayout() {
-  const { user, logout, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('calls');
+// Loading component
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+// Sign-in page component
+function SignInPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+            <UserIcon className="h-6 w-6 text-blue-600" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Welcome to Scholarix CRM
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Sign in to access your sales dashboard
+          </p>
+        </div>
+        <div className="mt-8 space-y-6">
+          <div className="flex justify-center">
+            <SignInButton mode="modal">
+              <Button size="lg" className="w-full">
+                Sign in to continue
+              </Button>
+            </SignInButton>
+          </div>
         </div>
       </div>
-    );
+    </div>
+  );
+}
+
+// Main protected layout
+function ProtectedLayout() {
+  const { user, isLoaded } = useUser();
+  const [activeTab, setActiveTab] = useState('calls');
+
+  if (!isLoaded) {
+    return <LoadingSpinner />;
   }
 
   if (!user) {
-    return <LoginPage />;
+    return <RedirectToSignIn />;
   }
 
-  const handleLogout = async () => {
-    await logout();
-  };
+  // Get user role from user metadata or default to 'agent'
+  const userRole = user.publicMetadata?.role as string || 'agent';
 
   const getRoleBadge = (role: string) => (
     <Badge 
@@ -72,162 +110,94 @@ function ProtectedLayout() {
             <div className="flex items-center space-x-2 sm:space-x-4">
               {/* User info - responsive */}
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <Avatar className="h-8 w-8 sm:h-10 sm:w-10 touch-target">
-                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xs sm:text-sm">
-                    {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                
                 {/* User details - hidden on very small screens */}
                 <div className="hidden sm:block">
                   <div className="text-sm font-medium text-gray-900 truncate max-w-24 md:max-w-none">
-                    {user.name}
+                    {user.fullName || user.firstName || 'User'}
                   </div>
                   <div className="text-xs text-gray-500 truncate max-w-24 md:max-w-none">
-                    {user.email}
+                    {user.primaryEmailAddress?.emailAddress}
                   </div>
                 </div>
                 
                 {/* Role badge - smaller on mobile */}
                 <div className="hidden xs:block">
-                  {getRoleBadge(user.role)}
+                  {getRoleBadge(userRole)}
                 </div>
-              </div>
 
-              {/* Logout button - mobile-optimized */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-800 touch-target px-3 sm:px-4"
-              >
-                <SignOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
+                {/* Clerk User Button - handles user menu and logout */}
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-8 w-8 sm:h-10 sm:w-10"
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile-First Main Content */}
-      <main className="mobile-container max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 safe-area-bottom">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          {/* Mobile-optimized tabs with horizontal scroll */}
-          <div className="tabs-mobile">
-            <TabsList className="inline-flex h-12 w-max min-w-full sm:w-full items-center justify-start sm:justify-center rounded-lg bg-muted p-1 text-muted-foreground space-x-1">
+      {/* Navigation Tabs - Mobile Responsive */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="mobile-container max-w-7xl mx-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 h-12 sm:h-14 bg-transparent p-0">
               <TabsTrigger 
                 value="calls" 
-                className="flex items-center whitespace-nowrap px-3 py-2 text-sm font-medium touch-target"
+                className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600"
               >
-                <PhoneCall className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:inline">Calls</span>
+                <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>Calls</span>
               </TabsTrigger>
               
               <TabsTrigger 
                 value="leads" 
-                className="flex items-center whitespace-nowrap px-3 py-2 text-sm font-medium touch-target"
+                className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600"
               >
-                <Users className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:inline">Leads</span>
+                <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>Leads</span>
               </TabsTrigger>
               
-              {user.role === 'admin' && (
+              {(userRole === 'admin' || userRole === 'manager') && (
                 <TabsTrigger 
                   value="admin" 
-                  className="flex items-center whitespace-nowrap px-3 py-2 text-sm font-medium touch-target"
+                  className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 data-[state=active]:border-b-2 data-[state=active]:border-purple-600"
                 >
-                  <Shield className="h-4 w-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline sm:inline">Admin</span>
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span>Admin</span>
                 </TabsTrigger>
               )}
-              
-              <TabsTrigger 
-                value="profile" 
-                className="flex items-center whitespace-nowrap px-3 py-2 text-sm font-medium touch-target"
-              >
-                <UserIcon className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:inline">Profile</span>
-              </TabsTrigger>
             </TabsList>
-          </div>
 
-          <TabsContent value="calls">
-            <CallApp />
-          </TabsContent>
-
-          <TabsContent value="leads">
-            <LeadManagement />
-          </TabsContent>
-
-          {user.role === 'admin' && (
-            <TabsContent value="admin">
-              <AdminPanel />
-            </TabsContent>
-          )}
-
-          <TabsContent value="profile">
-            <div className="max-w-2xl mx-auto">
-              <div className="card-mobile bg-white rounded-lg border border-gray-200">
-                <h2 className="text-responsive-lg font-semibold mb-4 sm:mb-6">Profile Settings</h2>
-                
-                <div className="space-mobile-y">
-                  <div className="grid-mobile-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name
-                      </label>
-                      <div className="text-sm text-gray-900 break-words">{user.name}</div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <div className="text-sm text-gray-900">{user.email}</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Role
-                      </label>
-                      <div>{getRoleBadge(user.role)}</div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Department
-                      </label>
-                      <div className="text-sm text-gray-900">{user.department || 'Not specified'}</div>
-                    </div>
-                  </div>
-
-                  {user.phone && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone
-                      </label>
-                      <div className="text-sm text-gray-900">{user.phone}</div>
-                    </div>
-                  )}
-
-                  {user.lastLogin && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Login
-                      </label>
-                      <div className="text-sm text-gray-900">
-                        {new Date(user.lastLogin).toLocaleString()}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+            {/* Tab Content */}
+            <div className="min-h-[calc(100vh-8rem)]">
+              <TabsContent value="calls" className="mt-0 h-full">
+                <CallApp />
+              </TabsContent>
+              
+              <TabsContent value="leads" className="mt-0 h-full">
+                <LeadManagement />
+              </TabsContent>
+              
+              {(userRole === 'admin' || userRole === 'manager') && (
+                <TabsContent value="admin" className="mt-0 h-full">
+                  <AdminPanel />
+                </TabsContent>
+              )}
             </div>
-          </TabsContent>
-        </Tabs>
-      </main>
+          </Tabs>
+        </div>
+      </div>
 
-      <Toaster position="top-right" />
+      {/* Toast notifications */}
+      <Toaster 
+        position="top-center" 
+        toastOptions={{
+          className: 'toast-mobile'
+        }}
+      />
     </div>
   );
 }
@@ -235,8 +205,13 @@ function ProtectedLayout() {
 // Main App component
 export default function App() {
   return (
-    <AuthProvider>
-      <ProtectedLayout />
-    </AuthProvider>
+    <>
+      <SignedOut>
+        <SignInPage />
+      </SignedOut>
+      <SignedIn>
+        <ProtectedLayout />
+      </SignedIn>
+    </>
   );
 }
