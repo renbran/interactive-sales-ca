@@ -1,0 +1,39 @@
+📣 TEAM ANNOUNCEMENT: Scholarix CRM Testing
+
+Hi Team! 👋
+
+Our new Scholarix Interactive Sales Call Assistant is live and ready for your testing!
+
+🌐 Access: https://scholarix-crm.pages.dev
+
+🎯 What to Test:
+✅ Lead Management - Create, search, update leads
+✅ Call Management - Start calls, follow scripts, complete summaries
+✅ Data Persistence - Complete a call, refresh browser, verify it's still there
+✅ Analytics - Review call history and metrics
+✅ Mobile Experience - Test on your phone
+
+⏰ Please test and provide feedback by 31-October 2025
+
+📝 Feedback Focus:
+• What works well?
+• What needs improvement?
+• Any bugs? (include browser, device, steps to reproduce)
+• Feature suggestions?
+
+🐛 Found a Bug?
+Include: Browser/device, steps to reproduce, screenshots
+
+💡 Quick Start:
+1. Sign up with your work email
+2. Create 2-3 test leads
+3. Complete at least one full call
+4. Check if data persists after refresh
+
+Your feedback is crucial for making this tool perfect for our team!
+
+Questions? Reach out anytime. Let's make this awesome! 🚀
+
+---
+
+For detailed testing guide, see: TEAM_ANNOUNCEMENT.md in the project repo

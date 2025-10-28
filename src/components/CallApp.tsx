@@ -122,8 +122,11 @@ export default function CallApp() {
       if (success) {
         toast.success('Call started - Recording audio locally!');
       } else {
-        toast.warning('Call started but audio recording failed. Check microphone permissions.');
+        toast.warning('Call started but audio recording failed. Please check:\n• Microphone permissions in browser settings\n• Microphone is connected and working\n• No other app is using the microphone');
       }
+    }).catch(error => {
+      console.error('Recording start error:', error);
+      toast.error('Failed to start recording. Call will continue without audio.');
     });
   };
 
@@ -176,9 +179,9 @@ export default function CallApp() {
       try {
         const recording = await audioRecorder.stopRecording();
         
-        // Create enhanced recording data
+        // Create enhanced recording data with the actual blob
         const recordingData = audioRecordingManager.createRecordingData(
-          new Blob([recording.url]), // This will need to be the actual blob
+          recording.blob,
           recording.duration,
           activeCall.prospectInfo.name
         );

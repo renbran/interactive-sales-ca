@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 
 interface RecordingResult {
+  blob: Blob;
   url: string;
   duration: number;
 }
@@ -19,12 +20,48 @@ export function useAudioRecorder() {
 
   const startRecording = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Check browser support
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('Browser does not support audio recording');
+        return false;
+      }
+
+      // Check MediaRecorder support
+      if (!window.MediaRecorder) {
+        console.error('MediaRecorder API not supported');
+        return false;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        } 
+      });
       streamRef.current = stream;
 
-      const mediaRecorder = new MediaRecorder(stream);
+      // Determine best supported MIME type
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+          mimeType = 'audio/ogg';
+        } else {
+          console.warn('No preferred audio format supported, using default');
+          mimeType = '';
+        }
+      }
+
+      const options = mimeType ? { mimeType } : undefined;
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
+
+      mediaRecorder.onerror = (event: any) => {
+        console.error('MediaRecorder error:', event.error);
+      };
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -32,7 +69,7 @@ export function useAudioRecorder() {
         }
       };
 
-      mediaRecorder.start(100);
+      mediaRecorder.start(100); // Collect data every 100ms
       startTimeRef.current = Date.now();
       pausedTimeRef.current = 0;
       setIsRecording(true);
@@ -44,9 +81,20 @@ export function useAudioRecorder() {
         }
       }, 1000);
 
+      console.log('Recording started successfully with MIME type:', mimeType || 'default');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to start recording:', error);
+      
+      // Provide specific error messages
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        console.error('Microphone permission denied');
+      } else if (error.name === 'NotFoundError') {
+        console.error('No microphone found');
+      } else if (error.name === 'NotReadableError') {
+        console.error('Microphone is already in use');
+      }
+      
       return false;
     }
   }, []);
@@ -96,7 +144,7 @@ export function useAudioRecorder() {
         setIsPaused(false);
         setRecordingTime(0);
 
-        resolve({ url, duration });
+        resolve({ blob: audioBlob, url, duration });
       };
 
       mediaRecorderRef.current.stop();
