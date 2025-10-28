@@ -27,7 +27,7 @@ database_id = "ffdec392-b118-45ac-9fbe-f1bb7737b7f6"
 # =====================================================
 [vars]
 ENVIRONMENT = "production"
-CORS_ORIGIN = "https://4b3242df.interactive-sales-ca.pages.dev"
+CORS_ORIGIN = "https://scholarix-crm.pages.dev"
 
 # =====================================================
 # SECRETS (Set with: wrangler secret put <KEY>)
