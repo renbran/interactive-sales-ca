@@ -118,7 +118,7 @@ export class AudioRecordingManager {
    * Check if browser supports audio recording
    */
   isRecordingSupported(): boolean {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+    return !!(navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function' && window.MediaRecorder);
   }
 
   /**

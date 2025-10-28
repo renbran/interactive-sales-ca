@@ -1,6 +1,7 @@
 // src/lib/api.ts
 // API Client for Scholarix CRM
 
+import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import type {
   ApiResponse,
