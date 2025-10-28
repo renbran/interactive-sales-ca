@@ -1,0 +1,87 @@
+# Wrangler Configuration for Scholarix CRM
+# Cloudflare Workers + D1 Database + R2 Storage
+
+name = "scholarix-crm"
+main = "functions/index.ts"
+compatibility_date = "2024-01-01"
+
+# =====================================================
+# D1 DATABASE BINDING
+# =====================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "scholarix-crm-db"
+database_id = "YOUR_DATABASE_ID_HERE"  # Replace after creating D1 database
+# Create with: wrangler d1 create scholarix-crm-db
+
+# =====================================================
+# R2 STORAGE BINDING (For call recordings)
+# =====================================================
+[[r2_buckets]]
+binding = "RECORDINGS"
+bucket_name = "scholarix-recordings"
+# Create with: wrangler r2 bucket create scholarix-recordings
+
+# =====================================================
+# ENVIRONMENT VARIABLES
+# =====================================================
+[vars]
+ENVIRONMENT = "production"
+CORS_ORIGIN = "https://interactive-sales-ca.pages.dev"
+
+# =====================================================
+# SECRETS (Set with: wrangler secret put <KEY>)
+# =====================================================
+# CLERK_SECRET_KEY - Your Clerk secret key
+# CLERK_PUBLISHABLE_KEY - Your Clerk publishable key
+# ENCRYPTION_KEY - For encrypting sensitive data
+
+# Set secrets with:
+# wrangler secret put CLERK_SECRET_KEY
+# wrangler secret put CLERK_PUBLISHABLE_KEY
+
+# =====================================================
+# ROUTES (Connect to Cloudflare Pages)
+# =====================================================
+routes = [
+  { pattern = "interactive-sales-ca.pages.dev/api/*", zone_name = "pages.dev" }
+]
+
+# =====================================================
+# DEVELOPMENT ENVIRONMENT
+# =====================================================
+[env.development]
+name = "scholarix-crm-dev"
+vars = { ENVIRONMENT = "development", CORS_ORIGIN = "http://localhost:5173" }
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "scholarix-crm-db-dev"
+database_id = "YOUR_DEV_DATABASE_ID_HERE"
+
+# =====================================================
+# BUILD CONFIGURATION
+# =====================================================
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "service-worker"
+
+# =====================================================
+# COMPATIBILITY FLAGS
+# =====================================================
+compatibility_flags = ["nodejs_compat"]
+
+# =====================================================
+# LIMITS
+# =====================================================
+# Workers can run for up to 50ms on free tier
+# Increase to 30 seconds on paid plan
+limits = { cpu_ms = 50 }
+
+# =====================================================
+# DEPLOYMENT
+# =====================================================
+# Deploy with: wrangler deploy
+# Deploy to dev: wrangler deploy --env development

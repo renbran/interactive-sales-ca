@@ -13,7 +13,7 @@ export function useAudioRecorder() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedTimeRef = useRef<number>(0);
 
