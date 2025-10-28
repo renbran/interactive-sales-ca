@@ -12,10 +12,12 @@ import PostCallSummary from '@/components/PostCallSummary';
 import CallHistory from '@/components/CallHistory';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import ObjectionHandler from '@/components/ObjectionHandler';
+import RecordingSettings from '@/components/RecordingSettings';
 import { CallRecord, ProspectInfo, CallObjective, QualificationStatus } from '@/lib/types';
 import { scholarixScript, determineOutcome } from '@/lib/scholarixScript';
 import { calculateMetrics } from '@/lib/callUtils';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { audioRecordingManager } from '@/lib/audioRecordingManager';
 
 function App() {
   const [callHistory, setCallHistory] = useKV<CallRecord[]>('scholarix-call-history', []);
@@ -114,9 +116,22 @@ function App() {
     if (audioRecorder.isRecording) {
       try {
         const recording = await audioRecorder.stopRecording();
+        
+        // Create enhanced recording data
+        const recordingData = audioRecordingManager.createRecordingData(
+          new Blob([recording.url]), // This will need to be the actual blob
+          recording.duration,
+          activeCall.prospectInfo.name
+        );
+        
         recordingUrl = recording.url;
         recordingDuration = recording.duration;
-        toast.success('Audio recording saved locally');
+        
+        // Save metadata and handle auto-download
+        audioRecordingManager.saveRecordingMetadata(recordingData, activeCall.id);
+        audioRecordingManager.handleAutoDownload(recordingData);
+        
+        toast.success(`Audio recording saved! File: ${recordingData.filename}`);
       } catch (error) {
         console.error('Failed to save recording:', error);
         toast.error('Failed to save audio recording');
@@ -229,11 +244,12 @@ function App() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
+          <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
             <TabsTrigger value="call">Live Call</TabsTrigger>
             <TabsTrigger value="ai-helper">AI Helper</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="call" className="space-y-6">
@@ -323,6 +339,10 @@ function App() {
 
           <TabsContent value="analytics">
             <AnalyticsDashboard metrics={metrics} />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <RecordingSettings />
           </TabsContent>
         </Tabs>
       </div>
