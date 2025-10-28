@@ -99,7 +99,7 @@ export default function CallApp() {
         }
       } catch (error) {
         console.error('Error loading call history:', error);
-        toast.error('Failed to load call history from server. Using local storage.');
+        // Silently fall back to local storage - no need to alarm the user
         // Keep using local storage if backend fails
       }
     };
