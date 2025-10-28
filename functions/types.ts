@@ -424,9 +424,10 @@ export interface SignupForm {
 
 export interface Env {
   DB: D1Database;
-  RECORDINGS: R2Bucket;
+  RECORDINGS?: R2Bucket;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
+  ENVIRONMENT: string;
 }
 
 export interface AuthContext {

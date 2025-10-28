@@ -11,10 +11,6 @@ import type { Env, AuthContext } from '../src/lib/types';
 import { authRoutes } from './api/auth';
 import { leadRoutes } from './api/leads';
 import { callRoutes } from './api/calls';
-import { userRoutes } from './api/users';
-import { scriptRoutes } from './api/scripts';
-import { taskRoutes } from './api/tasks';
-import { analyticsRoutes } from './api/analytics';
 
 // =====================================================
 // CREATE HONO APP
@@ -150,10 +146,6 @@ app.get('/api/health', (c) => {
 app.route('/api/auth', authRoutes);
 app.route('/api/leads', leadRoutes);
 app.route('/api/calls', callRoutes);
-app.route('/api/users', userRoutes);
-app.route('/api/scripts', scriptRoutes);
-app.route('/api/tasks', taskRoutes);
-app.route('/api/analytics', analyticsRoutes);
 
 // =====================================================
 // ERROR HANDLER
