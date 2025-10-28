@@ -213,27 +213,39 @@ export default function CallApp() {
     <div className="min-h-screen bg-background">
       <Toaster position="top-right" />
       
-      <div className="container mx-auto py-8 px-4 max-w-[1600px]">
-        <header className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-[32px] font-semibold tracking-tight">Scholarix Telesales System</h1>
-                <span className="px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded-full">
+      <div className="mobile-container mx-auto py-4 sm:py-6 lg:py-8 max-w-[1600px]">
+        {/* Mobile-First Header */}
+        <header className="mb-6 sm:mb-8">
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+            {/* Title Section - Stacked on mobile */}
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <h1 className="text-responsive-xl sm:text-responsive-2xl font-semibold tracking-tight">
+                  Scholarix Telesales System
+                </h1>
+                <span className="inline-block px-3 py-1 bg-accent text-accent-foreground text-xs sm:text-sm font-medium rounded-full w-fit">
                   UAE Edition
                 </span>
               </div>
-              <p className="text-muted-foreground">
+              
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                 The No-Escape System: Turn cold calls into committed demos in under 5 minutes
               </p>
-              <p className="text-sm text-accent font-medium mt-1">
-                Target: 40%+ demo booking rate | 14-day deployment | 40 slots available
+              
+              <p className="text-xs sm:text-sm text-accent font-medium">
+                <span className="block sm:inline">Target: 40%+ demo booking rate</span>
+                <span className="hidden sm:inline mx-1">|</span>
+                <span className="block sm:inline">14-day deployment</span>
+                <span className="hidden sm:inline mx-1">|</span>
+                <span className="block sm:inline">40 slots available</span>
               </p>
             </div>
+            
+            {/* CTA Button - Full width on mobile, auto on desktop */}
             {!activeCall && (
               <Button 
                 size="lg" 
-                className="bg-accent hover:bg-accent/90 text-accent-foreground h-12 px-6"
+                className="btn-mobile bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto lg:w-auto px-6"
                 onClick={() => setShowPreCallSetup(true)}
               >
                 <Phone weight="fill" className="mr-2 h-5 w-5" />
@@ -243,19 +255,52 @@ export default function CallApp() {
           </div>
         </header>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
-            <TabsTrigger value="call">Live Call</TabsTrigger>
-            <TabsTrigger value="ai-helper">AI Helper</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          {/* Mobile-optimized horizontal scrolling tabs */}
+          <div className="tabs-mobile">
+            <TabsList className="inline-flex h-12 w-max min-w-full items-center justify-start rounded-lg bg-muted p-1 text-muted-foreground">
+              <TabsTrigger 
+                value="call" 
+                className="whitespace-nowrap px-3 sm:px-4 py-2 text-sm font-medium touch-target"
+              >
+                Live Call
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="ai-helper" 
+                className="whitespace-nowrap px-3 sm:px-4 py-2 text-sm font-medium touch-target"
+              >
+                AI Helper
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="history" 
+                className="whitespace-nowrap px-3 sm:px-4 py-2 text-sm font-medium touch-target"
+              >
+                History
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="analytics" 
+                className="whitespace-nowrap px-3 sm:px-4 py-2 text-sm font-medium touch-target"
+              >
+                Analytics
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="settings" 
+                className="whitespace-nowrap px-3 sm:px-4 py-2 text-sm font-medium touch-target"
+              >
+                Settings
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="call" className="space-y-6">
+          <TabsContent value="call" className="space-y-4 sm:space-y-6">
             {activeCall && currentNode ? (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-3">
+              <div className="space-y-4 lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0">
+                {/* Call Controls - Priority on mobile (top) */}
+                <div className="order-1 lg:order-1 lg:col-span-3">
                   <CallControls
                     prospectInfo={activeCall.prospectInfo}
                     startTime={activeCall.startTime}
@@ -267,7 +312,8 @@ export default function CallApp() {
                   />
                 </div>
 
-                <div className="lg:col-span-6">
+                {/* Script Display - Main content (middle on mobile) */}
+                <div className="order-2 lg:order-2 lg:col-span-6">
                   <ScriptDisplay
                     currentNode={currentNode}
                     prospectInfo={activeCall.prospectInfo}
@@ -275,25 +321,32 @@ export default function CallApp() {
                   />
                 </div>
 
-                <div className="lg:col-span-3">
+                {/* Qualification Checklist - Bottom on mobile */}
+                <div className="order-3 lg:order-3 lg:col-span-3">
                   <QualificationChecklist qualification={activeCall.qualification} />
                 </div>
               </div>
             ) : (
-              <div className="text-center py-20">
-                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-accent/10 mb-6">
-                  <Phone className="h-12 w-12 text-accent" weight="fill" />
+              <div className="text-center py-12 sm:py-16 lg:py-20 px-4">
+                <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-accent/10 mb-4 sm:mb-6">
+                  <Phone className="h-10 w-10 sm:h-12 sm:w-12 text-accent" weight="fill" />
                 </div>
-                <h2 className="text-2xl font-semibold mb-3">No Active Call</h2>
-                <p className="text-muted-foreground mb-2 max-w-md mx-auto">
+                
+                <h2 className="text-responsive-lg sm:text-responsive-xl font-semibold mb-3">
+                  No Active Call
+                </h2>
+                
+                <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm sm:text-base">
                   Ready to transform cold prospects into committed demos?
                 </p>
-                <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                
+                <p className="text-xs sm:text-sm text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
                   Stand up, smile, and start a new call to begin the Scholarix methodology.
                 </p>
+                
                 <Button 
                   size="lg"
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground h-12 px-6"
+                  className="btn-mobile bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto px-6"
                   onClick={() => setShowPreCallSetup(true)}
                 >
                   <Phone weight="fill" className="mr-2 h-5 w-5" />

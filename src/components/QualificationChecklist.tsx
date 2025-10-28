@@ -51,14 +51,15 @@ export default function QualificationChecklist({ qualification }: QualificationC
   };
 
   return (
-    <Card className="p-6 h-full">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+    <Card className="card-mobile h-full">
+      <div className="space-mobile-y">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <Target weight="fill" className="h-5 w-5 text-accent" />
-            <h3 className="font-semibold text-lg">Qualification</h3>
+            <h3 className="text-responsive-lg font-semibold">Qualification</h3>
           </div>
           <Badge className={cn(
+            'w-fit',
             status.variant === 'default' ? 'bg-success text-success-foreground' :
             status.variant === 'destructive' ? 'bg-destructive text-destructive-foreground' :
             status.variant === 'secondary' ? 'bg-secondary text-secondary-foreground' :
@@ -78,23 +79,23 @@ export default function QualificationChecklist({ qualification }: QualificationC
 
         <Separator />
 
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {items.map((item, idx) => (
             <div
               key={idx}
               className={cn(
-                'flex items-start gap-3 p-3 rounded-lg transition-colors',
+                'flex items-start gap-3 p-3 rounded-lg transition-colors touch-target',
                 item.value === true && 'bg-success/10',
                 item.value === false && 'bg-destructive/10',
                 item.value === null && 'bg-muted/30'
               )}
             >
-              <div className="mt-0.5">
+              <div className="mt-0.5 shrink-0">
                 {renderIcon(item.value)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className={cn(
-                  'text-sm font-medium',
+                  'text-sm font-medium leading-tight',
                   item.value === true && 'text-success',
                   item.value === false && 'text-destructive',
                   item.value === null && 'text-muted-foreground'
@@ -102,7 +103,7 @@ export default function QualificationChecklist({ qualification }: QualificationC
                   {item.label}
                 </div>
                 {item.key === 'demoBooked' && item.value === true && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                  <div className="text-xs text-muted-foreground mt-1 leading-tight">
                     Remember: Send calendar invite within 1 hour!
                   </div>
                 )}

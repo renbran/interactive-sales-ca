@@ -46,33 +46,36 @@ export default function PreCallSetup({ open, onClose, onStart }: PreCallSetupPro
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="dialog-mobile sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-2">
-            <Phone weight="fill" className="h-6 w-6 text-accent" />
+          <DialogTitle className="text-responsive-lg flex items-center gap-2">
+            <Phone weight="fill" className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
             Pre-Call Setup
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm sm:text-base">
             Complete prospect intel before starting the call. This information will auto-fill in your script.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Prospect Name *</Label>
+        <div className="space-mobile-y py-4">
+          {/* Mobile-first: Stack all fields vertically, side-by-side on larger screens */}
+          <div className="grid-mobile-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium">Prospect Name *</Label>
               <Input
                 id="name"
+                className="input-mobile focus-mobile"
                 placeholder="Mohammed Al-Rashid"
                 value={prospect.name}
                 onChange={(e) => setProspect({ ...prospect, name: e.target.value })}
               />
             </div>
             
-            <div className="grid gap-2">
-              <Label htmlFor="title">Title</Label>
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm font-medium">Title</Label>
               <Input
                 id="title"
+                className="input-mobile focus-mobile"
                 placeholder="Managing Director"
                 value={prospect.title}
                 onChange={(e) => setProspect({ ...prospect, title: e.target.value })}
@@ -80,23 +83,24 @@ export default function PreCallSetup({ open, onClose, onStart }: PreCallSetupPro
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="company">Company Name *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="company" className="text-sm font-medium">Company Name *</Label>
             <Input
               id="company"
+              className="input-mobile focus-mobile"
               placeholder="ABC Real Estate LLC"
               value={prospect.company}
               onChange={(e) => setProspect({ ...prospect, company: e.target.value })}
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="industry">Industry *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="industry" className="text-sm font-medium">Industry *</Label>
             <Select 
               value={prospect.industry} 
               onValueChange={(value) => setProspect({ ...prospect, industry: value as Industry })}
             >
-              <SelectTrigger id="industry">
+              <SelectTrigger id="industry" className="select-mobile focus-mobile">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

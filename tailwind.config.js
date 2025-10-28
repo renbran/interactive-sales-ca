@@ -19,9 +19,18 @@ const defaultTheme = {
   },
   extend: {
     screens: {
-      coarse: { raw: "(pointer: coarse)" },
-      fine: { raw: "(pointer: fine)" },
-      pwa: { raw: "(display-mode: standalone)" },
+      'xs': '375px',      // Extra small phones
+      'sm': '640px',      // Small devices (tablets)
+      'md': '768px',      // Medium devices (small laptops)
+      'lg': '1024px',     // Large devices (desktops)
+      'xl': '1280px',     // Extra large devices
+      '2xl': '1536px',    // 2x Extra large devices
+      // Custom utility screens
+      'coarse': { raw: "(pointer: coarse)" },
+      'fine': { raw: "(pointer: fine)" },
+      'pwa': { raw: "(display-mode: standalone)" },
+      'touch': { raw: "(hover: none) and (pointer: coarse)" },
+      'mouse': { raw: "(hover: hover) and (pointer: fine)" },
     },
     colors: {
       neutral: {

@@ -26,28 +26,28 @@ export default function CallControls({
   onTogglePause
 }: CallControlsProps) {
   return (
-    <Card className="p-6 space-y-6">
-      <div className="space-y-4">
+    <Card className="card-mobile space-mobile-y">
+      <div className="space-mobile-y">
         <div>
-          <h3 className="font-semibold text-lg mb-2">Prospect Information</h3>
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="text-muted-foreground">Name:</span>
-              <span className="ml-2 font-medium">{prospectInfo.name}</span>
+          <h3 className="text-responsive-lg font-semibold mb-3">Prospect Information</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="text-muted-foreground min-w-0 flex-shrink-0">Name:</span>
+              <span className="ml-0 sm:ml-2 font-medium wrap-break-word">{prospectInfo.name}</span>
             </div>
-            <div>
-              <span className="text-muted-foreground">Company:</span>
-              <span className="ml-2 font-medium">{prospectInfo.company}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="text-muted-foreground min-w-0 flex-shrink-0">Company:</span>
+              <span className="ml-0 sm:ml-2 font-medium wrap-break-word">{prospectInfo.company}</span>
             </div>
             {prospectInfo.industry && (
-              <div>
-                <span className="text-muted-foreground">Industry:</span>
-                <span className="ml-2 font-medium">{prospectInfo.industry}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center">
+                <span className="text-muted-foreground min-w-0 flex-shrink-0">Industry:</span>
+                <span className="ml-0 sm:ml-2 font-medium capitalize">{prospectInfo.industry}</span>
               </div>
             )}
-            <div>
-              <span className="text-muted-foreground">Phone:</span>
-              <span className="ml-2 font-medium">{prospectInfo.phone}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="text-muted-foreground min-w-0 flex-shrink-0">Phone:</span>
+              <span className="ml-0 sm:ml-2 font-medium">{prospectInfo.phone}</span>
             </div>
           </div>
         </div>
@@ -73,22 +73,24 @@ export default function CallControls({
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex gap-2">
+      {/* Mobile-optimized call controls */}
+      <div className="space-mobile-y">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="lg"
-            className="flex-1"
+            className="btn-mobile flex-1 w-full sm:w-auto"
             onClick={onToggleRecording}
           >
             <Record weight="fill" className="mr-2 h-5 w-5" />
-            {isRecording ? 'Stop' : 'Record'}
+            {isRecording ? 'Stop Recording' : 'Start Recording'}
           </Button>
+          
           {isRecording && (
             <Button
               variant="outline"
               size="lg"
-              className="flex-1"
+              className="btn-mobile flex-1 w-full sm:w-auto"
               onClick={onTogglePause}
             >
               {isPaused ? (
@@ -109,7 +111,7 @@ export default function CallControls({
         <Button
           size="lg"
           variant="destructive"
-          className="w-full"
+          className="btn-mobile w-full"
           onClick={onEndCall}
         >
           <PhoneDisconnect weight="fill" className="mr-2 h-5 w-5" />
