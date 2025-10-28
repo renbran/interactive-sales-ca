@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useKV } from '@github/spark/hooks';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { audioRecordingManager } from '@/lib/audioRecordingManager';
 
 export default function CallApp() {
-  const [callHistory, setCallHistory] = useKV<CallRecord[]>('scholarix-call-history', []);
+  const [callHistory, setCallHistory] = useLocalStorage<CallRecord[]>('scholarix-call-history', []);
   const { user } = useUser();
   const { getToken } = useAuth();
   const audioRecorder = useAudioRecorder();
