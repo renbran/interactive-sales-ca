@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useKV } from '@github/spark/hooks';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Phone } from '@phosphor-icons/react';
@@ -21,6 +22,8 @@ import { audioRecordingManager } from '@/lib/audioRecordingManager';
 
 export default function CallApp() {
   const [callHistory, setCallHistory] = useKV<CallRecord[]>('scholarix-call-history', []);
+  const { user } = useUser();
+  const { getToken } = useAuth();
   const audioRecorder = useAudioRecorder();
   
   const [showPreCallSetup, setShowPreCallSetup] = useState(false);
@@ -36,6 +39,62 @@ export default function CallApp() {
   const [showPostCallSummary, setShowPostCallSummary] = useState(false);
   const [completedCall, setCompletedCall] = useState<CallRecord | null>(null);
   const [activeTab, setActiveTab] = useState('call');
+
+  // Load call history from backend on mount
+  useEffect(() => {
+    const loadCallHistory = async () => {
+      if (!user) return;
+
+      try {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+        const token = await getToken();
+        
+        const response = await fetch(`${API_BASE_URL}/calls?limit=50`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Transform backend calls to CallRecord format
+          const transformedCalls: CallRecord[] = data.calls.map((call: any) => ({
+            id: call.id.toString(),
+            prospectInfo: {
+              name: call.lead?.name || 'Unknown',
+              company: call.lead?.company || '',
+              role: '',
+              email: call.lead?.email || '',
+              phone: call.lead?.phone || '',
+            },
+            objective: 'discovery',
+            startTime: new Date(call.started_at).getTime(),
+            endTime: call.ended_at ? new Date(call.ended_at).getTime() : undefined,
+            duration: call.duration || 0,
+            outcome: call.outcome || 'no-contact',
+            qualification: {
+              usesManualProcess: call.qualification_score > 70,
+              painPointIdentified: call.qualification_score > 60,
+              painQuantified: call.qualification_score > 50,
+              valueAcknowledged: call.qualification_score > 40,
+              timeCommitted: call.qualification_score > 30,
+              demoBooked: call.outcome === 'demo-booked',
+            },
+            notes: call.notes || '',
+          }));
+
+          setCallHistory(transformedCalls);
+          console.log(`Loaded ${transformedCalls.length} calls from backend`);
+        }
+      } catch (error) {
+        console.error('Error loading call history:', error);
+        // Keep using local storage if backend fails
+      }
+    };
+
+    loadCallHistory();
+  }, [user, getToken, setCallHistory]);
 
   const startCall = (prospect: ProspectInfo, objective: CallObjective) => {
     const newCall = {
@@ -158,11 +217,50 @@ export default function CallApp() {
     setActiveCall(null);
   };
 
-  const saveCallSummary = (notes: string) => {
+  const saveCallSummary = async (notes: string) => {
     if (!completedCall) return;
 
     const updatedCall = { ...completedCall, notes };
+    
+    // Save to local state first for immediate UI update
     setCallHistory((current) => [...(current || []), updatedCall]);
+    
+    // Save to backend database
+    try {
+      const leadId = localStorage.getItem('current-lead-id');
+      
+      if (leadId && user) {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+        const token = await getToken();
+        
+        const response = await fetch(`${API_BASE_URL}/calls`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            lead_id: parseInt(leadId),
+            status: 'completed',
+            started_at: new Date(updatedCall.startTime).toISOString(),
+            duration: updatedCall.duration,
+            outcome: updatedCall.outcome,
+            qualification_score: calculateQualificationScore(updatedCall.qualification),
+            notes: notes,
+            next_steps: updatedCall.outcome === 'demo-booked' ? 'Send calendar invite' : '',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save call to backend');
+        }
+
+        console.log('Call saved to backend successfully');
+      }
+    } catch (error) {
+      console.error('Error saving call to backend:', error);
+      toast.error('Call saved locally but failed to sync to server');
+    }
     
     setShowPostCallSummary(false);
     setCompletedCall(null);
@@ -170,10 +268,19 @@ export default function CallApp() {
     if (updatedCall.outcome === 'demo-booked') {
       toast.success('🎉 Demo booked! Remember: Send calendar invite within 1 hour!');
     } else {
-      toast.success('Call saved to history');
+      toast.success('Call saved successfully');
     }
     
     setActiveTab('analytics');
+  };
+
+  // Helper function to calculate qualification score
+  const calculateQualificationScore = (qualification: QualificationStatus): number => {
+    const scores = Object.values(qualification).map(val => 
+      val === true ? 1 : val === false ? 0 : 0.5
+    );
+    const sum = scores.reduce((a, b) => a + b, 0);
+    return Math.round((sum / scores.length) * 100);
   };
 
   const toggleRecording = () => {
