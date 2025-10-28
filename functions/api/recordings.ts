@@ -32,6 +32,26 @@ recordingRoutes.post('/upload', async (c) => {
       return c.json({ error: 'No recording file provided' }, 400);
     }
 
+    // Validate file size (max 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      return c.json({
+        error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB`
+      }, 413);
+    }
+
+    if (file.size < 1000) {
+      return c.json({ error: 'File too small to be a valid recording' }, 400);
+    }
+
+    // Validate MIME type
+    const ALLOWED_TYPES = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/mpeg'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return c.json({
+        error: `Invalid file type. Allowed: ${ALLOWED_TYPES.join(', ')}`
+      }, 400);
+    }
+
     // Generate unique filename
     const timestamp = Date.now();
     const extension = file.name.split('.').pop() || 'webm';
@@ -40,13 +60,25 @@ recordingRoutes.post('/upload', async (c) => {
     // Convert file to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
 
-    // Upload to R2 - R2.put only takes key and value
-    await c.env.RECORDINGS.put(filename, arrayBuffer);
+    // Upload to R2 with metadata
+    await c.env.RECORDINGS.put(filename, arrayBuffer, {
+      httpMetadata: {
+        contentType: file.type,
+        contentDisposition: `attachment; filename="${file.name}"`,
+      },
+      customMetadata: {
+        userId: auth.userId.toString(),
+        leadId: leadId?.toString() || 'unknown',
+        callId: callId?.toString() || 'unknown',
+        uploadedAt: new Date().toISOString(),
+        originalFilename: file.name,
+        fileSize: file.size.toString(),
+      },
+    });
 
-    // Generate public URL (or signed URL depending on your security needs)
-    // For now, we'll use the R2 dev URL format
-    const accountId = '5ca87478e09d6ebc6954f770ac4656e8'; // From your Cloudflare account
-    const bucketName = 'scholarix-recordings';
+    // Generate public URL using environment variables
+    const accountId = c.env.R2_ACCOUNT_ID;
+    const bucketName = c.env.R2_BUCKET_NAME;
     const recordingUrl = `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${filename}`;
 
     console.log('Recording uploaded successfully:', filename);
@@ -136,7 +168,7 @@ recordingRoutes.delete('/:filename{.+}', async (c) => {
     }
 
     // Delete from R2
-    await c.env.RECORDINGS.put(`recordings/${filename}`, null); // R2 uses put(key, null) to delete
+    await c.env.RECORDINGS.delete(`recordings/${filename}`);
 
     console.log('Recording deleted:', filename);
 

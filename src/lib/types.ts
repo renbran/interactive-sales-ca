@@ -427,6 +427,8 @@ export interface Env {
   RECORDINGS: R2Bucket;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
+  R2_ACCOUNT_ID: string;
+  R2_BUCKET_NAME: string;
 }
 
 export interface AuthContext {

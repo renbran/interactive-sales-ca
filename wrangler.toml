@@ -28,6 +28,8 @@ bucket_name = "scholarix-recordings"
 [vars]
 ENVIRONMENT = "production"
 CORS_ORIGIN = "https://scholarix-crm.pages.dev"
+R2_ACCOUNT_ID = "5ca87478e09d6ebc6954f770ac4656e8"
+R2_BUCKET_NAME = "scholarix-recordings"
 
 # =====================================================
 # SECRETS (Set with: wrangler secret put <KEY>)

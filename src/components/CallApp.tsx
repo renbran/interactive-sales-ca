@@ -20,12 +20,63 @@ import { calculateMetrics } from '@/lib/callUtils';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { audioRecordingManager } from '@/lib/audioRecordingManager';
 
+// Helper function to upload recording with retry logic
+async function uploadRecordingWithRetry(
+  formData: FormData,
+  apiUrl: string,
+  token: string | null,
+  maxRetries = 3
+): Promise<any> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Upload attempt ${attempt}/${maxRetries}`);
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+
+      // If not OK and not last attempt, retry
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+        console.log(`Upload failed, retrying in ${waitTime/1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      } else {
+        // Last attempt failed
+        throw new Error(`Upload failed after ${maxRetries} attempts: ${response.status}`);
+      }
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      // Retry on network error
+      const waitTime = Math.pow(2, attempt) * 1000;
+      console.log(`Network error, retrying in ${waitTime/1000}s...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  throw new Error('Upload failed after all retries');
+}
+
 export default function CallApp() {
   const [callHistory, setCallHistory] = useLocalStorage<CallRecord[]>('scholarix-call-history', []);
   const { user } = useUser();
   const { getToken } = useAuth();
   const audioRecorder = useAudioRecorder();
-  
+
+  // Store recording blob properly in React state instead of window global
+  const [pendingRecording, setPendingRecording] = useState<{
+    blob: Blob;
+    type: string;
+  } | null>(null);
+
   const [showPreCallSetup, setShowPreCallSetup] = useState(false);
   const [activeCall, setActiveCall] = useState<{
     id: string;
@@ -210,12 +261,13 @@ export default function CallApp() {
         // Store the blob for later upload to backend
         recordingUrl = recording.url;
         recordingDuration = recording.duration;
-        
-        // Save blob to state for upload when saving call
-        // We'll store it temporarily with the call record
-        (window as any).__pendingRecordingBlob = recording.blob;
-        (window as any).__pendingRecordingType = recording.blob.type;
-        
+
+        // Save blob to React state for upload when saving call
+        setPendingRecording({
+          blob: recording.blob,
+          type: recording.blob.type,
+        });
+
         // Save metadata and handle auto-download
         audioRecordingManager.saveRecordingMetadata(recordingData, activeCall.id);
         audioRecordingManager.handleAutoDownload(recordingData);
@@ -314,37 +366,28 @@ export default function CallApp() {
       
       // Upload recording if available
       let recordingUrl = updatedCall.recordingUrl;
-      const recordingBlob = (window as any).__pendingRecordingBlob;
-      const recordingType = (window as any).__pendingRecordingType || 'audio/webm';
-      
-      if (recordingBlob) {
+
+      if (pendingRecording) {
         try {
-          console.log('Uploading recording to R2...');
+          console.log('Uploading recording to R2 with retry logic...');
           const formData = new FormData();
-          formData.append('recording', recordingBlob, `recording-${leadId}-${Date.now()}.webm`);
+          formData.append('recording', pendingRecording.blob, `recording-${leadId}-${Date.now()}.webm`);
           formData.append('lead_id', leadId);
           formData.append('call_id', updatedCall.id);
-          
-          const uploadResponse = await fetch(`${API_BASE_URL}/recordings/upload`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-            body: formData,
-          });
-          
-          if (uploadResponse.ok) {
-            const uploadResult = await uploadResponse.json();
-            recordingUrl = uploadResult.url;
-            console.log('Recording uploaded successfully:', recordingUrl);
-            
-            // Clean up temporary storage
-            delete (window as any).__pendingRecordingBlob;
-            delete (window as any).__pendingRecordingType;
-          } else {
-            console.error('Failed to upload recording:', await uploadResponse.text());
-            toast.warning('Recording saved locally but not uploaded to cloud');
-          }
+
+          // Use retry function with exponential backoff
+          const uploadResult = await uploadRecordingWithRetry(
+            formData,
+            `${API_BASE_URL}/recordings/upload`,
+            token,
+            3 // Max 3 retries
+          );
+
+          recordingUrl = uploadResult.url;
+          console.log('Recording uploaded successfully:', recordingUrl);
+
+          // Clean up React state
+          setPendingRecording(null);
         } catch (uploadError) {
           console.error('Error uploading recording:', uploadError);
           toast.warning('Recording saved locally but not uploaded to cloud');
