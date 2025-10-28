@@ -5,12 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import CallTimer from './CallTimer';
 import { ProspectInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { AudioLevelMeter } from './CallQualityIndicator';
+import CallQualityIndicator from './CallQualityIndicator';
+import type { CallQualityMetrics } from '@/lib/webrtcService';
 
 interface CallControlsProps {
   prospectInfo: ProspectInfo;
   startTime: number;
   isRecording: boolean;
   isPaused: boolean;
+  audioLevel?: number; // 0-100
+  callQuality?: CallQualityMetrics | null;
   onEndCall: () => void;
   onToggleRecording: () => void;
   onTogglePause: () => void;
@@ -21,6 +26,8 @@ export default function CallControls({
   startTime,
   isRecording,
   isPaused,
+  audioLevel,
+  callQuality,
   onEndCall,
   onToggleRecording,
   onTogglePause
@@ -71,6 +78,20 @@ export default function CallControls({
             </Badge>
           </div>
         </div>
+
+        {/* Audio Level Meter */}
+        {audioLevel !== undefined && (
+          <div className="pt-4 border-t">
+            <AudioLevelMeter level={audioLevel} label="Microphone Level" />
+          </div>
+        )}
+
+        {/* Call Quality Indicator */}
+        {callQuality && (
+          <div className="pt-4 border-t">
+            <CallQualityIndicator metrics={callQuality} />
+          </div>
+        )}
       </div>
 
       {/* Mobile-optimized call controls */}

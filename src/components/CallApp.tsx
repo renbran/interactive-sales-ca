@@ -577,6 +577,7 @@ export default function CallApp() {
                     startTime={activeCall.startTime}
                     isRecording={audioRecorder.isRecording}
                     isPaused={audioRecorder.isPaused}
+                    audioLevel={audioRecorder.audioLevel}
                     onEndCall={endCall}
                     onToggleRecording={toggleRecording}
                     onTogglePause={togglePause}

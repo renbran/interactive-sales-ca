@@ -10,6 +10,7 @@ export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [audioLevel, setAudioLevel] = useState(0); // 0-100 audio level
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -17,6 +18,9 @@ export function useAudioRecorder() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedTimeRef = useRef<number>(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   const startRecording = useCallback(async () => {
     try {
@@ -62,6 +66,36 @@ export function useAudioRecorder() {
         deviceId: settings.deviceId,
         label: audioTrack.label
       });
+
+      // Setup audio level monitoring
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
+
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      // Start monitoring audio levels
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const checkAudioLevel = () => {
+        if (analyserRef.current && !pausedTimeRef.current) {
+          analyserRef.current.getByteFrequencyData(dataArray);
+          const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          const normalizedLevel = Math.min(100, (average / 128) * 100); // Normalize to 0-100
+          setAudioLevel(Math.round(normalizedLevel));
+
+          // Warn if audio level is too low
+          if (normalizedLevel < 5) {
+            console.warn('⚠️ Low audio level detected - speak louder or check microphone');
+          }
+        }
+        animationFrameRef.current = requestAnimationFrame(checkAudioLevel);
+      };
+      checkAudioLevel();
 
       // Determine best supported MIME type with codec for quality
       let mimeType = '';
@@ -262,6 +296,18 @@ export function useAudioRecorder() {
         timerRef.current = null;
       }
 
+      // Stop audio level monitoring
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      // Close audio context
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+
       // Stop media tracks
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -279,6 +325,7 @@ export function useAudioRecorder() {
     isRecording,
     isPaused,
     recordingTime,
+    audioLevel,
     startRecording,
     pauseRecording,
     resumeRecording,
