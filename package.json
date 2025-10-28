@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:cloudflare": "tsc && vite build --config vite.config.cloudflare.ts",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist -b gh-pages",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler pages deploy dist --project-name=interactive-sales-ca",
+    "pages:deploy": "npm run build:cloudflare && wrangler pages deploy dist",
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy",
     "worker:deploy:dev": "wrangler deploy --env development",
