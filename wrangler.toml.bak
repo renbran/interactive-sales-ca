@@ -27,7 +27,7 @@ bucket_name = "scholarix-recordings"
 # =====================================================
 [vars]
 ENVIRONMENT = "production"
-CORS_ORIGIN = "https://17275279.interactive-sales-ca.pages.dev"
+CORS_ORIGIN = "https://7f621ddd.interactive-sales-ca.pages.dev"
 
 # =====================================================
 # SECRETS (Set with: wrangler secret put <KEY>)
