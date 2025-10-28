@@ -33,6 +33,6 @@ export default defineConfig({
       },
     },
   },
-  // Ensure proper base path for Cloudflare Pages
-  base: '/',
+  // GitHub Pages deployment base path
+  base: '/interactive-sales-ca/',
 });
