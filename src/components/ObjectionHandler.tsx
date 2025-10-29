@@ -19,7 +19,16 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
   const [aiEnabled, setAiEnabled] = useState(false);
 
   useState(() => {
-    checkAIHealth().then(setAiEnabled);
+    // Check if OpenAI API key is available
+    const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY && 
+                     import.meta.env.VITE_OPENAI_API_KEY !== 'your_openai_api_key_here';
+    
+    if (hasApiKey) {
+      checkAIHealth().then(setAiEnabled);
+    } else {
+      // For production, assume AI is available and let the API call handle errors
+      setAiEnabled(true);
+    }
   });
 
   const commonObjections = [
@@ -43,7 +52,15 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
       setResponse(aiResponse);
     } catch (error) {
       console.error('Failed to generate objection response:', error);
-      setResponse('Sorry, I cannot generate a response right now. Please check your Ollama connection.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('API key')) {
+        setResponse('AI service is temporarily unavailable. Please contact support to configure the OpenAI API key.');
+      } else if (errorMessage.includes('rate limit')) {
+        setResponse('AI service is temporarily busy. Please try again in a moment.');
+      } else {
+        setResponse('Sorry, I cannot generate a response right now. The AI service may be temporarily unavailable.');
+      }
     }
     setIsGenerating(false);
   };
@@ -64,12 +81,13 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-lg font-medium mb-2">AI Assistant Unavailable</p>
-            <p className="text-sm">
-              Connect to Ollama to get AI-powered objection handling suggestions.
+            <p className="text-lg font-medium mb-2">AI Assistant Loading...</p>
+            <p className="text-sm mb-2">
+              Initializing AI-powered objection handling.
             </p>
-            <p className="text-xs mt-2 text-blue-600">
-              Make sure your OpenAI API key is configured in environment variables
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-xs text-blue-600">
+              If this takes too long, the service may be temporarily unavailable.
             </p>
           </div>
         </CardContent>
