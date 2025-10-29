@@ -1,6 +1,14 @@
 // OpenAI API integration for Scholarix Interactive Sales Assistant
 // This service handles communication with OpenAI for AI-powered features
 
+import {
+  CallObjective,
+  ProspectInfo,
+  LiveCoachingInsight,
+  AdaptiveScriptSuggestion,
+  PerformanceCoaching
+} from './types';
+
 export interface OpenAIConfig {
   apiKey: string;
   model: string;
@@ -178,6 +186,164 @@ Keep response under 150 words and use a conversational, professional tone.
 `;
 
     return this.generateCompletion(prompt);
+  }
+
+  // Live coaching: Analyze prospect response and provide real-time coaching
+  async analyzeLiveResponse(responseData: {
+    prospectResponse: string;
+    callPhase: string;
+    scriptContent: string;
+    prospectInfo: any;
+    conversationHistory?: string[];
+  }): Promise<LiveCoachingInsight> {
+    const prompt = `
+As an expert sales coach for Odoo ERP solutions, analyze this live prospect response and provide immediate coaching:
+
+CALL CONTEXT:
+- Phase: ${responseData.callPhase}
+- Prospect: ${responseData.prospectInfo.name} (${responseData.prospectInfo.company})
+- Industry: ${responseData.prospectInfo.industry}
+- Current Script: ${responseData.scriptContent.substring(0, 200)}...
+
+PROSPECT'S RESPONSE: "${responseData.prospectResponse}"
+
+PREVIOUS CONVERSATION:
+${responseData.conversationHistory ? responseData.conversationHistory.slice(-3).join('\n') : 'None'}
+
+Provide coaching in JSON format:
+{
+  "responseType": "positive|negative|neutral|objection|buying_signal|concern",
+  "sentiment": "enthusiastic|interested|skeptical|resistant|confused",
+  "coachingTip": "Specific actionable advice for the salesperson (max 60 words)",
+  "nextBestAction": "What to do next (max 40 words)",
+  "detectedSignals": ["buying_signal1", "concern1", "objection1"],
+  "suggestedFollow up": "Specific follow-up question or statement",
+  "urgencyLevel": "low|medium|high",
+  "confidence": 0.95
+}
+
+Focus on actionable, specific coaching that helps close the deal.
+`;
+
+    try {
+      const response = await this.generateCompletion(prompt);
+      const parsed = JSON.parse(response);
+      return parsed as LiveCoachingInsight;
+    } catch (error) {
+      console.error('Error parsing live coaching response:', error);
+      // Return fallback coaching
+      return {
+        responseType: 'neutral',
+        sentiment: 'skeptical',
+        coachingTip: 'Listen actively and ask clarifying questions to better understand their needs.',
+        nextBestAction: 'Continue with the next part of your script.',
+        detectedSignals: [],
+        suggestedFollowUp: 'What questions do you have about this?',
+        urgencyLevel: 'medium',
+        confidence: 0.5
+      };
+    }
+  }
+
+  // Generate adaptive script suggestions based on prospect responses
+  async generateAdaptiveScript(context: {
+    currentPhase: string;
+    prospectResponse: string;
+    prospectInfo: any;
+    detectedSignals: string[];
+  }): Promise<AdaptiveScriptSuggestion> {
+    const prompt = `
+As a sales script expert, adapt the conversation flow based on this prospect response:
+
+CONTEXT:
+- Current Phase: ${context.currentPhase}
+- Prospect Response: "${context.prospectResponse}"
+- Company: ${context.prospectInfo.company}
+- Industry: ${context.prospectInfo.industry}
+- Detected Signals: ${context.detectedSignals.join(', ')}
+
+Generate an adaptive script suggestion in JSON format:
+{
+  "suggestedScript": "Personalized script text with [NAME] placeholders",
+  "reasoning": "Why this approach is recommended",
+  "alternativeApproach": "Backup approach if the main one doesn't work",
+  "keyPoints": ["point1", "point2", "point3"],
+  "transitionPhase": "next_phase_if_successful",
+  "timeToSpend": "30-60 seconds",
+  "successMetrics": "What to listen for to know it's working"
+}
+
+Make it conversational, industry-specific, and focused on moving toward a demo.
+`;
+
+    try {
+      const response = await this.generateCompletion(prompt);
+      return JSON.parse(response) as AdaptiveScriptSuggestion;
+    } catch (error) {
+      console.error('Error generating adaptive script:', error);
+      return {
+        suggestedScript: "That's a great point, [NAME]. Let me ask you this - what would it mean for [COMPANY] if we could solve that challenge for you?",
+        reasoning: "Generic follow-up question to maintain conversation flow",
+        alternativeApproach: "Ask about their current process and pain points",
+        keyPoints: ["Listen actively", "Ask clarifying questions", "Connect to value proposition"],
+        transitionPhase: "discovery",
+        timeToSpend: "30-60 seconds",
+        successMetrics: "Prospect shares more details about their challenges"
+      };
+    }
+  }
+
+  // Real-time performance coaching during the call
+  async generatePerformanceCoaching(callMetrics: {
+    talkTimeRatio: number; // 0.0 to 1.0 (1.0 = rep talked 100% of time)
+    questionsAsked: number;
+    objectionCount: number;
+    callDuration: number; // in seconds
+    currentPhase: string;
+    prospectEngagement: 'low' | 'medium' | 'high';
+  }): Promise<PerformanceCoaching> {
+    const prompt = `
+As a sales performance coach, analyze these real-time call metrics and provide coaching:
+
+CALL METRICS:
+- Talk Time Ratio: ${(callMetrics.talkTimeRatio * 100).toFixed(1)}% (rep speaking)
+- Questions Asked: ${callMetrics.questionsAsked}
+- Objections Raised: ${callMetrics.objectionCount}
+- Call Duration: ${Math.floor(callMetrics.callDuration / 60)} minutes
+- Current Phase: ${callMetrics.currentPhase}
+- Prospect Engagement: ${callMetrics.prospectEngagement}
+
+Provide performance coaching in JSON format:
+{
+  "overallScore": 8.5,
+  "primaryFeedback": "Main coaching point (max 50 words)",
+  "specificImprovements": ["improvement1", "improvement2"],
+  "strengths": ["strength1", "strength2"],
+  "nextFocusArea": "What to focus on next",
+  "adjustmentNeeded": "immediate|minor|none",
+  "suggestedTechnique": "Specific technique to try",
+  "warningFlag": "Any red flags to address immediately"
+}
+
+Focus on actionable, real-time adjustments.
+`;
+
+    try {
+      const response = await this.generateCompletion(prompt);
+      return JSON.parse(response) as PerformanceCoaching;
+    } catch (error) {
+      console.error('Error generating performance coaching:', error);
+      return {
+        overallScore: 7.0,
+        primaryFeedback: "Focus on asking more questions to engage the prospect better.",
+        specificImprovements: ["Ask more open-ended questions", "Listen more actively"],
+        strengths: ["Good call structure", "Professional tone"],
+        nextFocusArea: "Increase prospect engagement",
+        adjustmentNeeded: "minor",
+        suggestedTechnique: "Use the SPIN questioning technique",
+        warningFlag: callMetrics.talkTimeRatio > 0.7 ? "Talking too much - let prospect speak more" : ""
+      };
+    }
   }
 }
 

@@ -136,6 +136,15 @@ export default function ScriptDisplay({ currentNode, prospectInfo, onResponse }:
               </Button>
             ))}
           </div>
+          
+          {/* AI Objection Helper Hint */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-blue-800">
+              <Lightbulb weight="fill" className="h-4 w-4" />
+              <span className="font-medium">Pro Tip:</span>
+              <span>Need help with an objection? Use the "AI Helper" tab for personalized responses!</span>
+            </div>
+          </div>
         </div>
       )}
     </Card>

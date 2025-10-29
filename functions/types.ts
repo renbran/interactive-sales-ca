@@ -427,6 +427,7 @@ export interface Env {
   RECORDINGS?: R2Bucket;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
+  OPENAI_API_KEY: string;
   ENVIRONMENT: string;
 }
 

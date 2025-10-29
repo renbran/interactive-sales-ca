@@ -504,6 +504,15 @@ export interface CallRecord {
   scriptPath: string[];
   recordingUrl?: string;
   recordingDuration?: number;
+  // Transcription fields
+  transcription?: string;
+  transcriptionStatus?: 'processing' | 'completed' | 'failed';
+  transcriptionSummary?: string;
+  sentimentScore?: number;
+  keyTopics?: string[];
+  actionItems?: string[];
+  nextSteps?: string[];
+  callQualityScore?: number;
 }
 
 export interface CallMetrics {
@@ -517,6 +526,88 @@ export interface CallMetrics {
     painQuantified: number;
     valueAcknowledged: number;
   };
+}
+
+// =====================================================
+// TRANSCRIPTION TYPES
+// =====================================================
+
+export interface TranscriptionSegment {
+  id: number;
+  start: number;
+  end: number;
+  speaker: string;
+  text: string;
+  confidence: number;
+}
+
+export interface TranscriptionAnalytics {
+  talkTimeRatio: number;
+  interruptions: number;
+  speakingPace: number;
+  sentimentTrend: Array<{ time: number; sentiment: number }>;
+  engagementScore: number;
+}
+
+export interface TranscriptionData {
+  status: 'processing' | 'completed' | 'failed';
+  transcript?: string;
+  summary?: string;
+  sentiment?: {
+    score: number;
+    label: 'positive' | 'negative' | 'neutral';
+  };
+  keyTopics?: string[];
+  actionItems?: string[];
+  nextSteps?: string[];
+  qualityScore?: number;
+  segments?: TranscriptionSegment[];
+  analytics?: TranscriptionAnalytics;
+}
+
+// =====================================================
+// LIVE AI COACHING TYPES
+// =====================================================
+
+export interface LiveCoachingInsight {
+  responseType: 'positive' | 'negative' | 'neutral' | 'objection' | 'buying_signal' | 'concern';
+  sentiment: 'enthusiastic' | 'interested' | 'skeptical' | 'resistant' | 'confused';
+  coachingTip: string;
+  nextBestAction: string;
+  detectedSignals: string[];
+  suggestedFollowUp: string;
+  urgencyLevel: 'low' | 'medium' | 'high';
+  confidence: number;
+}
+
+export interface AdaptiveScriptSuggestion {
+  suggestedScript: string;
+  reasoning: string;
+  alternativeApproach: string;
+  keyPoints: string[];
+  transitionPhase: string;
+  timeToSpend: string;
+  successMetrics: string;
+}
+
+export interface PerformanceCoaching {
+  overallScore: number;
+  primaryFeedback: string;
+  specificImprovements: string[];
+  strengths: string[];
+  nextFocusArea: string;
+  adjustmentNeeded: 'immediate' | 'minor' | 'none';
+  suggestedTechnique: string;
+  warningFlag: string;
+}
+
+export interface LiveCallMetrics {
+  talkTimeRatio: number;
+  questionsAsked: number;
+  objectionCount: number;
+  callDuration: number;
+  currentPhase: string;
+  prospectEngagement: 'low' | 'medium' | 'high';
 }
 
 // =====================================================
