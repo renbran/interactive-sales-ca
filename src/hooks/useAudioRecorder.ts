@@ -69,13 +69,16 @@ export function useAudioRecorder() {
       let selectedFormat = 'default';
       let fileExtension = 'webm';
       
-      // Priority order for WhatsApp compatibility:
-      // 1. MP4 with AAC (best for WhatsApp, supported by Safari/iOS)
-      // 2. OGG with Opus (good quality, WhatsApp compatible)
-      // 3. WebM with Opus (Chrome/Firefox, good quality but less WhatsApp compatible)
+      // Priority order for maximum compatibility:
+      // 1. MP4 with AAC (best for WhatsApp, Windows Media Player, iOS, Android)
+      // 2. WebM with VP9/Vorbis (widely compatible, NOT Opus)
+      // 3. OGG with Opus (good quality, WhatsApp compatible)
+      // 4. WebM with Opus (Chrome/Firefox, but less compatible with players)
       const formats = [
-        { mime: 'audio/mp4', name: 'MP4 AAC (WhatsApp Compatible)', ext: 'mp4' },
-        { mime: 'audio/ogg;codecs=opus', name: 'OGG Opus (WhatsApp Compatible)', ext: 'ogg' },
+        { mime: 'audio/mp4;codecs=mp4a.40.2', name: 'MP4 AAC (Universal)', ext: 'mp4' },
+        { mime: 'audio/mp4', name: 'MP4 AAC', ext: 'mp4' },
+        { mime: 'audio/webm;codecs=vorbis', name: 'WebM Vorbis (Compatible)', ext: 'webm' },
+        { mime: 'audio/ogg;codecs=opus', name: 'OGG Opus', ext: 'ogg' },
         { mime: 'audio/ogg', name: 'OGG', ext: 'ogg' },
         { mime: 'audio/webm;codecs=opus', name: 'WebM Opus', ext: 'webm' },
         { mime: 'audio/webm', name: 'WebM', ext: 'webm' },

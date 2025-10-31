@@ -51,7 +51,8 @@ app.use('*', logger());
 
 app.use('/api/*', async (c, next) => {
   // Skip auth for public endpoints
-  if (c.req.path === '/api/auth/sync') {
+  const publicPaths = ['/api/auth/sync', '/api/health'];
+  if (publicPaths.includes(c.req.path)) {
     return next();
   }
 
@@ -66,7 +67,13 @@ app.use('/api/*', async (c, next) => {
   try {
     // Verify Clerk JWT token
     const CLERK_SECRET_KEY = c.env.CLERK_SECRET_KEY;
-    const response = await fetch('https://api.clerk.dev/v1/verify_token', {
+
+    if (!CLERK_SECRET_KEY) {
+      console.error('CLERK_SECRET_KEY not configured');
+      return c.json({ error: 'Server misconfiguration', message: 'Auth not configured' }, 500);
+    }
+
+    const response = await fetch('https://api.clerk.com/v1/tokens/verify', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CLERK_SECRET_KEY}`,
@@ -76,7 +83,13 @@ app.use('/api/*', async (c, next) => {
     });
 
     if (!response.ok) {
-      return c.json({ error: 'Unauthorized', message: 'Invalid token' }, 401);
+      const errorText = await response.text();
+      console.error('Clerk token verification failed:', response.status, errorText);
+      return c.json({
+        error: 'Unauthorized',
+        message: 'Invalid token',
+        debug: `Clerk verification failed: ${response.status}`
+      }, 401);
     }
 
     const clerkUser = await response.json();
