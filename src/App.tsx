@@ -9,7 +9,7 @@ import {
   RedirectToSignIn
 } from '@clerk/clerk-react';
 import CallApp from '@/components/CallApp';
-import LeadManagement from '@/pages/LeadManagement';
+import LeadManager from '@/components/LeadManager';
 import AdminPanel from '@/pages/AdminPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -178,7 +178,7 @@ function ProtectedLayout() {
               </TabsContent>
               
               <TabsContent value="leads" className="mt-0 h-full">
-                <LeadManagement />
+                <LeadManager />
               </TabsContent>
               
               {(userRole === 'admin' || userRole === 'manager') && (

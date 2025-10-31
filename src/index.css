@@ -11,6 +11,12 @@
   }
 }
 
+@layer components {
+  .progress-bar {
+    width: var(--progress, 0%);
+  }
+}
+
 :root {
   --background: oklch(0.15 0.04 245);
   --foreground: oklch(0.95 0.01 220);
