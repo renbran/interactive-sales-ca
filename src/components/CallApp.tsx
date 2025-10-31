@@ -15,6 +15,8 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import ObjectionHandler from '@/components/ObjectionHandler';
 import LiveCoachingAssistant from '@/components/LiveCoachingAssistant';
 import RecordingSettings from '@/components/RecordingSettings';
+import InCallNotes from '@/components/InCallNotes';
+import InlineObjectionHandler from '@/components/InlineObjectionHandler';
 import { CallRecord, ProspectInfo, CallObjective, QualificationStatus } from '@/lib/types';
 import { scholarixScript, determineOutcome } from '@/lib/scholarixScript';
 import { calculateMetrics } from '@/lib/callUtils';
@@ -40,6 +42,7 @@ export default function CallApp() {
   const [showPostCallSummary, setShowPostCallSummary] = useState(false);
   const [completedCall, setCompletedCall] = useState<CallRecord | null>(null);
   const [activeTab, setActiveTab] = useState('call');
+  const [callNotes, setCallNotes] = useState('');
 
   // Load call history from backend on mount
   useEffect(() => {
@@ -200,28 +203,34 @@ export default function CallApp() {
     if (audioRecorder.isRecording) {
       try {
         const recording = await audioRecorder.stopRecording();
-        
+
         // Create enhanced recording data with the actual blob
         const recordingData = audioRecordingManager.createRecordingData(
           recording.blob,
           recording.duration,
           activeCall.prospectInfo.name
         );
-        
+
         // Store the blob for later upload to backend
         recordingUrl = recording.url;
         recordingDuration = recording.duration;
-        
+
         // Save blob to state for upload when saving call
         // We'll store it temporarily with the call record
         (window as any).__pendingRecordingBlob = recording.blob;
         (window as any).__pendingRecordingType = recording.blob.type;
-        
-        // Save metadata and handle auto-download
-        audioRecordingManager.saveRecordingMetadata(recordingData, activeCall.id);
+
+        // Save recording to IndexedDB for playback
+        await audioRecordingManager.saveRecording(
+          recordingData,
+          activeCall.id,
+          activeCall.prospectInfo.name
+        );
+
+        // Handle auto-download
         audioRecordingManager.handleAutoDownload(recordingData);
-        
-        toast.success(`Audio recording saved! File: ${recordingData.filename}`);
+
+        toast.success(`📼 Recording saved! Duration: ${Math.floor(recording.duration)}s`);
       } catch (error) {
         console.error('Failed to save recording:', error);
         toast.error('Failed to save audio recording');
@@ -251,7 +260,9 @@ export default function CallApp() {
   const saveCallSummary = async (notes: string) => {
     if (!completedCall) return;
 
-    const updatedCall = { ...completedCall, notes };
+    // Combine in-call notes with post-call notes
+    const finalNotes = callNotes ? `${callNotes}\n\n--- Post-Call Summary ---\n${notes}` : notes;
+    const updatedCall = { ...completedCall, notes: finalNotes };
     
     // Save to local state first for immediate UI update
     setCallHistory((current) => [...(current || []), updatedCall]);
@@ -527,32 +538,52 @@ export default function CallApp() {
 
           <TabsContent value="call" className="space-y-4 sm:space-y-6">
             {activeCall && currentNode ? (
-              <div className="space-y-4 lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0">
-                {/* Call Controls - Priority on mobile (top) */}
-                <div className="order-1 lg:order-1 lg:col-span-3">
-                  <CallControls
-                    prospectInfo={activeCall.prospectInfo}
-                    startTime={activeCall.startTime}
-                    isRecording={audioRecorder.isRecording}
-                    isPaused={audioRecorder.isPaused}
-                    onEndCall={endCall}
-                    onToggleRecording={toggleRecording}
-                    onTogglePause={togglePause}
-                  />
+              <div className="space-y-4">
+                {/* Main call interface - 3 column layout on desktop */}
+                <div className="space-y-4 lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0">
+                  {/* Call Controls - Priority on mobile (top) */}
+                  <div className="order-1 lg:order-1 lg:col-span-3">
+                    <CallControls
+                      prospectInfo={activeCall.prospectInfo}
+                      startTime={activeCall.startTime}
+                      isRecording={audioRecorder.isRecording}
+                      isPaused={audioRecorder.isPaused}
+                      onEndCall={endCall}
+                      onToggleRecording={toggleRecording}
+                      onTogglePause={togglePause}
+                    />
+                  </div>
+
+                  {/* Script Display - Main content (middle on mobile) */}
+                  <div className="order-2 lg:order-2 lg:col-span-6">
+                    <ScriptDisplay
+                      currentNode={currentNode}
+                      prospectInfo={activeCall.prospectInfo}
+                      onResponse={handleResponse}
+                    />
+                  </div>
+
+                  {/* Qualification Checklist - Bottom on mobile */}
+                  <div className="order-3 lg:order-3 lg:col-span-3">
+                    <QualificationChecklist qualification={activeCall.qualification} />
+                  </div>
                 </div>
 
-                {/* Script Display - Main content (middle on mobile) */}
-                <div className="order-2 lg:order-2 lg:col-span-6">
-                  <ScriptDisplay
-                    currentNode={currentNode}
-                    prospectInfo={activeCall.prospectInfo}
-                    onResponse={handleResponse}
+                {/* In-call utilities - Notes and Objection Handler */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* In-call notes */}
+                  <InCallNotes
+                    callId={activeCall.id}
+                    prospectName={activeCall.prospectInfo.name}
+                    onNotesChange={setCallNotes}
                   />
-                </div>
 
-                {/* Qualification Checklist - Bottom on mobile */}
-                <div className="order-3 lg:order-3 lg:col-span-3">
-                  <QualificationChecklist qualification={activeCall.qualification} />
+                  {/* Inline objection handler */}
+                  <InlineObjectionHandler
+                    industry={activeCall.prospectInfo.industry}
+                    prospectName={activeCall.prospectInfo.name}
+                    compact={false}
+                  />
                 </div>
               </div>
             ) : (
