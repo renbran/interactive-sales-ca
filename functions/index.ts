@@ -23,14 +23,20 @@ const app = new Hono<{ Bindings: Env; Variables: { auth: AuthContext } }>();
 // MIDDLEWARE
 // =====================================================
 
-// CORS
+// CORS - Use environment variable for production, fallback to dev origins
 app.use('*', cors({
-  origin: (origin) => {
+  origin: (origin, c) => {
+    // Get CORS_ORIGIN from environment (set in wrangler.toml)
+    const envCorsOrigin = c.env?.CORS_ORIGIN;
+
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
       'https://interactive-sales-ca.pages.dev',
+      'https://scholarix-crm.pages.dev',
+      ...(envCorsOrigin ? [envCorsOrigin] : []),
     ];
+
     return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   },
   credentials: true,
