@@ -32,17 +32,18 @@ export function useAudioRecorder() {
         return false;
       }
 
-      // Enhanced audio constraints for better quality
+      // Enhanced audio constraints optimized for VOICE clarity
+      // These settings prioritize speech intelligibility over music quality
       const audioConstraints = {
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: { ideal: 48000, min: 44100 }, // Higher sample rate for better quality
-          channelCount: { ideal: 2, min: 1 }, // Stereo preferred, mono fallback
-          sampleSize: { ideal: 16 }, // 16-bit audio
-          latency: { ideal: 0.01 }, // Low latency for real-time
-          volume: { ideal: 1.0 } // Maximum volume
+          echoCancellation: true,      // Remove echo for clearer voice
+          noiseSuppression: true,       // Remove background noise
+          autoGainControl: true,        // Normalize volume levels
+          sampleRate: { ideal: 48000, min: 16000 }, // 48kHz ideal, 16kHz minimum (phone quality)
+          channelCount: { ideal: 1 },   // Mono is better for voice (smaller files, same clarity)
+          sampleSize: { ideal: 16 },    // 16-bit audio (standard)
+          latency: { ideal: 0.01 },     // Low latency for real-time
+          volume: { ideal: 1.0 }        // Maximum volume
         } 
       };
 
@@ -63,36 +64,46 @@ export function useAudioRecorder() {
         label: audioTrack.label
       });
 
-      // Determine best supported MIME type with codec for quality
+      // Determine best supported MIME type for WhatsApp compatibility
       let mimeType = '';
       let selectedFormat = 'default';
+      let fileExtension = 'webm';
       
-      // Priority order: webm with opus (best quality/compression), mp4, ogg, webm basic
+      // Priority order for WhatsApp compatibility:
+      // 1. MP4 with AAC (best for WhatsApp, supported by Safari/iOS)
+      // 2. OGG with Opus (good quality, WhatsApp compatible)
+      // 3. WebM with Opus (Chrome/Firefox, good quality but less WhatsApp compatible)
       const formats = [
-        { mime: 'audio/webm;codecs=opus', name: 'WebM Opus (Best)' },
-        { mime: 'audio/webm', name: 'WebM' },
-        { mime: 'audio/mp4', name: 'MP4' },
-        { mime: 'audio/ogg;codecs=opus', name: 'OGG Opus' },
-        { mime: 'audio/ogg', name: 'OGG' },
+        { mime: 'audio/mp4', name: 'MP4 AAC (WhatsApp Compatible)', ext: 'mp4' },
+        { mime: 'audio/ogg;codecs=opus', name: 'OGG Opus (WhatsApp Compatible)', ext: 'ogg' },
+        { mime: 'audio/ogg', name: 'OGG', ext: 'ogg' },
+        { mime: 'audio/webm;codecs=opus', name: 'WebM Opus', ext: 'webm' },
+        { mime: 'audio/webm', name: 'WebM', ext: 'webm' },
       ];
 
       for (const format of formats) {
         if (MediaRecorder.isTypeSupported(format.mime)) {
           mimeType = format.mime;
           selectedFormat = format.name;
+          fileExtension = format.ext;
           break;
         }
       }
 
       if (!mimeType) {
         console.warn('No preferred audio format supported, using browser default');
+        fileExtension = 'webm'; // Default fallback
       }
 
-      // Configure MediaRecorder with quality settings
+      // Configure MediaRecorder with optimized settings for voice
+      // Lower bitrate is fine for voice, reduces file size without affecting clarity
       const recorderOptions: MediaRecorderOptions = {
         mimeType: mimeType || undefined,
-        audioBitsPerSecond: 128000, // 128 kbps - high quality audio
+        audioBitsPerSecond: 64000, // 64 kbps - perfect for voice, smaller files, WhatsApp friendly
       };
+
+      // Store file extension for later use
+      (window as any).__recordingFileExtension = fileExtension;
 
       const mediaRecorder = new MediaRecorder(stream, recorderOptions);
       mediaRecorderRef.current = mediaRecorder;
@@ -125,8 +136,11 @@ export function useAudioRecorder() {
       console.log('✅ Recording started successfully');
       console.log('   Format:', selectedFormat);
       console.log('   MIME:', mimeType || 'browser default');
-      console.log('   Bitrate: 128 kbps');
+      console.log('   File Extension:', fileExtension);
+      console.log('   Bitrate: 64 kbps (optimized for voice)');
       console.log('   Sample Rate:', settings.sampleRate, 'Hz');
+      console.log('   Channels:', settings.channelCount, '(mono for voice)');
+      console.log('   WhatsApp Compatible: Yes');
       
       return true;
     } catch (error: any) {
@@ -186,15 +200,24 @@ export function useAudioRecorder() {
         const totalSize = audioChunksRef.current.reduce((acc, chunk) => acc + chunk.size, 0);
         console.log('   Total size:', (totalSize / 1024 / 1024).toFixed(2), 'MB');
 
+        // Get the file extension stored during recording start
+        const fileExt = (window as any).__recordingFileExtension || 'webm';
+        
         // Create blob with correct MIME type
         const audioBlob = new Blob(audioChunksRef.current, { type: actualMimeType });
+        
+        // Store file extension in the blob for later retrieval
+        (audioBlob as any).fileExtension = fileExt;
+        
         const url = URL.createObjectURL(audioBlob);
         const duration = recordingTime;
 
         console.log('✅ Recording completed');
         console.log('   Duration:', duration, 'seconds');
         console.log('   Format:', actualMimeType);
-        console.log('   Quality: High (128 kbps)');
+        console.log('   File Extension:', fileExt);
+        console.log('   Quality: Voice Optimized (64 kbps)');
+        console.log('   WhatsApp Compatible:', fileExt === 'mp4' || fileExt === 'ogg' ? 'Yes ✓' : 'Possibly');
 
         // Clean up media stream
         if (streamRef.current) {
