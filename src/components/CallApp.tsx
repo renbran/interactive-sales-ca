@@ -55,9 +55,9 @@ export default function CallApp() {
       try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
         const token = await getToken();
-        
+
         console.log('Loading call history from:', API_BASE_URL);
-        
+
         const response = await fetch(`${API_BASE_URL}/calls?limit=50`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -66,9 +66,9 @@ export default function CallApp() {
 
         if (response.ok) {
           const data = await response.json();
-          
+
           console.log('Raw API response:', data);
-          
+
           // Transform backend calls to CallRecord format
           const transformedCalls: CallRecord[] = data.calls.map((call: any) => ({
             id: call.id.toString(),
@@ -95,21 +95,39 @@ export default function CallApp() {
             notes: call.notes || '',
           }));
 
-          setCallHistory(transformedCalls);
-          console.log(`✅ Loaded ${transformedCalls.length} calls from backend`);
+          // CRITICAL FIX: Only update if backend has data OR if localStorage is empty
+          // This prevents overwriting localStorage with empty backend response
+          if (transformedCalls.length > 0) {
+            setCallHistory(transformedCalls);
+            console.log(`✅ Loaded ${transformedCalls.length} calls from backend`);
+          } else {
+            // Backend returned empty - check if we have local data
+            const currentLocalData = callHistory || [];
+            if (currentLocalData.length > 0) {
+              console.log(`⚠️ Backend returned empty, preserving ${currentLocalData.length} local calls`);
+              toast.info(`Using ${currentLocalData.length} locally saved calls. Backend sync pending.`);
+            } else {
+              console.log('✅ No calls in backend or local storage');
+            }
+          }
         } else {
           const errorText = await response.text();
           console.error('Failed to load calls:', response.status, errorText);
+          toast.error('Failed to load calls from server. Using local data.');
         }
       } catch (error) {
         console.error('Error loading call history:', error);
-        // Silently fall back to local storage - no need to alarm the user
-        // Keep using local storage if backend fails
+        // Preserve local storage data on error
+        const localCount = callHistory?.length || 0;
+        if (localCount > 0) {
+          console.log(`⚠️ Backend error, preserving ${localCount} local calls`);
+          toast.warning(`Network error. Using ${localCount} locally saved calls.`);
+        }
       }
     };
 
     loadCallHistory();
-  }, [user, getToken, setCallHistory]);
+  }, [user, getToken, setCallHistory, callHistory]);
 
   const startCall = (prospect: ProspectInfo, objective: CallObjective) => {
     const newCall = {
@@ -391,12 +409,21 @@ export default function CallApp() {
 
       const result = await response.json();
       console.log('Call saved to backend successfully:', result);
-      toast.success('Call saved and synced to cloud!');
+      toast.success('✅ Call saved and synced to cloud!');
     } catch (error: any) {
       console.error('Error saving call to backend:', error);
-      toast.error(`Call saved locally but failed to sync: ${error.message || 'Network error'}`);
+      const errorMessage = error.message || 'Network error';
+      console.error('Full error details:', error);
+
+      // Show detailed error message to help diagnose
+      toast.error(
+        `Call saved locally but failed to sync to cloud.\n` +
+        `Error: ${errorMessage}\n` +
+        `Your data is safe in localStorage. Try signing out and back in.`,
+        { duration: 6000 }
+      );
     }
-    
+
     setShowPostCallSummary(false);
     setCompletedCall(null);
     
