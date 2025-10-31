@@ -77,7 +77,13 @@ export default function PostCallSummary({ open, callRecord, onSave }: PostCallSu
       setFollowUpSuggestions(suggestions);
     } catch (error) {
       console.error('Failed to generate AI summary:', error);
-      // Show a user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('API key') || errorMessage.includes('invalid_request_error')) {
+        setAiSummary('🔧 AI Summary Feature Unavailable\n\nThe AI-powered call summary requires OpenAI API configuration. Please contact your administrator to enable AI features.\n\nFor now, please manually add your call notes below.');
+      } else {
+        setAiSummary('AI summary temporarily unavailable. Please add your call notes manually.');
+      }
     }
     setIsGeneratingAI(false);
   };

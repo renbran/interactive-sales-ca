@@ -20,13 +20,19 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
 
   useState(() => {
     // Check if OpenAI API key is available
-    const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY && 
-                     import.meta.env.VITE_OPENAI_API_KEY !== 'your_openai_api_key_here';
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const hasApiKey = apiKey && 
+                     apiKey !== 'your_openai_api_key_here' &&
+                     apiKey !== 'sk-your-openai-api-key-here';
     
     if (hasApiKey) {
-      checkAIHealth().then(setAiEnabled);
+      // Test the API connection
+      checkAIHealth().then(setAiEnabled).catch(() => {
+        // If health check fails, still enable AI to let users try
+        setAiEnabled(true);
+      });
     } else {
-      // For production, assume AI is available and let the API call handle errors
+      // For production deployment, assume AI is available if no key is visible (it might be set via secrets)
       setAiEnabled(true);
     }
   });
@@ -54,12 +60,12 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
       console.error('Failed to generate objection response:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
-      if (errorMessage.includes('API key')) {
-        setResponse('AI service is temporarily unavailable. Please contact support to configure the OpenAI API key.');
+      if (errorMessage.includes('API key') || errorMessage.includes('invalid_request_error')) {
+        setResponse('🔧 AI Assistant Setup Required\n\nThe AI objection handler needs to be configured with a valid OpenAI API key. Please contact your administrator to enable AI features.\n\nIn the meantime, here are some general objection handling tips:\n\n• Acknowledge their concern\n• Ask clarifying questions\n• Provide relevant examples\n• Offer a trial or demo\n• Ask for next steps');
       } else if (errorMessage.includes('rate limit')) {
         setResponse('AI service is temporarily busy. Please try again in a moment.');
       } else {
-        setResponse('Sorry, I cannot generate a response right now. The AI service may be temporarily unavailable.');
+        setResponse('AI features are currently unavailable. Please use your sales training and experience to handle this objection, or try again later when the service is restored.');
       }
     }
     setIsGenerating(false);
