@@ -4,6 +4,7 @@
 import { Hono } from 'hono';
 import type { Env, AuthContext } from '../../src/lib/types';
 import { createActivityLog, getPaginationParams, buildWhereClause } from '../index';
+import { createTranscriptionService } from '../services/transcription';
 
 export const callRoutes = new Hono<{ Bindings: Env; Variables: { auth: AuthContext } }>();
 
@@ -361,5 +362,202 @@ callRoutes.post('/:id/recording', async (c) => {
   } catch (error) {
     console.error('Error uploading recording:', error);
     return c.json({ error: 'Failed to upload recording' }, 500);
+  }
+});
+
+// =====================================================
+// TRANSCRIBE CALL RECORDING
+// =====================================================
+
+callRoutes.post('/:id/transcribe', async (c) => {
+  const auth = c.get('auth');
+  const id = parseInt(c.req.param('id'));
+  const transcriptionService = new TranscriptionService(c.env.OPENAI_API_KEY);
+
+  try {
+    // Check if call exists and user has access
+    const call = await c.env.DB.prepare('SELECT * FROM calls WHERE id = ?')
+      .bind(id)
+      .first();
+
+    if (!call) {
+      return c.json({ error: 'Call not found' }, 404);
+    }
+
+    if (call.user_id !== auth.userId && auth.role !== 'admin') {
+      return c.json({ error: 'Access denied' }, 403);
+    }
+
+    if (!call.recording_url) {
+      return c.json({ error: 'No recording found for this call' }, 400);
+    }
+
+    // Update call status to transcribing
+    await c.env.DB.prepare('UPDATE calls SET transcription_status = ? WHERE id = ?')
+      .bind('processing', id)
+      .run();
+
+    // Process transcription asynchronously
+    try {
+      const transcriptionResult = await transcriptionService.transcribeCall(
+        call.recording_url,
+        id,
+        call.lead_id
+      );
+
+      // Store transcription results
+      await c.env.DB.prepare(`
+        UPDATE calls 
+        SET transcription = ?, 
+            transcription_status = ?,
+            sentiment_score = ?,
+            key_topics = ?,
+            action_items = ?,
+            next_steps = ?,
+            call_quality_score = ?,
+            transcription_summary = ?
+        WHERE id = ?
+      `).bind(
+        JSON.stringify(transcriptionResult.transcript),
+        'completed',
+        transcriptionResult.sentiment.score,
+        JSON.stringify(transcriptionResult.keyTopics),
+        JSON.stringify(transcriptionResult.actionItems),
+        JSON.stringify(transcriptionResult.nextSteps),
+        transcriptionResult.qualityScore,
+        transcriptionResult.summary,
+        id
+      ).run();
+
+      // Store segments
+      for (const segment of transcriptionResult.segments) {
+        await c.env.DB.prepare(`
+          INSERT INTO transcription_segments 
+          (call_id, segment_id, start_time, end_time, speaker, text, confidence)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          id,
+          segment.id,
+          segment.start,
+          segment.end,
+          segment.speaker,
+          segment.text,
+          segment.confidence
+        ).run();
+      }
+
+      // Store analytics
+      await c.env.DB.prepare(`
+        INSERT INTO call_analytics 
+        (call_id, talk_time_ratio, interruptions, speaking_pace, sentiment_trend, engagement_score)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(
+        id,
+        transcriptionResult.analytics.talkTimeRatio,
+        transcriptionResult.analytics.interruptions,
+        transcriptionResult.analytics.speakingPace,
+        JSON.stringify(transcriptionResult.analytics.sentimentTrend),
+        transcriptionResult.analytics.engagementScore
+      ).run();
+
+      // Log activity
+      await createActivityLog(
+        c.env.DB,
+        auth.userId,
+        'transcription_completed',
+        'call',
+        id,
+        { 
+          sentiment: transcriptionResult.sentiment.label,
+          topics: transcriptionResult.keyTopics.length,
+          quality: transcriptionResult.qualityScore 
+        }
+      );
+
+      return c.json({ 
+        data: transcriptionResult, 
+        message: 'Call transcribed successfully' 
+      });
+
+    } catch (transcriptionError) {
+      // Update status to failed
+      await c.env.DB.prepare('UPDATE calls SET transcription_status = ? WHERE id = ?')
+        .bind('failed', id)
+        .run();
+      
+      throw transcriptionError;
+    }
+
+  } catch (error) {
+    console.error('Error transcribing call:', error);
+    return c.json({ error: 'Failed to transcribe call' }, 500);
+  }
+});
+
+// =====================================================
+// GET CALL TRANSCRIPTION
+// =====================================================
+
+callRoutes.get('/:id/transcription', async (c) => {
+  const auth = c.get('auth');
+  const id = parseInt(c.req.param('id'));
+
+  try {
+    // Check if call exists and user has access
+    const call = await c.env.DB.prepare(`
+      SELECT c.*, 
+             GROUP_CONCAT(ts.segment_id || ':' || ts.start_time || ':' || ts.end_time || ':' || ts.speaker || ':' || ts.text || ':' || ts.confidence, '|') as segments
+      FROM calls c
+      LEFT JOIN transcription_segments ts ON c.id = ts.call_id
+      WHERE c.id = ?
+      GROUP BY c.id
+    `).bind(id).first();
+
+    if (!call) {
+      return c.json({ error: 'Call not found' }, 404);
+    }
+
+    if (call.user_id !== auth.userId && auth.role !== 'admin') {
+      return c.json({ error: 'Access denied' }, 403);
+    }
+
+    // Get analytics
+    const analytics = await c.env.DB.prepare('SELECT * FROM call_analytics WHERE call_id = ?')
+      .bind(id)
+      .first();
+
+    // Parse segments
+    const segments = call.segments ? call.segments.split('|').map(seg => {
+      const [segmentId, start, end, speaker, text, confidence] = seg.split(':');
+      return {
+        id: parseInt(segmentId),
+        start: parseFloat(start),
+        end: parseFloat(end),
+        speaker,
+        text,
+        confidence: parseFloat(confidence)
+      };
+    }) : [];
+
+    const transcriptionData = {
+      status: call.transcription_status,
+      transcript: call.transcription ? JSON.parse(call.transcription) : null,
+      summary: call.transcription_summary,
+      sentiment: {
+        score: call.sentiment_score,
+        label: call.sentiment_score > 0.1 ? 'positive' : call.sentiment_score < -0.1 ? 'negative' : 'neutral'
+      },
+      keyTopics: call.key_topics ? JSON.parse(call.key_topics) : [],
+      actionItems: call.action_items ? JSON.parse(call.action_items) : [],
+      nextSteps: call.next_steps ? JSON.parse(call.next_steps) : [],
+      qualityScore: call.call_quality_score,
+      segments,
+      analytics
+    };
+
+    return c.json({ data: transcriptionData });
+  } catch (error) {
+    console.error('Error getting transcription:', error);
+    return c.json({ error: 'Failed to get transcription' }, 500);
   }
 });

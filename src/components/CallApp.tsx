@@ -13,6 +13,7 @@ import PostCallSummary from '@/components/PostCallSummary';
 import CallHistory from '@/components/CallHistory';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import ObjectionHandler from '@/components/ObjectionHandler';
+import LiveCoachingAssistant from '@/components/LiveCoachingAssistant';
 import RecordingSettings from '@/components/RecordingSettings';
 import { CallRecord, ProspectInfo, CallObjective, QualificationStatus } from '@/lib/types';
 import { scholarixScript, determineOutcome } from '@/lib/scholarixScript';
@@ -320,17 +321,8 @@ export default function CallApp() {
       if (recordingBlob) {
         try {
           console.log('Uploading recording to R2...');
-          
-          // Get the correct file extension from the blob
-          const fileExtension = (recordingBlob as any).fileExtension || 'webm';
-          const filename = `recording-${leadId}-${Date.now()}.${fileExtension}`;
-          
-          console.log(`   File: ${filename}`);
-          console.log(`   Type: ${recordingType}`);
-          console.log(`   Size: ${(recordingBlob.size / 1024 / 1024).toFixed(2)} MB`);
-          
           const formData = new FormData();
-          formData.append('recording', recordingBlob, filename);
+          formData.append('recording', recordingBlob, `recording-${leadId}-${Date.now()}.webm`);
           formData.append('lead_id', leadId);
           formData.append('call_id', updatedCall.id);
           
@@ -609,12 +601,25 @@ export default function CallApp() {
 
           <TabsContent value="ai-helper">
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+              <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-blue-900 mb-2">🤖 AI Sales Assistant</h2>
                 <p className="text-blue-700 text-sm">
-                  Get AI-powered suggestions for handling objections and improving your sales conversations.
+                  Get AI-powered suggestions for handling objections and real-time coaching during your calls.
                 </p>
               </div>
+              
+              {/* Live Coaching Assistant - Only show during active calls */}
+              {activeCall && currentNode && (
+                <LiveCoachingAssistant
+                  prospectInfo={activeCall.prospectInfo}
+                  currentPhase={currentNode.phase}
+                  callDuration={Date.now() - activeCall.startTime}
+                  onScriptSuggestion={(suggestion) => {
+                    // Could integrate with script display to show suggested text
+                    console.log('Script suggestion:', suggestion);
+                  }}
+                />
+              )}
               
               <ObjectionHandler 
                 industry={activeCall?.prospectInfo.industry || 'real-estate'}

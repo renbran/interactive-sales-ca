@@ -27,18 +27,20 @@ bucket_name = "scholarix-recordings"
 # =====================================================
 [vars]
 ENVIRONMENT = "production"
-CORS_ORIGIN = "https://scholarix-crm.pages.dev"
+CORS_ORIGIN = "https://17275279.interactive-sales-ca.pages.dev"
 
 # =====================================================
 # SECRETS (Set with: wrangler secret put <KEY>)
 # =====================================================
 # CLERK_SECRET_KEY - Your Clerk secret key
 # CLERK_PUBLISHABLE_KEY - Your Clerk publishable key
+# OPENAI_API_KEY - Your OpenAI API key for transcription
 # ENCRYPTION_KEY - For encrypting sensitive data
 
 # Set secrets with:
 # wrangler secret put CLERK_SECRET_KEY
 # wrangler secret put CLERK_PUBLISHABLE_KEY
+# wrangler secret put OPENAI_API_KEY
 
 # =====================================================
 # ROUTES (Connect to Cloudflare Pages)
