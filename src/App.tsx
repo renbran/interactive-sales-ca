@@ -1,13 +1,14 @@
 // Main application with routing and authentication using Clerk
-import { useState } from 'react';
-import { 
-  SignedIn, 
-  SignedOut, 
-  SignInButton, 
-  UserButton, 
+import { useState, useEffect } from 'react';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
   useUser,
   RedirectToSignIn
 } from '@clerk/clerk-react';
+import { toast } from 'sonner';
 import CallApp from '@/components/CallApp';
 import LeadManager from '@/components/LeadManager';
 import AdminPanel from '@/pages/AdminPanel';
@@ -15,12 +16,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from 'sonner';
-import { 
+import {
   PhoneCall,
   Users,
   Shield,
   User as UserIcon
 } from '@phosphor-icons/react';
+import { apiClient } from '@/lib/api';
 
 // Loading component
 function LoadingSpinner() {
@@ -68,6 +70,43 @@ function SignInPage() {
 function ProtectedLayout() {
   const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState('calls');
+  const [userSynced, setUserSynced] = useState(false);
+
+  // Sync user to D1 database on sign-in
+  useEffect(() => {
+    if (user && !userSynced) {
+      const syncUserToDatabase = async () => {
+        try {
+          const fullName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User';
+          const email = user.primaryEmailAddress?.emailAddress || '';
+          const role = (user.publicMetadata?.role as 'admin' | 'agent') || 'agent';
+
+          console.log('Syncing user to D1 database:', { id: user.id, email, fullName, role });
+
+          const response = await apiClient.syncUser(user.id, email, fullName, role);
+
+          if (response.success) {
+            console.log('✅ User synced to D1 database successfully');
+            setUserSynced(true);
+          } else {
+            console.error('Failed to sync user:', response.error, response.message);
+            // Don't show error toast if user already exists
+            if (response.message !== 'User already exists') {
+              toast.error(`Failed to sync account: ${response.message || response.error}`);
+            } else {
+              console.log('User already exists in database');
+              setUserSynced(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error syncing user to database:', error);
+          toast.error('Failed to sync account. Some features may not work.');
+        }
+      };
+
+      syncUserToDatabase();
+    }
+  }, [user, userSynced]);
 
   if (!isLoaded) {
     return <LoadingSpinner />;
