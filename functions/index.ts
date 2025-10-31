@@ -4,7 +4,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { jwt } from 'hono/jwt';
+import { createClerkClient } from '@clerk/backend';
 import type { Env, AuthContext } from '../src/lib/types';
 
 // Import route handlers
@@ -57,7 +57,7 @@ app.use('/api/*', async (c, next) => {
   }
 
   const authHeader = c.req.header('Authorization');
-  
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized', message: 'No token provided' }, 401);
   }
@@ -65,7 +65,7 @@ app.use('/api/*', async (c, next) => {
   const token = authHeader.substring(7);
 
   try {
-    // Verify Clerk JWT token
+    // Verify Clerk JWT token using official @clerk/backend SDK
     const CLERK_SECRET_KEY = c.env.CLERK_SECRET_KEY;
 
     if (!CLERK_SECRET_KEY) {
@@ -73,38 +73,38 @@ app.use('/api/*', async (c, next) => {
       return c.json({ error: 'Server misconfiguration', message: 'Auth not configured' }, 500);
     }
 
-    const response = await fetch('https://api.clerk.com/v1/tokens/verify', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${CLERK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token }),
+    // Initialize Clerk client
+    const clerk = createClerkClient({
+      secretKey: CLERK_SECRET_KEY,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Clerk token verification failed:', response.status, errorText);
-      return c.json({
-        error: 'Unauthorized',
-        message: 'Invalid token',
-        debug: `Clerk verification failed: ${response.status}`
-      }, 401);
+    // Verify the session token
+    const verifiedToken = await clerk.verifyToken(token, {
+      jwtKey: CLERK_SECRET_KEY,
+    });
+
+    if (!verifiedToken || !verifiedToken.sub) {
+      console.error('Token verification failed: Invalid token or missing subject');
+      return c.json({ error: 'Unauthorized', message: 'Invalid token' }, 401);
     }
 
-    const clerkUser = await response.json();
+    const clerkUserId = verifiedToken.sub;
+    console.log('✅ Token verified for user:', clerkUserId);
 
     // Get user from database
     const user = await c.env.DB.prepare(
       'SELECT * FROM users WHERE clerk_id = ?'
-    ).bind(clerkUser.sub).first();
+    ).bind(clerkUserId).first();
 
     if (!user) {
-      return c.json({ 
-        error: 'User not found', 
-        message: 'Please sync your account first' 
+      console.error('User not found in database:', clerkUserId);
+      return c.json({
+        error: 'User not found',
+        message: 'Please sync your account first. Sign out and sign back in.'
       }, 404);
     }
+
+    console.log('✅ User found in database:', user.email);
 
     // Set auth context
     c.set('auth', {
@@ -122,7 +122,12 @@ app.use('/api/*', async (c, next) => {
     return next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    return c.json({ error: 'Unauthorized', message: 'Token verification failed' }, 401);
+    const errorMessage = error instanceof Error ? error.message : 'Token verification failed';
+    return c.json({
+      error: 'Unauthorized',
+      message: errorMessage,
+      hint: 'Try signing out and back in'
+    }, 401);
   }
 });
 
