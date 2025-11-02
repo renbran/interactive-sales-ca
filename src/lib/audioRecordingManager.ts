@@ -1,15 +1,12 @@
 // Audio recording utilities for Scholarix Interactive Sales CA
 // Handles local audio recording, storage, and download functionality
 
-import { recordingStorage, StoredRecording } from './recordingStorage';
-
 export interface AudioRecordingData {
   blob: Blob;
   url: string;
   duration: number;
   timestamp: number;
   filename: string;
-  fileExtension?: string;
 }
 
 export class AudioRecordingManager {
@@ -71,36 +68,9 @@ export class AudioRecordingManager {
   }
 
   /**
-   * Save recording to IndexedDB with full audio data
+   * Save recording data to local storage (metadata only, not the actual audio)
    */
-  async saveRecording(recordingData: AudioRecordingData, callId: string, prospectName: string): Promise<void> {
-    try {
-      const storedRecording: StoredRecording = {
-        id: `recording-${callId}`,
-        callId,
-        blob: recordingData.blob,
-        filename: recordingData.filename,
-        duration: recordingData.duration,
-        timestamp: recordingData.timestamp,
-        prospectName,
-        mimeType: recordingData.blob.type,
-        size: recordingData.blob.size
-      };
-
-      await recordingStorage.saveRecording(storedRecording);
-
-      // Also save metadata to localStorage for backwards compatibility
-      this.saveRecordingMetadata(recordingData, callId);
-    } catch (error) {
-      console.error('Failed to save recording to IndexedDB:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Save recording metadata to local storage (metadata only, not the actual audio)
-   */
-  private saveRecordingMetadata(recordingData: AudioRecordingData, callId: string): void {
+  saveRecordingMetadata(recordingData: AudioRecordingData, callId: string): void {
     try {
       const metadata = {
         callId,
@@ -113,46 +83,10 @@ export class AudioRecordingManager {
 
       const existingRecordings = this.getRecordingMetadata();
       existingRecordings[callId] = metadata;
-
+      
       localStorage.setItem('scholarix-recordings-metadata', JSON.stringify(existingRecordings));
     } catch (error) {
       console.error('Failed to save recording metadata:', error);
-    }
-  }
-
-  /**
-   * Get recording from IndexedDB by call ID
-   */
-  async getRecording(callId: string): Promise<StoredRecording | null> {
-    try {
-      return await recordingStorage.getRecordingByCallId(callId);
-    } catch (error) {
-      console.error('Failed to get recording:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Download recording by call ID
-   */
-  async downloadRecordingByCallId(callId: string): Promise<void> {
-    const recording = await this.getRecording(callId);
-    if (recording) {
-      recordingStorage.downloadRecording(recording);
-    } else {
-      throw new Error('Recording not found');
-    }
-  }
-
-  /**
-   * Share recording by call ID
-   */
-  async shareRecordingByCallId(callId: string): Promise<void> {
-    const recording = await this.getRecording(callId);
-    if (recording) {
-      await recordingStorage.shareRecording(recording);
-    } else {
-      throw new Error('Recording not found');
     }
   }
 
@@ -227,9 +161,7 @@ export class AudioRecordingManager {
    */
   createRecordingData(blob: Blob, duration: number, prospectName: string): AudioRecordingData {
     const timestamp = Date.now();
-    // Get file extension from blob if available
-    const fileExt = (blob as any).fileExtension || (window as any).__recordingFileExtension || 'webm';
-    const filename = this.generateFilename(prospectName, timestamp, fileExt);
+    const filename = this.generateFilename(prospectName, timestamp);
     const url = URL.createObjectURL(blob);
 
     return {
@@ -237,8 +169,7 @@ export class AudioRecordingManager {
       url,
       duration,
       timestamp,
-      filename,
-      fileExtension: fileExt
+      filename
     };
   }
 

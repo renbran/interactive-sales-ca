@@ -32,7 +32,6 @@ import { useState, useEffect } from 'react';
 import { audioRecordingManager } from '@/lib/audioRecordingManager';
 import { transcriptionApi } from '@/lib/transcriptionApi';
 import TranscriptionDisplay from './TranscriptionDisplay';
-import RecordingPlayer from './RecordingPlayer';
 
 interface CallHistoryProps {
   calls: CallRecord[];
@@ -260,16 +259,44 @@ function CallCard({
               <TabsContent value="recording" className="space-y-4 mt-4">
                 {call.recordingUrl && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <Microphone weight="fill" className="h-4 w-4" />
-                      <span>Recording ({formatDuration(call.recordingDuration || 0)})</span>
-                      {getRecordingInfo(call.id) && (
-                        <Badge variant="outline" className="text-xs">Stored Locally</Badge>
-                      )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Microphone weight="fill" className="h-4 w-4" />
+                        <span>Recording ({formatDuration(call.recordingDuration || 0)})</span>
+                        {getRecordingInfo(call.id) && (
+                          <Badge variant="outline" className="text-xs">Local Copy</Badge>
+                        )}
+                      </div>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="outline">
+                            <DotsThree className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onDownloadRecording(call)}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+                          {getRecordingInfo(call.id) && (
+                            <DropdownMenuItem 
+                              onClick={() => onDeleteRecording(call.id)}
+                              className="text-destructive"
+                            >
+                              <Trash className="h-4 w-4 mr-2" />
+                              Delete Local Copy
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-
-                    {/* New enhanced recording player with playback controls */}
-                    <RecordingPlayer callId={call.id} compact={false} />
+                    
+                    <audio
+                      src={call.recordingUrl}
+                      controls
+                      className="w-full"
+                    />
                   </div>
                 )}
               </TabsContent>

@@ -60,8 +60,8 @@ export const scholarixScript: Record<string, ScriptNode> = {
     id: 'start',
     phase: 'opening',
     type: 'statement',
-    text: 'Good morning! Is this Mr. [NAME]?\n\n[Wait for confirmation]\n\nHi [NAME], this is [YOUR NAME] from Scholarix Global here in Dubai. Hey, quick question for you—are you still using Excel or manual processes to manage [THEIR CORE OPERATION]?',
-    tips: '🎯 CRITICAL: Stand up, smile, speak with energy and warmth. Use "Hey" to sound friendly. This opening breaks their autopilot filter. Pause 2 seconds after question and LISTEN.',
+    text: 'Good morning! Mr. [NAME]?\n\n[Wait for confirmation]\n\nThis is [YOUR NAME] from Scholarix Global in Dubai. Quick question—are you still using Excel or manual processes to run [THEIR CORE OPERATION]?',
+    tips: '🎯 CRITICAL: Stand up, smile, speak with energy. This opening breaks their autopilot filter. Pause 2 seconds after question.',
     responses: [
       { label: 'Yes, using Excel/manual', type: 'positive', nextNodeId: 'permission-hook-yes' },
       { label: 'No, have a system', type: 'negative', nextNodeId: 'permission-hook-no' },
@@ -73,8 +73,8 @@ export const scholarixScript: Record<string, ScriptNode> = {
     id: 'permission-hook-yes',
     phase: 'opening',
     type: 'statement',
-    text: 'Yeah, I figured as much. Listen, [NAME], let me be straight with you:\n\nWe\'re working with about 40 companies across the UAE right now, helping them automate their [INDUSTRY_PROCESS]. The thing is, most consultants drag this out for 6 months—we get you up and running in about two weeks.\n\nI\'m specifically reaching out to [THEIR INDUSTRY] businesses because, honestly, this is where we see the biggest wins. Companies like yours are often losing real money every day to manual processes.\n\nCan I ask you three quick questions? Should take about 90 seconds. If it sounds like we might be able to help, I\'ll show you exactly how it works—just 15 minutes. If it\'s not a fit, at least you\'ll know. Fair enough?',
-    tips: '🗣️ Conversational and consultative, not salesy. Use "Yeah" and "Listen" for warmth. "Let me be straight" builds trust. Pause and wait for genuine response.',
+    text: 'Perfect—I figured as much. Look, Mr. [NAME], I\'ll be straight with you:\n\nWe\'re working with 40 companies across the UAE right now, helping them automate their [INDUSTRY_PROCESS] in about two weeks instead of the usual 6-month nightmare most consultants put you through.\n\nI\'m reaching out to [THEIR INDUSTRY] companies specifically because, honestly, you guys are losing the most money to these manual processes every single day.\n\nCan I ask you three quick questions? Takes maybe 90 seconds. If it sounds like we can help, I\'ll show you exactly how this works in a quick 15-minute demo. If not, at least you\'ll know.\n\nSound fair?',
+    tips: '🗣️ More conversational, less salesy. Use "I figured" and "honestly" for authenticity. Wait for response.',
     responses: [
       { label: 'Fair / Go ahead', type: 'positive', nextNodeId: 'discovery-situation', qualificationUpdate: { usesManualProcess: true } },
       { label: 'Not interested', type: 'negative', nextNodeId: 'objection-not-interested' },
@@ -122,8 +122,8 @@ export const scholarixScript: Record<string, ScriptNode> = {
     id: 'discovery-problem',
     phase: 'discovery',
     type: 'question',
-    text: 'Okay, I think I\'m getting the picture. So you\'ve got [REFLECT THEIR PROCESS BRIEFLY].\n\nHere\'s what I\'m curious about—what\'s driving you the most crazy about all this right now?\n\n[FOR REAL ESTATE]: Is it more the commission errors, the document chaos, or losing track of where your deals actually are?\n\n[FOR RETAIL]: Is it the inventory blindness—like not knowing what you have—the manual stock counts, or trying to coordinate multiple locations?\n\n[FOR TRADING]: Is it managing suppliers, tracking your actual margins, or just the whole procurement mess?\n\n[FOR LOGISTICS]: Is it keeping track of shipments, billing errors, or constantly updating clients?\n\n[FOR CONSULTING]: Is it not knowing if projects are actually profitable, tracking time, or billing accurately?\n\nLike, what\'s the thing that makes you go "ugh, not this again" every day?',
-    tips: '🎯 Conversational tone—"what I\'m curious about" is warmer than "let me ask." Use "like" for natural flow. Listen for emotional words like "frustrating," "nightmare," or "killing me." Mirror their energy.',
+    text: 'Okay, I think I\'m getting the picture. So you\'ve got [REFLECT THEIR PROCESS BRIEFLY].\n\nLet me ask you this—what\'s driving you the most crazy about this whole setup right now?\n\n[FOR REAL ESTATE]: Is it the commission errors, the document chaos, or losing track of where deals are in the pipeline?\n\n[FOR RETAIL]: Is it the inventory blindness, the manual stock counts, or trying to manage multiple locations?\n\n[FOR TRADING]: Is it supplier management, margin tracking, or the procurement mess?\n\n[FOR LOGISTICS]: Is it shipment tracking, billing errors, or keeping clients updated?\n\n[FOR CONSULTING]: Is it not knowing if projects are profitable, time tracking, or billing clients accurately?\n\nWhat\'s your biggest headache day-to-day?',
+    tips: '🎯 Use their industry pain points. Listen for emotional words like "frustrating" or "nightmare."',
     responses: [
       { label: 'Commission/margin errors', type: 'positive', nextNodeId: 'discovery-implication', qualificationUpdate: { painPointIdentified: true } },
       { label: 'Process/document chaos', type: 'positive', nextNodeId: 'discovery-implication', qualificationUpdate: { painPointIdentified: true } },
@@ -137,7 +137,7 @@ export const scholarixScript: Record<string, ScriptNode> = {
     id: 'discovery-implication',
     phase: 'discovery',
     type: 'question',
-    text: 'Yeah, I bet that\'s frustrating. So this thing with [THEIR SPECIFIC PAIN]—what\'s that actually costing you?\n\n[FOR REAL ESTATE]: I mean, when commission calculations are wrong, or a deal falls through because documents got lost, what does that hit cost you?\n\n[FOR RETAIL]: When you\'re out of stock because you didn\'t know inventory levels, or you order too much and it sits there—what\'s a typical loss?\n\n[FOR TRADING]: When supplier payments are late or margins are calculated wrong, what kind of money are we talking about?\n\n[FOR LOGISTICS]: When shipments get delayed because information wasn\'t updated, or billing is wrong—what does that cost in client relationships?\n\n[FOR CONSULTING]: When you finish a project and realize you actually lost money on it, what\'s a typical loss?\n\nBallpark—is this costing you thousands monthly? More?',
+    text: 'Yeah, that sounds really frustrating. So [THEIR SPECIFIC PAIN]—what\'s that actually costing you?\n\n[FOR REAL ESTATE]: I mean, when commission calculations are wrong, or a deal falls through because documents got lost, what does that hit cost you?\n\n[FOR RETAIL]: When you\'re out of stock because you didn\'t know inventory levels, or you order too much and it sits there—what\'s a typical loss?\n\n[FOR TRADING]: When supplier payments are late or margins are calculated wrong, what kind of money are we talking about?\n\n[FOR LOGISTICS]: When shipments get delayed because information wasn\'t updated, or billing is wrong—what does that cost in client relationships?\n\n[FOR CONSULTING]: When you finish a project and realize you actually lost money on it, what\'s a typical loss?\n\nBallpark—is this costing you thousands monthly? More?',
     tips: '� Keep it conversational. Let them tell you the cost. Don\'t do math for them.',
     responses: [
       { label: 'Thousands monthly', type: 'positive', nextNodeId: 'discovery-need-payoff', qualificationUpdate: { painQuantified: true } },
@@ -164,8 +164,8 @@ export const scholarixScript: Record<string, ScriptNode> = {
     id: 'teaching-moment',
     phase: 'teaching',
     type: 'statement',
-    text: 'You know what, [NAME]? Here\'s something interesting that most business owners don\'t realize...\n\n[FOR REAL ESTATE]: The top real estate companies here in Dubai aren\'t hiring more people to grow. They\'re automating everything—commission tracking, documents, client management—and they\'re scaling with basically the same team size.\n\n[FOR RETAIL]: The retailers who are expanding like crazy right now aren\'t hiring armies of inventory managers. They\'ve got systems that just tell them exactly what to order, when, and for which location. It\'s almost automatic.\n\n[FOR TRADING]: The really successful trading companies aren\'t drowning in spreadsheets trying to track suppliers. They\'ve automated procurement and they can see their margins in real-time—like, they actually know if they\'re making money.\n\n[FOR LOGISTICS]: The logistics companies that are winning the big contracts aren\'t the ones with the most staff. They\'re the ones who can give clients live updates and never mess up billing.\n\n[FOR CONSULTING]: The profitable consulting firms—the really good ones—they know which projects are making money BEFORE they finish them. Not six months later when it\'s too late.\n\nWe just helped a company like yours get this set up in two weeks. Most consultants would drag it out for six months and charge you double.\n\nThat\'s why I\'d really like to show you how this could work for your specific situation.',
-    tips: '🎯 Consultative, almost like you\'re sharing insider knowledge. Use "like crazy," "just tell them," "almost automatic" for conversational flow. Sound genuinely excited about helping, not selling.',
+    text: 'You know what, Mr. [NAME]? Here\'s something most business owners don\'t realize...\n\n[FOR REAL ESTATE]: The top real estate companies in Dubai aren\'t hiring more agents and admins to grow. They\'re automating everything—commission tracking, document workflows, client management—and scaling with the same team size.\n\n[FOR RETAIL]: The retailers who are expanding rapidly aren\'t hiring armies of inventory managers. They\'ve got systems that tell them exactly what to order, when, and for which location.\n\n[FOR TRADING]: Successful trading companies aren\'t drowning in spreadsheets and supplier chaos. They\'ve automated procurement and can see their margins in real-time.\n\n[FOR LOGISTICS]: The logistics companies winning big contracts aren\'t the ones with the most staff. They\'re the ones who can give clients real-time updates and never miss a billing detail.\n\n[FOR CONSULTING]: Profitable consulting firms know which projects make money BEFORE they finish them, not after.\n\nWe just helped a company like yours deploy this in two weeks. Most consultants would have taken six months and charged double.\n\nThat\'s why I\'d like to show you exactly how this works for your specific situation.',
+    tips: '🎯 Industry-specific success stories. More consultative, less aggressive.',
     responses: [
       { label: 'Continue to demo offer', type: 'neutral', nextNodeId: 'demo-offer' }
     ]
@@ -306,6 +306,157 @@ export const scholarixScript: Record<string, ScriptNode> = {
     responses: [
       { label: 'Yes, hold a slot', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { timeCommitted: true } },
       { label: 'No, will reach out', type: 'negative', nextNodeId: 'end-follow-up' }
+    ]
+  },
+
+  // PRICING OBJECTIONS (From final script)
+  'objection-too-expensive': {
+    id: 'objection-too-expensive',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: '🚫 OBJECTION: "It\'s too expensive"\n\nI understand price is important, Mr. [NAME]. Let me ask you something:\n\nIf I could show you how to make or save 25,300 AED monthly, would you invest 5,999 AED to get it?\n\n[PAUSE - Let them answer]\n\nThat\'s exactly what this is. Look at the numbers:\n\nYou\'re currently losing 27,500 AED monthly to manual processes.\nOur solution costs 5,999 AED monthly.\nNet savings: 21,501 AED monthly.\n\nYou\'re not paying 5,999 AED. You\'re MAKING 21,501 AED net profit monthly.\n\nThe real question isn\'t whether you can afford our solution - it\'s whether you can afford to keep losing 27,500 AED monthly.\n\nWhich is more expensive:\n- 5,999 AED that makes you 21,501 AED profit\n- OR 0 AED that loses you 27,500 AED\n\nMr. [NAME], this isn\'t an expense. It\'s the most profitable investment you\'ll make this year - 358% ROI.\n\nShould we get started with the Professional package?',
+    tips: '💰 Value vs. Cost Reframe. Use their own pain points. Calculate ROI live.',
+    responses: [
+      { label: 'Makes sense, let\'s proceed', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { valueAcknowledged: true, demoBooked: true } },
+      { label: 'Still price concerned', type: 'objection', nextNodeId: 'objection-price-breakdown' },
+      { label: 'Not interested', type: 'negative', nextNodeId: 'objection-not-interested-final' }
+    ]
+  },
+
+  'objection-price-breakdown': {
+    id: 'objection-price-breakdown',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'Let me break down what 5,999 AED monthly actually means, Mr. [NAME]:\n\n5,999 AED ÷ 22 working days = 273 AED per day\n273 AED ÷ 50 orders = 5.46 AED per order\n\nYou\'re paying 5.46 AED per order to:\n- Eliminate manual data entry\n- Remove human errors\n- Generate instant invoices\n- Update inventory automatically\n- Create real-time reports\n- Reduce customer complaints\n\nYour current manual process costs you 550 AED per order (27,500 ÷ 50).\n\nSo you\'re replacing a 550 AED per order process with a 5.46 AED per order process.\n\nThat\'s 99% cost reduction per order.\n\nDoes that put it in perspective?',
+    tips: '📊 Break down cost per unit. Make monthly price feel tiny.',
+    responses: [
+      { label: 'Yes, that helps', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { valueAcknowledged: true, demoBooked: true } },
+      { label: 'Need to think', type: 'neutral', nextNodeId: 'objection-think-about-it-closing' },
+      { label: 'Still too much', type: 'negative', nextNodeId: 'objection-payment-terms' }
+    ]
+  },
+
+  'objection-payment-terms': {
+    id: 'objection-payment-terms',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'I understand cash flow is important, Mr. [NAME]. Many successful UAE businesses use flexible payment terms for strategic investments.\n\nWe offer 90-day payment terms, and we can structure this so it improves your cash flow from month one - the savings cover the cost.\n\nBut let\'s not get ahead of ourselves. Let me first SHOW you if this even makes sense for your business. Then we can discuss payment options that work for you.\n\nWould you be open to a 30-minute meeting to explore if this is even right for you?',
+    tips: '💳 Offer payment flexibility. Reduce risk perception.',
+    responses: [
+      { label: 'Yes, show me options', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } },
+      { label: 'No budget at all', type: 'negative', nextNodeId: 'objection-no-budget-final' }
+    ]
+  },
+
+  'objection-no-budget-final': {
+    id: 'objection-no-budget-final',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'I appreciate you being upfront about budget, Mr. [NAME]. Here\'s the good news - this meeting is completely free, and you SHOULD see what\'s possible even without budget because:\n\n1. You\'ll learn valuable things about improving operations that you can implement yourself\n2. When budget opens up, you\'ll know exactly what to invest in\n3. Our solution typically PAYS for itself through savings\n\nRemember that 475,200 AED you\'re losing yearly to manual processes? Our solution costs about 72,000 AED yearly.\n\nSo you\'re not spending 72,000 - you\'re MAKING 403,200 AED in year one through savings. That\'s 560% ROI.\n\nThis isn\'t an expense that needs budget - it\'s an investment that creates budget.\n\nCan we at least do the meeting? No cost, no commitment.',
+    tips: '🎯 Investment vs. expense reframe. Show ROI creates its own budget.',
+    responses: [
+      { label: 'Fair enough, let\'s meet', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } },
+      { label: 'Still can\'t do it', type: 'negative', nextNodeId: 'end-not-interested' }
+    ]
+  },
+
+  'objection-discount-request': {
+    id: 'objection-discount-request',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: '🚫 OBJECTION: "Can you give us a discount?"\n\nI appreciate you asking, Mr. [NAME]. Let me be transparent with you.\n\nOur pricing is already competitive for the value you\'re getting. If I gave you 50% discount, I\'d have to remove 50% of the value. Would you want:\n- Half the features?\n- Half the support?\n- Half the training?\n- Half the results?\n\nOf course not.\n\nHere\'s what I CAN do instead of discounting the price:\n\nIf you commit today, I\'ll include at NO extra charge:\n\n✓ Premium training package (worth 3,000 AED)\n  - 4 training sessions instead of 2\n  - Video tutorials for your team\n  - Training materials in Arabic and English\n\n✓ 6 months of priority support (worth 5,000 AED)\n  - 4-hour response time instead of 24 hours\n  - Direct WhatsApp to me personally\n  - Weekend support included\n\n✓ Custom report templates (worth 2,000 AED)\n  - 5 custom reports designed for your business\n  - Automated daily/weekly/monthly reports\n  - Dashboard customization\n\nThat\'s 10,000 AED in added value at no extra charge.\n\nShould we move forward with the Professional package plus these premium bonuses?',
+    tips: '🎁 Value-adds instead of discounts. Maintain price integrity.',
+    responses: [
+      { label: 'Yes, with bonuses', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { valueAcknowledged: true, demoBooked: true } },
+      { label: 'Still want price reduction', type: 'objection', nextNodeId: 'objection-discount-final' },
+      { label: 'Not interested', type: 'negative', nextNodeId: 'end-not-interested' }
+    ]
+  },
+
+  'objection-discount-final': {
+    id: 'objection-discount-final',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'Mr. [NAME], let me see what I can do.\n\n[Pause - pretend to calculate]\n\nHere\'s what I can offer: If you commit to a 12-month contract paid quarterly, I can bring it down to 5,499 AED monthly - that\'s 500 AED off monthly, which is 6,000 AED savings yearly.\n\nBut this requires:\n1. 12-month commitment (not month-to-month)\n2. Quarterly payment in advance\n3. Decision today to lock in this price\n\nIf you wait until next week, this offer expires and we\'re back to 5,999 AED.\n\nCan you commit to 12 months at 5,499 AED monthly with quarterly payment?',
+    tips: '⚠️ Small discount with conditions. Never discount more than 10-15%.',
+    responses: [
+      { label: 'Yes, deal', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true, timeCommitted: true } },
+      { label: 'Need to think', type: 'neutral', nextNodeId: 'objection-think-about-it-closing' },
+      { label: 'No thanks', type: 'negative', nextNodeId: 'end-not-interested' }
+    ]
+  },
+
+  'objection-think-about-it-closing': {
+    id: 'objection-think-about-it-closing',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: '🚫 OBJECTION: "We need to think about it" (At closing stage)\n\nOf course, Mr. [NAME]. This is an important decision. But let me ask - what specifically do you need to think about?\n\nIs it:\n- Whether the solution actually works? (You\'ve seen the demo)\n- Whether the ROI makes sense? (358% return)\n- Whether we can deliver? (I gave you references)\n- Whether you can afford it? (It pays for itself in 11 weeks)\n- Whether your team can use it? (We train them)\n- Something else?\n\nHelp me understand what\'s holding you back.\n\n[PAUSE - They\'ll tell you the REAL objection]\n\nHere\'s what I\'ve learned: When someone says "I need to think about it" after seeing everything, one of three things happens:\n\n1. They think for a week, life gets busy, and forget\n2. They think for a month, finally decide yes, but lost 27,500 AED in delay\n3. They think for 3 months, see competitors already automated, and realize they\'re behind\n\nHere\'s what I suggest:\n\nStart with a 30-day trial. If you don\'t see value, we refund everything. You have nothing to lose and 25,300 AED monthly to gain.\n\nEvery day you delay costs you 1,250 AED. A week is 8,750 AED gone. A month is 27,500 AED gone.\n\nThe smart decision is to start now with 30-day trial. If it doesn\'t work, you\'ve lost nothing. If it does work, you\'re saving 25,300 AED monthly immediately.\n\nCan we get started?',
+    tips: '🔥 Uncover real objection. Quantify cost of delay. Offer trial to reduce risk.',
+    responses: [
+      { label: 'Ok, let\'s start trial', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } },
+      { label: 'Still need time', type: 'negative', nextNodeId: 'objection-think-timeline' },
+      { label: 'Not ready', type: 'negative', nextNodeId: 'end-follow-up' }
+    ]
+  },
+
+  'objection-think-timeline': {
+    id: 'objection-think-timeline',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'I understand. How long do you need to think? A week? Two weeks?\n\n[Let them answer]\n\nOk, here\'s what I\'ll do. I\'ll check back with you on [SPECIFIC DATE]. But Mr. [NAME], I need you to understand:\n\nEach day of delay costs you 1,250 AED. That\'s real money.\n\nAnd our December implementation slots are filling up. If we lose your spot, it pushes to January, which means you lose an entire month of savings - 27,500 AED.\n\nPlease take this seriously. I\'ll follow up on [DATE]. Fair?',
+    tips: '⏰ Set specific follow-up. Create urgency with capacity and cost.',
+    responses: [
+      { label: 'Fair, follow up then', type: 'neutral', nextNodeId: 'end-follow-up' },
+      { label: 'Actually, let\'s do it now', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } }
+    ]
+  },
+
+  'objection-tried-automation-before': {
+    id: 'objection-tried-automation-before',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: '🚫 OBJECTION: "We tried automation before and it didn\'t work"\n\nI\'m sorry that happened, Mr. [NAME]. That must have been frustrating. Can you tell me what went wrong specifically?\n\n[LISTEN - They\'ll tell you exactly what to avoid]\n\nThat\'s exactly why we do things differently. Most automation failures happen because:\n- Companies sell complicated systems requiring IT experts\n- No proper training - just hand over software\n- No ongoing support after installation\n- One-size-fits-all approach\n\nWe\'ve learned from those mistakes. Here\'s how we\'re different:\n\n✓ Start small and prove value first - not everything at once\n✓ Train your team properly until comfortable - not just 1 hour\n✓ Provide ongoing support - I give you my personal mobile\n✓ Customize to YOUR processes - not force rigid system\n✓ Local in Dubai - not disappearing after installation\n\nWould you be willing to see our different approach? Just 30 minutes. If you see same red flags, tell me and we\'ll end the call.\n\nYou\'re in complete control. Fair?',
+    tips: '🔄 Turn past failure into opportunity. Show how you\'re different.',
+    responses: [
+      { label: 'Ok, show me your approach', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } },
+      { label: 'Too risky to try again', type: 'negative', nextNodeId: 'objection-risk-mitigation' },
+      { label: 'Not interested', type: 'negative', nextNodeId: 'end-not-interested' }
+    ]
+  },
+
+  'objection-risk-mitigation': {
+    id: 'objection-risk-mitigation',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'I completely understand your hesitation, Mr. [NAME]. Getting burned once makes you cautious. That\'s smart.\n\nHere\'s how we eliminate risk:\n\n✓ 30-day money-back guarantee - If not satisfied, full refund\n✓ Phase 1 pilot (2 weeks) - Prove value before full rollout\n✓ Pay-per-milestone - You pay as we deliver, not upfront\n✓ Written SLA - Response times and deliverables in contract\n✓ Reference customers - Call 3 businesses we\'ve helped\n\nYou\'re not taking a risk. We\'re taking the risk. We only succeed if you succeed.\n\nWorth 30 minutes to explore?',
+    tips: '🛡️ Remove all perceived risk. Make it safe to say yes.',
+    responses: [
+      { label: 'Ok, with guarantees yes', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } },
+      { label: 'Still not sure', type: 'negative', nextNodeId: 'end-follow-up' }
+    ]
+  },
+
+  'objection-partner-approval': {
+    id: 'objection-partner-approval',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: '🚫 OBJECTION: "I need to discuss with my partner first"\n\nAbsolutely, Mr. [NAME]. Important decisions need consensus. Here\'s what I suggest:\n\nI\'ll prepare a one-page business case for your partner showing:\n- Exact problem (manual processes costing 330,000 AED yearly)\n- Solution (automation reducing cost to 72,000 AED yearly)\n- ROI calculation (231,612 AED net savings year one)\n- Implementation timeline (3 weeks to automation)\n- Risk mitigation (30-day money-back guarantee)\n\nThen, let\'s schedule 15-minute call with you and your partner tomorrow where I answer any questions directly.\n\nThis gets approval within 24 hours instead of weeks of back-and-forth.\n\nCan we schedule that call for tomorrow 11 AM or 3 PM?',
+    tips: '👥 Include partner immediately. Control the conversation.',
+    responses: [
+      { label: 'Yes, include partner', type: 'positive', nextNodeId: 'confirm-demo', qualificationUpdate: { demoBooked: true } },
+      { label: 'Need to ask partner first', type: 'neutral', nextNodeId: 'objection-partner-timeline' }
+    ]
+  },
+
+  'objection-partner-timeline': {
+    id: 'objection-partner-timeline',
+    phase: 'objection',
+    type: 'objection-handler',
+    text: 'Fair enough. When can you discuss with your partner - tonight? This weekend?\n\n[Let them answer]\n\nOk, I\'ll send the business case today. Please discuss and I\'ll call you [SPECIFIC DAY] morning to hear your thoughts.\n\nBut Mr. [NAME] - please take this seriously. Every day of delay costs 1,250 AED, and December slots are filling up.\n\nIf we lose your spot, it\'s January implementation which means 27,500 AED lost in December alone.\n\nShould I prepare the contract so we\'re ready to move quickly once you both agree?',
+    tips: '📅 Set specific timeline. Prepare contract in advance. Create urgency.',
+    responses: [
+      { label: 'Yes, prepare contract', type: 'positive', nextNodeId: 'end-follow-up' },
+      { label: 'No, just send info', type: 'neutral', nextNodeId: 'end-follow-up' }
     ]
   },
 

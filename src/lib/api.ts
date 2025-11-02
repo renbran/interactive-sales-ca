@@ -389,15 +389,10 @@ class ApiClient {
   // SYNC ENDPOINT (Sync Clerk user to DB)
   // =====================================================
 
-  async syncUser(clerkUserId: string, email: string, fullName: string, role: 'admin' | 'agent' = 'agent'): Promise<ApiResponse<User>> {
+  async syncUser(clerkUserId: string): Promise<ApiResponse<User>> {
     return this.request('/auth/sync', {
       method: 'POST',
-      body: JSON.stringify({
-        clerk_id: clerkUserId,
-        email,
-        full_name: fullName,
-        role
-      }),
+      body: JSON.stringify({ clerk_id: clerkUserId }),
     });
   }
 }

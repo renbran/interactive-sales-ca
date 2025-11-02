@@ -38,12 +38,19 @@ export default function ObjectionHandler({ industry, prospectName }: ObjectionHa
   });
 
   const commonObjections = [
+    "I'm busy / No time / In a meeting",
+    "Not interested",
+    "Remove me from your list",
     "It's too expensive",
     "We need to think about it",
-    "We're happy with our current system",
-    "We don't have time right now",
-    "Need to discuss with my partner/team",
-    "Can you send me more information?",
+    "We're using existing system/software",
+    "We're too small for this",
+    "Just send me information first",
+    "We tried automation before and it didn't work",
+    "Can you give us a discount?",
+    "We need to discuss with partner/boss",
+    "We're talking to competitors",
+    "No budget right now",
   ];
 
   const handleGenerateResponse = async () => {

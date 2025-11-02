@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCHOLARIX // NEURAL NETWORK</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono:wght@400&display=swap');
+
+        :root {
+            --deep-navy: #f3f5f7;
+            --ocean-blue: #1e3a8a;
+            --sky-blue: #4fc3f7;
+            --ice-white: #e8f4fd;
+            --pure-white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--deep-navy);
+            color: var(--sky-blue);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* Matrix Rain Background */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.15;
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: var(--sky-blue);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            animation: fall linear infinite;
+            text-shadow: 0 0 8px var(--sky-blue);
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-100vh); opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* Scanlines */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(79, 195, 247, 0.03) 2px,
+                    rgba(79, 195, 247, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.5;
+        }
+
+        /* Main Container */
+        .cyberpunk-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Terminal */
+        .header-terminal {
+            background: rgba(34, 214, 255, 0.95);
+            border: 3px solid var(--sky-blue);
+            border-bottom: none;
+            padding: 20px;
+            position: relative;
+            box-shadow: 
+                0 0 30px rgba(79, 195, 247, 0.5),
+                inset 0 0 20px rgba(79, 195, 247, 0.1);
+            animation: headerGlow 4s ease-in-out infinite;
+        }
+        
+        @keyframes headerGlow {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(79, 195, 247, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(79, 195, 247, 0.7);
+            }
+        }
+
+        .terminal-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--sky-blue);
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid var(--sky-blue);
+            box-shadow: 0 0 5px var(--sky-blue);
+        }
+
+        .close { background: #FF6B6B; box-shadow: 0 0 10px #FF6B6B; }
+        .minimize { background: #F59E0B; box-shadow: 0 0 10px #F59E0B; }
+        .maximize { background: var(--sky-blue); box-shadow: 0 0 10px var(--sky-blue); }
+
+        .terminal-title {
+            color: var(--sky-blue);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--sky-blue);
+        }
+
+        .terminal-status {
+            color: var(--sky-blue);
+            font-size: 12px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: rgba(30, 58, 138, 0.3);
+            border-left: 2px solid var(--sky-blue);
+            border-right: 2px solid var(--sky-blue);
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(79, 195, 247, 0.1);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.3), var(--ice-white), rgba(79, 195, 247, 0.3), transparent);
+            animation: sweep 4s infinite;
+            box-shadow: 0 0 50px rgba(79, 195, 247, 0.5);
+        }
+
+        @keyframes sweep {
+            0% { left: -100%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        .logo-container {
+            position: relative;
+            z-index: 5;
+            margin-bottom: 40px;
+        }
+
+        .main-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 900;
+            color: var(--sky-blue);
+            text-shadow: 
+                0 0 10px var(--sky-blue),
+                0 0 20px var(--sky-blue),
+                0 0 40px var(--sky-blue),
+                0 0 80px rgba(79, 195, 247, 0.5);
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            animation: logoGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            from {
+                text-shadow: 
+                    0 0 10px var(--sky-blue),
+                    0 0 20px var(--sky-blue),
+                    0 0 40px var(--sky-blue);
+            }
+            to {
+                text-shadow: 
+                    0 0 20px var(--sky-blue),
+                    0 0 30px var(--sky-blue),
+                    0 0 60px var(--sky-blue),
+                    0 0 100px rgba(79, 195, 247, 0.5);
+            }
+        }
+
+        .tagline {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            color: var(--sky-blue);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        .typing-text {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--sky-blue);
+            min-height: 50px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px var(--sky-blue);
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+        }
+
+        /* Interactive Buttons */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .cyber-button {
+            background: rgba(79, 195, 247, 0.1);
+            border: 2px solid var(--sky-blue);
+            color: var(--sky-blue);
+            padding: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+            animation: buttonFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes buttonFloat {
+            0%, 100% { 
+                transform: translateY(0);
+                box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+            }
+            50% { 
+                transform: translateY(-5px);
+                box-shadow: 0 5px 25px rgba(79, 195, 247, 0.4);
+            }
+        }
+
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.5), transparent);
+            transition: left 0.5s;
+        }
+
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(79, 195, 247, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        .cyber-button:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .cyber-button:hover {
+            background: rgba(79, 195, 247, 0.3);
+            box-shadow: 
+                0 0 40px rgba(79, 195, 247, 0.6),
+                inset 0 0 30px rgba(79, 195, 247, 0.3);
+            transform: translateY(-5px) scale(1.05);
+            border-color: var(--ice-white);
+            animation: none;
+        }
+
+        .cyber-button:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.4);
+        }
+
+        /* Terminal Output */
+        .terminal-output {
+            background: rgba(12, 30, 52, 0.95);
+            border: 2px solid var(--sky-blue);
+            margin: 20px;
+            padding: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+        }
+
+        .terminal-line {
+            margin-bottom: 5px;
+        }
+
+        .prompt {
+            color: var(--sky-blue);
+            text-shadow: 0 0 5px var(--sky-blue);
+        }
+
+        .command {
+            color: var(--sky-blue);
+        }
+
+        .output {
+            color: var(--sky-blue);
+            padding-left: 20px;
+            opacity: 0.8;
+        }
+
+        .error {
+            color: #FF6B6B;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            background: rgba(30, 58, 138, 0.3);
+            border-left: 2px solid var(--sky-blue);
+            border-right: 2px solid var(--sky-blue);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: inset 0 0 30px rgba(79, 195, 247, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--sky-blue);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px 20px;
+            border: 2px solid var(--sky-blue);
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: bold;
+            background: rgba(79, 195, 247, 0.1);
+            text-shadow: 0 0 8px var(--sky-blue);
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+            }
+        }
+
+        .nav-link::before {
+            content: '> ';
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-right: 5px;
+        }
+
+        .nav-link:hover::before {
+            opacity: 1;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-10px); }
+            to { transform: translateX(0); }
+        }
+
+        .nav-link:hover {
+            border-color: var(--sky-blue);
+            background: rgba(79, 195, 247, 0.3);
+            text-shadow: 0 0 15px var(--sky-blue);
+            box-shadow: 
+                0 0 30px rgba(79, 195, 247, 0.6),
+                inset 0 0 20px rgba(79, 195, 247, 0.2);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .system-time {
+            color: var(--sky-blue);
+            font-size: 13px;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--sky-blue);
+            padding: 8px 15px;
+            border: 2px solid var(--sky-blue);
+            background: rgba(79, 195, 247, 0.1);
+            animation: timePulse 2s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes timePulse {
+            0%, 100% { 
+                text-shadow: 0 0 10px var(--sky-blue);
+                border-color: var(--sky-blue);
+            }
+            50% { 
+                text-shadow: 0 0 20px var(--sky-blue);
+                border-color: var(--ice-white);
+            }
+        }
+        
+        .system-time:hover {
+            background: rgba(79, 195, 247, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+
+        /* Stats Dashboard */
+        .stats-dashboard {
+            background: rgba(30, 58, 138, 0.2);
+            border-left: 2px solid var(--sky-blue);
+            border-right: 2px solid var(--sky-blue);
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            box-shadow: inset 0 0 50px rgba(79, 195, 247, 0.1);
+        }
+
+        .stat-card {
+            background: rgba(79, 195, 247, 0.05);
+            border: 2px solid var(--sky-blue);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
+            transition: all 0.3s ease;
+            animation: cardPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes cardPulse {
+            0%, 100% { 
+                border-color: var(--sky-blue);
+                box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
+            }
+            50% { 
+                border-color: var(--ice-white);
+                box-shadow: 0 0 30px rgba(79, 195, 247, 0.4);
+            }
+        }
+
+        .stat-card:hover {
+            background: rgba(79, 195, 247, 0.15);
+            box-shadow: 
+                0 0 40px rgba(79, 195, 247, 0.6),
+                inset 0 0 20px rgba(79, 195, 247, 0.2);
+            transform: translateY(-10px) scale(1.05) rotateZ(2deg);
+            animation: none;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--sky-blue), var(--ice-white), var(--sky-blue));
+            animation: loading 2s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--sky-blue);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 30px 30px;
+            border-color: transparent transparent var(--sky-blue) transparent;
+            opacity: 0.3;
+        }
+
+        @keyframes loading {
+            0%, 100% { 
+                width: 0%; 
+                left: 0;
+            }
+            50% { 
+                width: 100%; 
+                left: 0;
+            }
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--sky-blue);
+            text-shadow: 0 0 15px var(--sky-blue);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--sky-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+
+        /* Footer Terminal */
+        .footer-terminal {
+            background: rgba(12, 30, 52, 0.95);
+            border: 2px solid var(--sky-blue);
+            border-top: none;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 -10px 40px rgba(79, 195, 247, 0.3);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .footer-section h3 {
+            color: var(--sky-blue);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 16px;
+            font-weight: 900;
+            text-shadow: 
+                0 0 10px var(--sky-blue),
+                0 0 20px var(--sky-blue);
+            animation: titleGlow 3s ease-in-out infinite;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--sky-blue), transparent);
+            animation: lineExpand 2s ease-in-out infinite;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { 
+                text-shadow: 0 0 10px var(--sky-blue);
+            }
+            50% { 
+                text-shadow: 0 0 20px var(--sky-blue), 0 0 30px var(--sky-blue);
+            }
+        }
+        
+        @keyframes lineExpand {
+            0%, 100% { 
+                width: 50%;
+                left: 25%;
+            }
+            50% { 
+                width: 100%;
+                left: 0;
+            }
+        }
+
+        .footer-section p {
+            color: var(--sky-blue);
+            line-height: 1.8;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .footer-section a {
+            color: var(--sky-blue);
+            text-decoration: none;
+            line-height: 1.8;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 8px var(--sky-blue);
+        }
+
+        .footer-section a:hover {
+            color: var(--sky-blue);
+            text-shadow: 0 0 20px var(--sky-blue), 0 0 30px var(--sky-blue);
+            border: 1px solid var(--sky-blue);
+            background: rgba(79, 195, 247, 0.2);
+            transform: translateX(5px) scale(1.05);
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.4);
+        }
+
+        .copyright {
+            border-top: 1px solid var(--sky-blue);
+            padding-top: 20px;
+            color: var(--sky-blue);
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-logo {
+                font-size: 2.5rem;
+                letter-spacing: 4px;
+            }
+            
+            .hero-section {
+                padding: 40px 20px;
+            }
+            
+            .action-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+
+            .terminal-output {
+                margin: 20px 10px;
+                padding: 15px;
+            }
+
+            .stats-dashboard {
+                padding: 20px;
+                gap: 20px;
+            }
+        }
+
+        /* Interactive Elements */
+        .glitch {
+            animation: glitch 0.3s ease-in-out;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--deep-navy);
+            border-left: 1px solid var(--sky-blue);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--sky-blue);
+            box-shadow: 0 0 10px var(--sky-blue);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--ice-white);
+            box-shadow: 0 0 15px var(--ice-white);
+        }
+
+        /* Contact Links */
+        .contact-link {
+            color: var(--sky-blue);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 8px 12px;
+            border: 2px solid transparent;
+            display: inline-block;
+            animation: highlightPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes highlightPulse {
+            0%, 100% { 
+                text-shadow: 0 0 10px var(--sky-blue);
+            }
+            50% { 
+                text-shadow: 0 0 20px var(--sky-blue), 0 0 30px var(--sky-blue);
+            }
+        }
+
+        .contact-link:hover {
+            text-shadow: 0 0 25px var(--sky-blue), 0 0 40px var(--sky-blue);
+            border: 2px solid var(--sky-blue);
+            background: rgba(79, 195, 247, 0.2);
+            transform: scale(1.1) translateX(5px);
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+        
+        .contact-link::after {
+            content: ' →';
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .contact-link:hover::after {
+            opacity: 1;
+            animation: arrowBounce 0.6s ease infinite;
+        }
+        
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            background: rgba(30, 58, 138, 0.2);
+            border-left: 2px solid var(--sky-blue);
+            border-right: 2px solid var(--sky-blue);
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeSlideIn 0.6s ease-out;
+            min-height: 100vh;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Hide hero and stats when content section is active */
+        body:has(.content-section.active) .hero-section,
+        body:has(.content-section.active) .stats-dashboard {
+            display: none;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--sky-blue);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px var(--sky-blue);
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { text-shadow: 0 0 20px var(--sky-blue); }
+            50% { text-shadow: 0 0 40px var(--sky-blue), 0 0 60px var(--sky-blue); }
+        }
+
+        .section-description {
+            color: var(--sky-blue);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Service Cards Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .service-card {
+            background: rgba(79, 195, 247, 0.05);
+            border: 2px solid var(--sky-blue);
+            padding: 30px;
+            position: relative;
+            transition: all 0.4s ease;
+            overflow: hidden;
+            animation: cardFadeIn 0.6s ease-out backwards;
+        }
+
+        .service-card:nth-child(1) { animation-delay: 0.1s; }
+        .service-card:nth-child(2) { animation-delay: 0.2s; }
+        .service-card:nth-child(3) { animation-delay: 0.3s; }
+        .service-card:nth-child(4) { animation-delay: 0.4s; }
+        .service-card:nth-child(5) { animation-delay: 0.5s; }
+        .service-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--sky-blue), var(--ice-white), var(--sky-blue));
+            animation: scanLine 2s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            background: rgba(79, 195, 247, 0.15);
+            box-shadow: 0 10px 40px rgba(79, 195, 247, 0.4);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--sky-blue);
+            margin-bottom: 20px;
+            display: block;
+            text-shadow: 0 0 20px var(--sky-blue);
+        }
+
+        .service-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--sky-blue);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .service-description {
+            color: var(--sky-blue);
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* Portfolio Items */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .portfolio-item {
+            background: rgba(12, 30, 52, 0.8);
+            border: 2px solid var(--sky-blue);
+            padding: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            animation: cardFadeIn 0.6s ease-out backwards;
+        }
+
+        .portfolio-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(30, 58, 138, 0.5));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--sky-blue);
+            border-bottom: 2px solid var(--sky-blue);
+        }
+
+        .portfolio-content {
+            padding: 25px;
+        }
+
+        .portfolio-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            color: var(--sky-blue);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .portfolio-desc {
+            color: var(--sky-blue);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .portfolio-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            padding: 5px 15px;
+            border: 1px solid var(--sky-blue);
+            color: var(--sky-blue);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(79, 195, 247, 0.5);
+        }
+
+        /* Team Members */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .team-member {
+            background: rgba(79, 195, 247, 0.05);
+            border: 2px solid var(--sky-blue);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s ease;
+            animation: cardFadeIn 0.6s ease-out backwards;
+        }
+
+        .team-avatar {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            border: 3px solid var(--sky-blue);
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(30, 58, 138, 0.5));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--sky-blue);
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.3);
+        }
+
+        .team-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--sky-blue);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .team-role {
+            color: var(--sky-blue);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .team-bio {
+            color: var(--sky-blue);
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .team-member:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 50px rgba(79, 195, 247, 0.5);
+        }
+
+        .team-member:hover .team-avatar {
+            box-shadow: 0 0 50px rgba(79, 195, 247, 0.6);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Contact Form */
+        .contact-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: rgba(12, 30, 52, 0.8);
+            border: 2px solid var(--sky-blue);
+            padding: 40px;
+        }
+
+        .contact-form {
+            display: grid;
+            gap: 25px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--sky-blue);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px var(--sky-blue);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(79, 195, 247, 0.05);
+            border: 2px solid var(--sky-blue);
+            color: var(--sky-blue);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            background: rgba(79, 195, 247, 0.1);
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            background: rgba(79, 195, 247, 0.2);
+            border: 2px solid var(--sky-blue);
+            color: var(--sky-blue);
+            padding: 18px 40px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.5), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-button:hover::before {
+            left: 100%;
+        }
+
+        .submit-button:hover {
+            background: rgba(79, 195, 247, 0.3);
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 30, 52, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(79, 195, 247, 0.2);
+            border-top: 4px solid var(--sky-blue);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--sky-blue);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--sky-blue);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(79, 195, 247, 0.2);
+            margin: 20px auto 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: var(--sky-blue);
+            box-shadow: 0 0 10px var(--sky-blue);
+            animation: loadingSlide 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loadingSlide {
+            0% { left: -50%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Effect -->
+    <div class="matrix-rain" id="matrixRain"></div>
+    
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <div class="cyberpunk-container">
+        
+        <!-- Header Terminal -->
+        <header class="header-terminal">
+            <div class="terminal-bar">
+                <div class="terminal-controls">
+                    <div class="control-btn close"></div>
+                    <div class="control-btn minimize"></div>
+                    <div class="control-btn maximize"></div>
+                </div>
+                <div class="terminal-title">Scholarix Neural Interface v3.7.2</div>
+                <div class="terminal-status">ONLINE</div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="logo-container">
+                <h1 class="main-logo" onclick="glitchLogo()">SCHOLARIX</h1>
+                <p class="tagline">AI Automation. Odoo Excellence. Real Results.</p>
+            </div>
+            
+            <div class="typing-text" id="typingText"></div>
+            
+            <div class="action-grid">
+                <button class="cyber-button" onclick="event.preventDefault(); navigate('destinations')">
+                    <span>[INDUSTRIES]</span><br>
+                    View Our Sectors
+                </button>
+                <button class="cyber-button" onclick="event.preventDefault(); navigate('services')">
+                    <span>[SOLUTIONS]</span><br>
+                    Explore Services
+                </button>
+                <button class="cyber-button" onclick="event.preventDefault(); navigate('contact')">
+                    <span>[BOOK DEMO]</span><br>
+                    Schedule Now
+                </button>
+                <button class="cyber-button" onclick="executeCommand('company_info')">
+                    <span>[COMPANY INFO]</span><br>
+                    Learn More
+                </button>
+            </div>
+        </section>
+
+        <!-- Navigation Menu -->
+        <nav class="nav-menu">
+            <div class="nav-links">
+                <a href="#" class="nav-link" onclick="event.preventDefault(); showHome()">Home</a>
+                <a href="#" class="nav-link" onclick="event.preventDefault(); navigate('destinations')">Destinations</a>
+                <a href="#" class="nav-link" onclick="event.preventDefault(); navigate('services')">Services</a>
+                <a href="#" class="nav-link" onclick="event.preventDefault(); navigate('about')">About Us</a>
+                <a href="#" class="nav-link" onclick="event.preventDefault(); navigate('contact')">Contact</a>
+            </div>
+            <div class="system-time" id="systemTime"></div>
+        </nav>
+
+        <!-- Terminal Output -->
+        <div class="terminal-output" id="terminalOutput">
+            <div class="terminal-line">
+                <span class="prompt">scholarix@neural-net:~$</span> <span class="command">system_boot</span>
+            </div>
+            <div class="terminal-line output">Initializing Scholarix Neural Network...</div>
+            <div class="terminal-line output">Loading AI modules... [█████████████  ███] 100%</div>
+            <div class="terminal-line output">Quantum processors online</div>
+            <div class="terminal-line output">Ready for neural interface</div>
+            <div class="terminal-line">
+                <span class="prompt">scholarix@neural-net:~$</span> <span class="cursor">█</span>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <section class="stats-dashboard">
+            <div class="stat-card">
+                <div class="stat-number" id="activeConnections">1,247</div>
+                <div class="stat-label">Active Neural Links</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="dataProcessed">847.2TB</div>
+                <div class="stat-label">Data Processed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="aiModules">156</div>
+                <div class="stat-label">AI Modules Online</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uptime">99.7%</div>
+                <div class="stat-label">System Uptime</div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">◆ AI Transformation Services ◆</h2>
+                <p class="section-description">
+                    Revolutionary Odoo + AI automation deployment in 14 days. Transform your business operations with enterprise-grade solutions at 40% below market price.
+                </p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <span class="service-icon">🤖</span>
+                    <h3 class="service-title">Odoo ERP Deployment</h3>
+                    <p class="service-description">
+                        Complete Odoo implementation customized for UAE businesses. Full integration with sales, inventory, accounting, and CRM modules in 14 days.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">⚡</span>
+                    <h3 class="service-title">AI Automation Integration</h3>
+                    <p class="service-description">
+                        Intelligent automation powered by cutting-edge AI. Automate workflows, customer interactions, and business processes with machine learning.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">�</span>
+                    <h3 class="service-title">CRM & Sales Intelligence</h3>
+                    <p class="service-description">
+                        AI-powered CRM systems with predictive analytics, lead scoring, and automated sales workflows. Turn cold calls into committed demos.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">🎯</span>
+                    <h3 class="service-title">Business Process Automation</h3>
+                    <p class="service-description">
+                        Eliminate manual tasks with intelligent automation. Streamline operations from order processing to customer service using AI agents.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">💼</span>
+                    <h3 class="service-title">Consulting & Strategy</h3>
+                    <p class="service-description">
+                        Expert guidance on AI transformation strategy. We analyze your business needs and design custom solutions for maximum ROI.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">🚀</span>
+                    <h3 class="service-title">Rapid Deployment</h3>
+                    <p class="service-description">
+                        14-day implementation guarantee. From initial consultation to go-live, we deliver enterprise solutions at startup speed.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Destinations/Industries Section -->
+        <section id="destinations" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">◆ Industries We Transform ◆</h2>
+                <p class="section-description">
+                    Specialized AI + Odoo solutions for UAE's most dynamic sectors. Proven success across multiple industries with measurable ROI.
+                </p>
+            </div>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <div class="portfolio-image">�</div>
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">Real Estate & Property</h3>
+                        <p class="portfolio-desc">
+                            Complete CRM + automation for property management, lead tracking, and automated client follow-ups. 40%+ conversion rate improvement.
+                        </p>
+                        <div class="portfolio-tags">
+                            <span class="tag">CRM</span>
+                            <span class="tag">Lead Gen</span>
+                            <span class="tag">Automation</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">💼</div>
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">Consulting Services</h3>
+                        <p class="portfolio-desc">
+                            Project management, client tracking, and intelligent scheduling systems. Streamline operations and scale your consultancy.
+                        </p>
+                        <div class="portfolio-tags">
+                            <span class="tag">Project Mgmt</span>
+                            <span class="tag">Time Tracking</span>
+                            <span class="tag">Billing</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">🛒</div>
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">Retail & E-Commerce</h3>
+                        <p class="portfolio-desc">
+                            End-to-end inventory management, POS integration, and AI-powered demand forecasting. Reduce stockouts by 70%.
+                        </p>
+                        <div class="portfolio-tags">
+                            <span class="tag">Inventory</span>
+                            <span class="tag">POS</span>
+                            <span class="tag">AI Forecast</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">📦</div>
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">Trading & Distribution</h3>
+                        <p class="portfolio-desc">
+                            Supply chain automation, order processing, and intelligent logistics management. Cut processing time by 60%.
+                        </p>
+                        <div class="portfolio-tags">
+                            <span class="tag">Supply Chain</span>
+                            <span class="tag">Orders</span>
+                            <span class="tag">Logistics</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">🚚</div>
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">Logistics & Transport</h3>
+                        <p class="portfolio-desc">
+                            Fleet management, route optimization, and automated documentation. Real-time tracking and AI-powered dispatch.
+                        </p>
+                        <div class="portfolio-tags">
+                            <span class="tag">Fleet</span>
+                            <span class="tag">Tracking</span>
+                            <span class="tag">Optimization</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">�</div>
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">Manufacturing & Production</h3>
+                        <p class="portfolio-desc">
+                            Production planning, quality control, and maintenance scheduling. IoT integration for predictive maintenance.
+                        </p>
+                        <div class="portfolio-tags">
+                            <span class="tag">MRP</span>
+                            <span class="tag">QC</span>
+                            <span class="tag">IoT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">◆ About Scholarix Global ◆</h2>
+                <p class="section-description">
+                    Elite AI consultants delivering world-class automation solutions. We combine Odoo expertise with cutting-edge AI to transform UAE businesses.
+                </p>
+            </div>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="team-avatar">🎯</div>
+                    <h3 class="team-name">Our Mission</h3>
+                    <p class="team-role">Democratizing Enterprise AI</p>
+                    <p class="team-bio">
+                        Making enterprise-grade AI + Odoo solutions accessible to UAE businesses at 40% below market price with 14-day deployment guarantee.
+                    </p>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">⚡</div>
+                    <h3 class="team-name">Speed & Quality</h3>
+                    <p class="team-role">14-Day Deployment</p>
+                    <p class="team-bio">
+                        From consultation to go-live in just 2 weeks. Enterprise solutions at startup speed without compromising on quality or customization.
+                    </p>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">💼</div>
+                    <h3 class="team-name">UAE Expertise</h3>
+                    <p class="team-role">Dubai-Based Team</p>
+                    <p class="team-bio">
+                        Deep understanding of UAE business landscape. Specialized in Real Estate, Trading, Retail, Consulting, and Logistics sectors.
+                    </p>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">🤖</div>
+                    <h3 class="team-name">AI Innovation</h3>
+                    <p class="team-role">Cutting-Edge Technology</p>
+                    <p class="team-bio">
+                        Advanced AI automation, machine learning models, and intelligent agents. Transform operations with predictive analytics and smart workflows.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">◆ Book Your Demo ◆</h2>
+                <p class="section-description">
+                    Limited to 40 slots. Get Odoo + AI automation deployed in 14 days at 40% below market price. Schedule your consultation now.
+                </p>
+            </div>
+            <div class="contact-container">
+                <form class="contact-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name</label>
+                        <input type="text" id="name" class="form-input" required placeholder="Your Name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="company">Company Name</label>
+                        <input type="text" id="company" class="form-input" required placeholder="Your Company">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" class="form-input" required placeholder="you@company.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Phone Number (WhatsApp)</label>
+                        <input type="tel" id="phone" class="form-input" required placeholder="+971 XX XXX XXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="industry">Industry / Sector</label>
+                        <input type="text" id="industry" class="form-input" placeholder="Real Estate, Retail, Trading, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="message">Business Challenge</label>
+                        <textarea id="message" class="form-textarea" required placeholder="Tell us about your business processes and pain points..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-button">
+                        Book Demo Session
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">LOADING NEURAL DATA...</div>
+                <div class="loading-bar"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer-terminal">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>◆ About Scholarix ◆</h3>
+                    <p>Elite AI consultants delivering Odoo + AI automation in 14 days. Transform your UAE business with enterprise solutions at 40% below market price. Limited to 40 slots.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>◆ Contact Us ◆</h3>
+                    <p>Email: <a href="mailto:info@scholarixglobal.com" class="contact-link">info@scholarixglobal.com</a></p>
+                    <p>WhatsApp: <a href="https://wa.me/971563905772" class="contact-link">+971 56 390 5772</a></p>
+                    <p>Telegram: <a href="https://t.me/+971563905772" class="contact-link">+971 56 390 5772</a></p>
+                    <p>Location: Dubai, United Arab Emirates</p>
+                </div>
+                <div class="footer-section">
+                    <h3>◆ Quick Links ◆</h3>
+                    <p><a href="#" class="contact-link" onclick="event.preventDefault(); navigate('services')">Our Services</a></p>
+                    <p><a href="#" class="contact-link" onclick="event.preventDefault(); navigate('destinations')">Industries</a></p>
+                    <p><a href="#" class="contact-link" onclick="event.preventDefault(); navigate('about')">About Us</a></p>
+                    <p><a href="#" class="contact-link" onclick="event.preventDefault(); navigate('contact')">Book Demo</a></p>
+                </div>
+            </div>
+            <div class="copyright">
+                © 2025 Scholarix Global AI Consultants. All rights reserved.<br>
+                Odoo + AI Automation Experts | Dubai, United Arab Emirates
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        function createMatrixRain() {
+            const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()◆■□▪▫';
+            const container = document.getElementById('matrixRain');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const columnCount = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columnCount; i++) {
+                const char = document.createElement('div');
+                char.className = 'matrix-char';
+                char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                char.style.left = (i * 20) + 'px';
+                char.style.animationDelay = Math.random() * 3 + 's';
+                char.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                container.appendChild(char);
+                
+                // Randomly change characters
+                setInterval(() => {
+                    char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                }, Math.random() * 1000 + 500);
+            }
+        }
+
+        // Typing Animation
+        const messages = [
+            'ODOO + AI DEPLOYMENT IN 14 DAYS',
+            '40% BELOW MARKET PRICE',
+            'LIMITED TO 40 SLOTS ONLY',
+            'UAE BUSINESS AUTOMATION EXPERTS',
+            'ENTERPRISE SOLUTIONS. STARTUP SPEED.',
+            'TRANSFORM YOUR BUSINESS TODAY.'
+        ];
+
+        let messageIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function typeMessage() {
+            const currentMessage = messages[messageIndex];
+            const typingElement = document.getElementById('typingText');
+            
+            if (!typingElement) return;
+            
+            if (!isDeleting) {
+                typingElement.innerHTML = currentMessage.substring(0, charIndex) + '<span class="cursor">█</span>';
+                charIndex++;
+                
+                if (charIndex > currentMessage.length) {
+                    isDeleting = true;
+                    setTimeout(typeMessage, 2000);
+                    return;
+                }
+            } else {
+                typingElement.innerHTML = currentMessage.substring(0, charIndex) + '<span class="cursor">█</span>';
+                charIndex--;
+                
+                if (charIndex < 0) {
+                    isDeleting = false;
+                    messageIndex = (messageIndex + 1) % messages.length;
+                }
+            }
+            
+            setTimeout(typeMessage, isDeleting ? 50 : 100);
+        }
+
+        // Command Execution
+        function executeCommand(command) {
+            const terminal = document.getElementById('terminalOutput');
+            if (!terminal) return;
+            
+            const commands = {
+                'company_info': {
+                    output: [
+                        'Loading company profile...',
+                        'Scholarix Global AI Consultants',
+                        'Founded: Dubai, UAE',
+                        'Specialization: Odoo + AI Automation',
+                        'Deployment Time: 14 Days Guaranteed',
+                        'Pricing: 40% Below Market',
+                        'Availability: Limited to 40 slots',
+                        'Contact: info@scholarixglobal.com',
+                        'WhatsApp: +971 56 390 5772'
+                    ]
+                },
+                'neural_scan': {
+                    output: [
+                        'Scanning business requirements...',
+                        'Analyzing current processes...',
+                        'AI automation compatibility: 98.7%',
+                        'Odoo integration feasible',
+                        'Estimated ROI: 300%+ in Year 1'
+                    ]
+                },
+                'data_stream': {
+                    output: [
+                        'Accessing case studies database...',
+                        'Real Estate: 40% conversion improvement',
+                        'Retail: 70% stockout reduction',
+                        'Trading: 60% faster order processing',
+                        'Success rate: 100% client satisfaction'
+                    ]
+                },
+                'connect': {
+                    output: [
+                        'Establishing contact protocol...',
+                        'Dubai office: Active',
+                        'Response time: < 1 hour',
+                        'Demo booking: Available now',
+                        'Email: info@scholarixglobal.com',
+                        'WhatsApp: +971 56 390 5772',
+                        'Ready to transform your business'
+                    ]
+                }
+            };
+
+            terminal.innerHTML = '';
+            
+            const commandLine = document.createElement('div');
+            commandLine.className = 'terminal-line';
+            commandLine.innerHTML = `<span class="prompt">scholarix@neural-net:~$</span> <span class="command">${command}</span>`;
+            terminal.appendChild(commandLine);
+
+            const cmd = commands[command];
+            if (cmd) {
+                cmd.output.forEach((line, index) => {
+                    setTimeout(() => {
+                        const outputLine = document.createElement('div');
+                        outputLine.className = 'terminal-line output';
+                        outputLine.textContent = line;
+                        terminal.appendChild(outputLine);
+                        
+                        if (index === cmd.output.length - 1) {
+                            setTimeout(() => {
+                                const promptLine = document.createElement('div');
+                                promptLine.className = 'terminal-line';
+                                promptLine.innerHTML = '<span class="prompt">scholarix@neural-net:~$</span> <span class="cursor">█</span>';
+                                terminal.appendChild(promptLine);
+                            }, 500);
+                        }
+                    }, index * 800);
+                });
+            }
+        }
+
+        // Navigation
+        function navigate(section) {
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('active');
+            }
+
+            // Update terminal
+            const terminal = document.getElementById('terminalOutput');
+            if (terminal) {
+                terminal.innerHTML = '';
+                
+                const commandLine = document.createElement('div');
+                commandLine.className = 'terminal-line';
+                commandLine.innerHTML = `<span class="prompt">scholarix@neural-net:~$</span> <span class="command">access ${section}</span>`;
+                terminal.appendChild(commandLine);
+
+                setTimeout(() => {
+                    const outputLine = document.createElement('div');
+                    outputLine.className = 'terminal-line output';
+                    outputLine.textContent = `Accessing ${section} module...`;
+                    terminal.appendChild(outputLine);
+                    
+                    setTimeout(() => {
+                        const successLine = document.createElement('div');
+                        successLine.className = 'terminal-line output';
+                        successLine.textContent = `${section.toUpperCase()} interface loaded`;
+                        terminal.appendChild(successLine);
+                    }, 800);
+                }, 500);
+            }
+
+            // Hide all sections
+            setTimeout(() => {
+                const allSections = document.querySelectorAll('.content-section');
+                allSections.forEach(sec => sec.classList.remove('active'));
+
+                // Show selected section
+                const targetSection = document.getElementById(section);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    
+                    // Scroll to section
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // Hide loading overlay
+                if (loadingOverlay) {
+                    loadingOverlay.classList.remove('active');
+                }
+            }, 1500);
+        }
+
+        // Form submission handler
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const terminal = document.getElementById('terminalOutput');
+            
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('active');
+            }
+
+            // Simulate form processing
+            setTimeout(() => {
+                if (terminal) {
+                    terminal.innerHTML = '';
+                    
+                    const commandLine = document.createElement('div');
+                    commandLine.className = 'terminal-line';
+                    commandLine.innerHTML = '<span class="prompt">scholarix@neural-net:~$</span> <span class="command">submit_connection_request</span>';
+                    terminal.appendChild(commandLine);
+
+                    const lines = [
+                        'Encrypting data...',
+                        'Establishing secure connection...',
+                        'Transmitting to neural network...',
+                        'Connection request received',
+                        'Our team will contact you within 24 hours',
+                        'Thank you for choosing Scholarix!'
+                    ];
+
+                    lines.forEach((line, index) => {
+                        setTimeout(() => {
+                            const outputLine = document.createElement('div');
+                            outputLine.className = 'terminal-line output';
+                            outputLine.textContent = line;
+                            terminal.appendChild(outputLine);
+                            
+                            if (index === lines.length - 1) {
+                                setTimeout(() => {
+                                    const promptLine = document.createElement('div');
+                                    promptLine.className = 'terminal-line';
+                                    promptLine.innerHTML = '<span class="prompt">scholarix@neural-net:~$</span> <span class="cursor">█</span>';
+                                    terminal.appendChild(promptLine);
+                                }, 500);
+                            }
+                        }, index * 600);
+                    });
+                }
+
+                // Reset form
+                setTimeout(() => {
+                    event.target.reset();
+                    if (loadingOverlay) {
+                        loadingOverlay.classList.remove('active');
+                    }
+                }, 4000);
+            }, 1500);
+        }
+
+        // Show Home function
+        function showHome() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('active');
+            }
+
+            setTimeout(() => {
+                // Hide all content sections
+                const allSections = document.querySelectorAll('.content-section');
+                allSections.forEach(sec => sec.classList.remove('active'));
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Hide loading
+                if (loadingOverlay) {
+                    loadingOverlay.classList.remove('active');
+                }
+
+                // Update terminal
+                const terminal = document.getElementById('terminalOutput');
+                if (terminal) {
+                    terminal.innerHTML = '';
+                    const commandLine = document.createElement('div');
+                    commandLine.className = 'terminal-line';
+                    commandLine.innerHTML = '<span class="prompt">scholarix@neural-net:~$</span> <span class="command">return_home</span>';
+                    terminal.appendChild(commandLine);
+
+                    setTimeout(() => {
+                        const outputLine = document.createElement('div');
+                        outputLine.className = 'terminal-line output';
+                        outputLine.textContent = 'Returning to main interface...';
+                        terminal.appendChild(outputLine);
+                        
+                        setTimeout(() => {
+                            const successLine = document.createElement('div');
+                            successLine.className = 'terminal-line output';
+                            successLine.textContent = 'HOME interface loaded';
+                            terminal.appendChild(successLine);
+                            
+                            setTimeout(() => {
+                                const promptLine = document.createElement('div');
+                                promptLine.className = 'terminal-line';
+                                promptLine.innerHTML = '<span class="prompt">scholarix@neural-net:~$</span> <span class="cursor">█</span>';
+                                terminal.appendChild(promptLine);
+                            }, 500);
+                        }, 800);
+                    }, 500);
+                }
+            }, 1200);
+        }
+
+        // Logo Glitch Effect
+        function glitchLogo() {
+            const logo = document.querySelector('.main-logo');
+            if (!logo) return;
+            
+            logo.classList.add('glitch');
+            setTimeout(() => {
+                logo.classList.remove('glitch');
+            }, 300);
+        }
+
+        // Update System Time
+        function updateSystemTime() {
+            const timeElement = document.getElementById('systemTime');
+            if (!timeElement) return;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false,
+                timeZoneName: 'short'
+            });
+            timeElement.textContent = `SYSTEM_TIME: ${timeString}`;
+        }
+
+        // Animate Stats
+        function animateStats() {
+            const stats = [
+                { id: 'activeConnections', start: 1000, end: 1247, suffix: '' },
+                { id: 'dataProcessed', start: 800, end: 847.2, suffix: 'TB' },
+                { id: 'aiModules', start: 140, end: 156, suffix: '' },
+                { id: 'uptime', start: 95, end: 99.7, suffix: '%' }
+            ];
+
+            stats.forEach(stat => {
+                const element = document.getElementById(stat.id);
+                if (!element) return;
+                
+                let current = stat.start;
+                const increment = (stat.end - stat.start) / 50;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= stat.end) {
+                        current = stat.end;
+                        clearInterval(timer);
+                    }
+                    
+                    if (stat.suffix === 'TB') {
+                        element.textContent = current.toFixed(1) + stat.suffix;
+                    } else if (stat.suffix === '%') {
+                        element.textContent = current.toFixed(1) + stat.suffix;
+                    } else {
+                        element.textContent = Math.floor(current) + stat.suffix;
+                    }
+                }, 100);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createMatrixRain();
+            typeMessage();
+            updateSystemTime();
+            setInterval(updateSystemTime, 1000);
+            setTimeout(animateStats, 1000);
+            
+            // Regenerate matrix rain periodically
+            setInterval(createMatrixRain, 10000);
+        });
+
+        // Recreate matrix on window resize
+        window.addEventListener('resize', createMatrixRain);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                const terminal = document.getElementById('terminalOutput');
+                if (terminal) {
+                    terminal.innerHTML = '';
+                    executeCommand('clear');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

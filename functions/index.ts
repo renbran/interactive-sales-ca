@@ -4,7 +4,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { createClerkClient } from '@clerk/backend';
+import { jwt } from 'hono/jwt';
 import type { Env, AuthContext } from '../src/lib/types';
 
 // Import route handlers
@@ -23,20 +23,14 @@ const app = new Hono<{ Bindings: Env; Variables: { auth: AuthContext } }>();
 // MIDDLEWARE
 // =====================================================
 
-// CORS - Use environment variable for production, fallback to dev origins
+// CORS
 app.use('*', cors({
-  origin: (origin, c) => {
-    // Get CORS_ORIGIN from environment (set in wrangler.toml)
-    const envCorsOrigin = c.env?.CORS_ORIGIN;
-
+  origin: (origin) => {
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
       'https://interactive-sales-ca.pages.dev',
-      'https://scholarix-crm.pages.dev',
-      ...(envCorsOrigin ? [envCorsOrigin] : []),
     ];
-
     return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   },
   credentials: true,
@@ -51,13 +45,12 @@ app.use('*', logger());
 
 app.use('/api/*', async (c, next) => {
   // Skip auth for public endpoints
-  const publicPaths = ['/api/auth/sync', '/api/health'];
-  if (publicPaths.includes(c.req.path)) {
+  if (c.req.path === '/api/auth/sync') {
     return next();
   }
 
   const authHeader = c.req.header('Authorization');
-
+  
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized', message: 'No token provided' }, 401);
   }
@@ -65,46 +58,34 @@ app.use('/api/*', async (c, next) => {
   const token = authHeader.substring(7);
 
   try {
-    // Verify Clerk JWT token using official @clerk/backend SDK
+    // Verify Clerk JWT token
     const CLERK_SECRET_KEY = c.env.CLERK_SECRET_KEY;
-
-    if (!CLERK_SECRET_KEY) {
-      console.error('CLERK_SECRET_KEY not configured');
-      return c.json({ error: 'Server misconfiguration', message: 'Auth not configured' }, 500);
-    }
-
-    // Initialize Clerk client
-    const clerk = createClerkClient({
-      secretKey: CLERK_SECRET_KEY,
+    const response = await fetch('https://api.clerk.dev/v1/verify_token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CLERK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
     });
 
-    // Verify the session token
-    const verifiedToken = await clerk.verifyToken(token, {
-      jwtKey: CLERK_SECRET_KEY,
-    });
-
-    if (!verifiedToken || !verifiedToken.sub) {
-      console.error('Token verification failed: Invalid token or missing subject');
+    if (!response.ok) {
       return c.json({ error: 'Unauthorized', message: 'Invalid token' }, 401);
     }
 
-    const clerkUserId = verifiedToken.sub;
-    console.log('✅ Token verified for user:', clerkUserId);
+    const clerkUser = await response.json();
 
     // Get user from database
     const user = await c.env.DB.prepare(
       'SELECT * FROM users WHERE clerk_id = ?'
-    ).bind(clerkUserId).first();
+    ).bind(clerkUser.sub).first();
 
     if (!user) {
-      console.error('User not found in database:', clerkUserId);
-      return c.json({
-        error: 'User not found',
-        message: 'Please sync your account first. Sign out and sign back in.'
+      return c.json({ 
+        error: 'User not found', 
+        message: 'Please sync your account first' 
       }, 404);
     }
-
-    console.log('✅ User found in database:', user.email);
 
     // Set auth context
     c.set('auth', {
@@ -122,12 +103,7 @@ app.use('/api/*', async (c, next) => {
     return next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Token verification failed';
-    return c.json({
-      error: 'Unauthorized',
-      message: errorMessage,
-      hint: 'Try signing out and back in'
-    }, 401);
+    return c.json({ error: 'Unauthorized', message: 'Token verification failed' }, 401);
   }
 });
 
