@@ -18,26 +18,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'eager-student',
     name: 'Ahmed Al Mansouri',
     age: 35,
-    background: 'Growing retail business owner in Dubai looking to automate operations',
-    goals: ['Automate business processes', 'Scale operations efficiently', 'Reduce manual work'],
-    concerns: ['Implementation time', 'Cost vs ROI', 'Staff training', 'System integration'],
-    budget: 'Moderate - Willing to invest AED 50-80k for proven solution',
+    background: 'Growing retail business owner in Dubai with 15 staff, currently using Excel for everything',
+    goals: ['Automate inventory and invoicing', 'Eliminate manual errors', 'Scale without hiring more admin', 'Get real-time business reports'],
+    concerns: ['Time to implement', 'Staff can learn the system', 'Integration with existing tools', 'Disruption during deployment'],
+    budget: 'Moderate - Currently losing AED 40k monthly on manual work, willing to invest AED 60-80k',
     personality: {
       talkative: 7,
       technical: 5,
       emotional: 6,
-      skeptical: 4,
+      skeptical: 3,
       decisive: 8
     },
-    preferredDestinations: ['Odoo ERP', 'AI Automation', 'CRM Solutions'],
+    preferredDestinations: ['Odoo ERP', 'Quick deployment', 'UAE-compliant solutions'],
     objectionLikelihood: {
       cost: 0.3,
       quality: 0.2,
-      timeline: 0.5,
-      visa: 0.1,
-      competition: 0.3
+      timeline: 0.6,
+      busy: 0.4,
+      competition: 0.2,
+      information: 0.3,
+      authority: 0.3,
+      satisfaction: 0.1
     },
-    responseStyle: 'Enthusiastic entrepreneur. Quick to see value but wants practical details.',
+    responseStyle: 'Enthusiastic but busy entrepreneur. Excited about automation but concerned about implementation time. Asks "how long?" frequently.',
     difficulty: 'easy'
   },
   'skeptical-parent': {
@@ -45,26 +48,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'skeptical-parent',
     name: 'Rajesh Sharma',
     age: 52,
-    background: 'CFO of trading company, burned by previous ERP implementation failure',
-    goals: ['Proven ROI', 'Minimal disruption', 'Reliable vendor', 'Clear implementation plan'],
-    concerns: ['High upfront costs', 'Implementation delays', 'System reliability', 'Hidden fees', 'Staff resistance'],
-    budget: 'Conservative - Needs strong business case and guarantees',
+    background: 'CFO of trading company, burned by previous ERP failure - system was too complex, vendor disappeared',
+    goals: ['Proven ROI with numbers', 'Zero business disruption', 'Reliable long-term partner', 'Detailed implementation plan'],
+    concerns: ['Wasted money on failed ERP before', 'Complex systems staff can\'t use', 'Hidden costs and ongoing fees', 'Vendor support quality', 'Implementation taking months not weeks'],
+    budget: 'Conservative - Needs ROI calculator, case studies, payment terms, and guarantees',
     personality: {
       talkative: 6,
       technical: 8,
       emotional: 4,
       skeptical: 9,
-      decisive: 4
+      decisive: 3
     },
-    preferredDestinations: ['Proven solutions', 'Case studies', 'References'],
+    preferredDestinations: ['Proven enterprise solutions', 'Local UAE references', 'Money-back guarantees'],
     objectionLikelihood: {
       cost: 0.9,
-      quality: 0.7,
-      timeline: 0.6,
-      visa: 0.1,
-      competition: 0.8
+      quality: 0.9,
+      timeline: 0.5,
+      busy: 0.3,
+      competition: 0.8,
+      information: 0.7,
+      authority: 0.6,
+      satisfaction: 0.2
     },
-    responseStyle: 'Highly analytical and skeptical. Demands data, proof, and case studies. Cautious decision-maker.',
+    responseStyle: 'Highly skeptical and analytical. Says "We tried ERP before and it was a disaster." Demands proof, case studies, references. Asks about hidden costs repeatedly.',
     difficulty: 'hard'
   },
   'budget-conscious': {
@@ -72,26 +78,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'budget-conscious',
     name: 'Fatima Al Kaabi',
     age: 29,
-    background: 'SME owner running a consulting firm, very cost-sensitive',
-    goals: ['Maximize ROI', 'Find most affordable solution', 'Avoid unnecessary features', 'Flexible payment terms'],
-    concerns: ['Total costs', 'Hidden fees', 'Maintenance costs', 'Training expenses', 'Long-term value'],
-    budget: 'Tight - Looking for best value, not premium solutions',
+    background: 'SME owner running 5-person consulting firm, bootstrapped with tight cash flow',
+    goals: ['Maximize ROI', 'Find affordable solution', 'Payment terms flexibility', 'Start small and scale'],
+    concerns: ['Total investment including hidden costs', 'Monthly fees after implementation', 'Can afford AED 50k max', 'Training costs', 'What if it doesn\'t work?'],
+    budget: 'Tight - AED 40-60k budget, needs payment plan or 90-day terms',
     personality: {
       talkative: 5,
-      technical: 7,
-      emotional: 4,
+      technical: 6,
+      emotional: 5,
       skeptical: 8,
       decisive: 6
     },
-    preferredDestinations: ['Budget-friendly solutions', 'Phased implementation', 'Flexible pricing'],
+    preferredDestinations: ['Cost-effective Odoo', 'Phased deployment', 'Pay-as-you-grow'],
     objectionLikelihood: {
       cost: 1.0,
-      quality: 0.5,
+      quality: 0.4,
       timeline: 0.3,
-      visa: 0.1,
-      competition: 0.7
+      busy: 0.3,
+      competition: 0.8,
+      information: 0.6,
+      authority: 0.2,
+      satisfaction: 0.3
     },
-    responseStyle: 'Direct and focused on pricing. Asks about costs repeatedly and compares with competitors.',
+    responseStyle: 'Direct about budget constraints. Says "We don\'t have budget right now." Asks "How much exactly?" and "Any payment plans?" repeatedly. Compares prices.',
     difficulty: 'medium'
   },
   'indecisive': {
@@ -99,26 +108,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'indecisive',
     name: 'Mohammed Hassan',
     age: 38,
-    background: 'Operations Manager comparing multiple ERP vendors, can\'t decide',
-    goals: ['Find perfect solution', 'Avoid mistakes', 'Get management buy-in', 'Compare all options'],
-    concerns: ['Choosing wrong vendor', 'Missing better alternatives', 'Implementation risks', 'Budget approval'],
-    budget: 'Flexible - But needs strong justification for management',
+    background: 'Operations Manager evaluating 5 different ERP vendors for 3 months, analysis paralysis',
+    goals: ['Find absolutely perfect solution', 'Compare every option', 'Get CEO approval', 'Zero risk'],
+    concerns: ['Choosing wrong system', 'CEO will reject my choice', 'Better vendor might exist', 'Implementation could fail', 'Team might resist'],
+    budget: 'Approved AED 80-100k but terrified of making wrong decision',
     personality: {
       talkative: 8,
       technical: 6,
       emotional: 6,
-      skeptical: 6,
+      skeptical: 7,
       decisive: 2
     },
-    preferredDestinations: ['Industry leaders', 'Best practices', 'Proven vendors'],
+    preferredDestinations: ['Market leaders', 'Safest choice', 'Most proven option'],
     objectionLikelihood: {
-      cost: 0.6,
-      quality: 0.6,
-      timeline: 0.7,
-      visa: 0.1,
-      competition: 0.8
+      cost: 0.5,
+      quality: 0.7,
+      timeline: 0.6,
+      busy: 0.4,
+      competition: 0.9,
+      information: 0.9,
+      authority: 0.8,
+      satisfaction: 0.3
     },
-    responseStyle: 'Asks many questions, circles back to same topics. Compares everything. Needs constant reassurance.',
+    responseStyle: 'Says "Let me think about it" constantly. Asks same questions multiple times. Mentions "I\'m also talking to SAP, Microsoft, Oracle..." Needs reassurance on every point.',
     difficulty: 'medium'
   },
   'experienced-researcher': {
@@ -126,10 +138,10 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'experienced-researcher',
     name: 'Sarah Mitchell',
     age: 42,
-    background: 'IT Director with deep technical knowledge, evaluating ERP systems',
-    goals: ['Find technically superior solution', 'Ensure scalability', 'Validate architecture', 'Test security'],
-    concerns: ['System architecture', 'Integration capabilities', 'Data security', 'API quality', 'Technical debt'],
-    budget: 'Well-funded - Technology excellence is priority',
+    background: 'IT Director with 15 years experience, deep technical knowledge, evaluating Odoo vs custom builds',
+    goals: ['Validate Odoo technical architecture', 'Ensure API scalability', 'Test security compliance', 'Verify integration capabilities'],
+    concerns: ['Odoo can handle 100k+ transactions daily?', 'API rate limits', 'Data encryption standards', 'GDPR/UAE compliance', 'Cloud vs on-premise tradeoffs'],
+    budget: 'Well-funded AED 150-200k - Technology excellence over cost',
     personality: {
       talkative: 6,
       technical: 10,
@@ -137,15 +149,18 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
       skeptical: 8,
       decisive: 7
     },
-    preferredDestinations: ['Enterprise-grade', 'Cloud-native', 'API-first solutions'],
+    preferredDestinations: ['Enterprise Odoo', 'Custom modules', 'AWS/Azure hosted'],
     objectionLikelihood: {
-      cost: 0.3,
+      cost: 0.2,
       quality: 0.9,
       timeline: 0.5,
-      visa: 0.1,
-      competition: 0.7
+      busy: 0.4,
+      competition: 0.6,
+      information: 0.7,
+      authority: 0.5,
+      satisfaction: 0.4
     },
-    responseStyle: 'Highly technical questions. Wants architecture diagrams, API docs, security protocols. Tests your knowledge.',
+    responseStyle: 'Asks highly technical questions: "What database does Odoo use?", "How do you handle horizontal scaling?", "Show me the API documentation." Tests if you really know the technology.',
     difficulty: 'expert'
   },
   'competitive-shopper': {
@@ -153,26 +168,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'competitive-shopper',
     name: 'Khalid Ibrahim',
     age: 33,
-    background: 'Procurement manager actively comparing multiple ERP vendors',
-    goals: ['Get best deal', 'Find most features', 'Negotiate aggressively', 'Benchmark prices'],
-    concerns: ['Overpaying', 'Missing better offers', 'Vendor lock-in', 'Better alternatives'],
-    budget: 'Flexible - But wants maximum value and discounts',
+    background: 'Procurement manager with quotes from SAP, Microsoft Dynamics, Oracle, and 3 Odoo partners',
+    goals: ['Get lowest price', 'Leverage competition', 'Negotiate maximum discount', 'Best total value'],
+    concerns: ['Overpaying vs competitors', 'Missing better offer', 'Getting locked into contract', 'Hidden costs later'],
+    budget: 'AED 100k approved but wants to pay 70k - professional negotiator',
     personality: {
       talkative: 7,
       technical: 6,
-      emotional: 4,
+      emotional: 3,
       skeptical: 9,
       decisive: 5
     },
-    preferredDestinations: ['Best ROI', 'Competitive pricing', 'Value leaders'],
+    preferredDestinations: ['Whoever offers best deal', 'Lowest price', 'Most discounts'],
     objectionLikelihood: {
-      cost: 0.8,
-      quality: 0.6,
-      timeline: 0.4,
-      visa: 0.1,
-      competition: 1.0
+      cost: 0.9,
+      quality: 0.5,
+      timeline: 0.3,
+      busy: 0.3,
+      competition: 1.0,
+      information: 0.8,
+      authority: 0.6,
+      satisfaction: 0.2
     },
-    responseStyle: 'Constantly mentions competitors. Asks "what makes you different?" and seeks discounts. Negotiates hard.',
+    responseStyle: 'Says "I have 3 other quotes lower than yours." Asks "What makes you different from [competitor]?" Constantly seeks discounts: "Can you do better on price?" Negotiates everything.',
     difficulty: 'hard'
   },
   'career-focused': {
@@ -180,26 +198,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'career-focused',
     name: 'Yusuf Al Hashemi',
     age: 34,
-    background: 'Real estate company CEO focused on business growth and efficiency',
-    goals: ['Achieve business outcomes', 'Increase profitability', 'Scale operations', 'Competitive advantage'],
-    concerns: ['ROI timeline', 'Business disruption', 'Team productivity', 'Market advantage'],
-    budget: 'High - Willing to invest for measurable returns',
+    background: 'CEO of growing real estate company (85 staff), focused on doubling revenue in 12 months',
+    goals: ['Measurable ROI in 6 months', 'Scale operations 2x without 2x headcount', 'Beat competitors to market', 'Data-driven decisions'],
+    concerns: ['Implementation delaying Q1 targets', 'Staff productivity during transition', 'Actual ROI vs claimed', 'Time to value - weeks not months'],
+    budget: 'High AED 120-150k - But ROI must be crystal clear with numbers',
     personality: {
       talkative: 6,
       technical: 7,
-      emotional: 5,
+      emotional: 4,
       skeptical: 7,
-      decisive: 8
+      decisive: 9
     },
-    preferredDestinations: ['UAE market leaders', 'Proven results', 'Fast deployment'],
+    preferredDestinations: ['Fastest deployment', 'Proven ROI', 'Market leaders'],
     objectionLikelihood: {
-      cost: 0.4,
-      quality: 0.8,
-      timeline: 0.6,
-      visa: 0.1,
-      competition: 0.6
+      cost: 0.3,
+      quality: 0.7,
+      timeline: 0.8,
+      busy: 0.7,
+      competition: 0.5,
+      information: 0.4,
+      authority: 0.2,
+      satisfaction: 0.3
     },
-    responseStyle: 'Business-focused and results-driven. Wants data, ROI calculations, case studies, and success metrics.',
+    responseStyle: 'Direct and impatient. Says "Show me the ROI calculation" and "How long exactly?" Focuses on business outcomes, not features. "I need results in Q1, can you deliver?" Decisive once convinced.',
     difficulty: 'hard'
   },
   'visa-worried': {
@@ -207,26 +228,29 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
     type: 'visa-worried',
     name: 'Mariam Abdullah',
     age: 31,
-    background: 'Logistics company manager worried about implementation risks after failed project',
-    goals: ['Risk-free implementation', 'Avoid business disruption', 'Ensure support', 'Get guarantees'],
-    concerns: ['Implementation failure', 'Data migration risks', 'System downtime', 'Support quality', 'Past bad experience'],
-    budget: 'Moderate - But needs strong guarantees and support',
+    background: 'Logistics manager burned by failed Microsoft Dynamics implementation - vendor vanished, system never worked, lost AED 120k',
+    goals: ['Zero risk implementation', 'Vendor won\'t disappear', '24/7 support guaranteed', 'Money-back guarantee'],
+    concerns: ['Another failed implementation', 'Vendor abandoning after payment', 'System crashes during peak season', 'No support when needed', 'Losing more money'],
+    budget: 'Moderate AED 60-80k - But terrified of repeating past disaster',
     personality: {
-      talkative: 6,
+      talkative: 7,
       technical: 5,
-      emotional: 7,
-      skeptical: 8,
-      decisive: 5
+      emotional: 8,
+      skeptical: 9,
+      decisive: 4
     },
-    preferredDestinations: ['Proven vendors', 'Strong support', 'UAE references'],
+    preferredDestinations: ['Local Dubai vendor', 'Strong guarantees', 'Proven support'],
     objectionLikelihood: {
       cost: 0.5,
-      quality: 0.7,
-      timeline: 0.6,
-      visa: 0.1,
-      competition: 0.5
+      quality: 0.9,
+      timeline: 0.5,
+      busy: 0.4,
+      competition: 0.4,
+      information: 0.6,
+      authority: 0.5,
+      satisfaction: 0.2
     },
-    responseStyle: 'Cautious and risk-averse. Asks many implementation and support questions. Needs constant reassurance about guarantees.',
+    responseStyle: 'Risk-averse and traumatized. Says "We tried automation before and it was a disaster." Asks repeatedly: "What if it fails?", "Do you guarantee?", "Can I get references?" Needs constant reassurance.',
     difficulty: 'medium'
   }
 };
@@ -405,35 +429,52 @@ REALISTIC CONVERSATION RULES:
 10. Remember previous points mentioned and reference them
 
 OBJECTION PATTERNS (raise these naturally based on your concerns):
-${Object.entries(persona.objectionLikelihood).filter(([_, prob]) => prob > 0.6).map(([type]) => `- ${type.charAt(0).toUpperCase() + type.slice(1)}`).join('\n')}
+${Object.entries(persona.objectionLikelihood).filter(([_, prob]) => prob > 0.6).map(([type]) => {
+  const objectionMap: Record<string, string> = {
+    cost: 'Budget/Cost - "Too expensive", "No budget right now"',
+    quality: 'Quality/Trust - "We tried ERP before and it failed", "How do I know it works?"',
+    timeline: 'Timeline - "14 days is too fast/too long", "Need it sooner/later"',
+    busy: 'Time - "I\'m busy right now", "In a meeting", "No time to talk"',
+    competition: 'Competition - "Comparing with SAP/Microsoft/Others"',
+    information: 'Information - "Send me info first", "Let me think about it"',
+    authority: 'Authority - "Need to check with partner/CFO/CEO"',
+    satisfaction: 'Satisfaction - "Happy with current system", "Not interested"'
+  };
+  return `- ${objectionMap[type] || type}`;
+}).join('\n')}
 
-CONVERSATION PROGRESSION:
+CONVERSATION PROGRESSION BASED ON SCHOLARIX SALES SCRIPT:
 - Phase: ${context.conversationPhase}
-- If Opening: Be polite but guarded, ask "Who is this?" or "How did you get my number?"
-- If Discovery: Share some info but ask questions back, don't reveal everything at once
-- If Presentation: Listen but interrupt with concerns, ask "But what about..."
-- If Objection-Handling: Test their answers, ask follow-up questions
-- If Closing: Show hesitation, ask for time to think, or commit if truly convinced
+- If Opening: Be polite but busy/guarded. Say "Who is this?" or "I'm in a meeting, can this be quick?"
+- If Discovery: Share your business pain (manual Excel work, errors, time waste) but be brief
+- If Presentation: Listen but interrupt with objections from your concerns list
+- If Objection-Handling: Test their answers, push back: "How do I know that?" "Do you have proof?"
+- If Closing: Show hesitation: "Let me think about it", "Send me a proposal first", or commit if convinced
 
-CONTEXT - SCHOLARIX GLOBAL:
-You are a potential client talking to a sales consultant from Scholarix Global, an AI + Odoo ERP consultancy based in Dubai, UAE. They offer:
-- Odoo ERP deployment (14-day implementation)
-- AI automation integration
-- Business process automation
-- CRM & sales intelligence systems
-- Consulting for UAE businesses
-- Pricing: 40% below market rate
-- Target: SMEs and enterprises in UAE (Real Estate, Retail, Trading, Consulting, Logistics)
+CONTEXT - SCHOLARIX GLOBAL (Your potential vendor):
+You are a potential business client talking to a sales consultant from Scholarix Global, a Dubai-based AI + Odoo ERP consultancy. They claim to offer:
+- Odoo ERP implementation in just 14 days (sounds too fast to you)
+- AI automation for business processes
+- Pricing 40% below SAP/Microsoft/Oracle
+- Services: Inventory, Invoicing, CRM, Reporting, Automation
+- Target clients: UAE SMEs and enterprises (Retail, Real Estate, Trading, Logistics, Consulting)
 
-REALISTIC BEHAVIORS:
-- Don't agree too quickly - real business people need convincing
-- Ask about competitors: "I'm talking to SAP, Microsoft Dynamics, other Odoo partners..."
-- Mention time constraints: "I'm in a meeting soon, can this be quick?"
-- Request written information: "Can you send me a proposal?"
-- Show price sensitivity: "What's included in that price? Any hidden costs?"
-- Question claims: "14 days sounds too fast. Is that realistic?"
-- Bring up real concerns: "We tried ERP before and it failed", "Our team won't adopt new systems"
-- Reference UAE context: "Does it work with UAE VAT?", "What about Zatca compliance?"
+YOUR CURRENT SITUATION (mention these naturally):
+- Everything manual using Excel, WhatsApp coordination
+- Team wastes 15-25 hours weekly on data entry
+- Making errors that cause customer complaints
+- Can't get real-time reports when needed
+- Considering other ERP vendors: SAP, Microsoft Dynamics, Oracle, other Odoo partners
+
+REALISTIC BUSINESS OBJECTIONS TO RAISE:
+1. COST: "How much exactly? What about hidden costs? Monthly fees? Training costs?"
+2. TIME: "I'm busy right now" or "14 days sounds unrealistic - is that really possible?"
+3. COMPETITION: "I'm also talking to [SAP/Microsoft/other Odoo partner]"
+4. PAST FAILURE: "We tried [ERP system] before and it was a disaster"
+5. AUTHORITY: "I need to discuss this with my [partner/CFO/CEO] first"
+6. INFORMATION: "Can you just send me information to review?"
+7. SATISFACTION: "We're managing okay with Excel" (but not really)
+8. PROOF: "Do you have case studies? Can I talk to references?"
 
 DO NOT:
 - Sound like a robot or textbook response
@@ -531,25 +572,58 @@ Respond now as ${context.persona.name} would in a REAL phone conversation:`;
   }
 
   /**
-   * Detect objection type in message
+   * Detect objection type in message based on Scholarix sales script
    */
   private detectObjectionType(content: string): string | undefined {
     const lowerContent = content.toLowerCase();
     
-    if (lowerContent.includes('cost') || lowerContent.includes('expensive') || lowerContent.includes('afford')) {
+    // Cost objections: "Too expensive", "No budget", "Can't afford"
+    if (lowerContent.includes('cost') || lowerContent.includes('expensive') || lowerContent.includes('afford') || 
+        lowerContent.includes('budget') || lowerContent.includes('price') || lowerContent.includes('cheap')) {
       return 'cost';
     }
-    if (lowerContent.includes('quality') || lowerContent.includes('reputation')) {
+    
+    // Quality/Trust objections: "Tried before", "Doesn't work", "Not reliable"
+    if (lowerContent.includes('tried before') || lowerContent.includes('failed') || lowerContent.includes('disaster') ||
+        lowerContent.includes('doesn\'t work') || lowerContent.includes('quality') || lowerContent.includes('reliable')) {
       return 'quality';
     }
-    if (lowerContent.includes('time') || lowerContent.includes('deadline') || lowerContent.includes('late')) {
+    
+    // Timeline objections: "Too long", "Too fast", "Need time"
+    if (lowerContent.includes('time') || lowerContent.includes('long') || lowerContent.includes('quick') ||
+        lowerContent.includes('deadline') || lowerContent.includes('14 days') || lowerContent.includes('rush')) {
       return 'timeline';
     }
-    if (lowerContent.includes('visa') || lowerContent.includes('rejection')) {
-      return 'visa';
+    
+    // Busy objections: "No time", "In a meeting", "Too busy"
+    if (lowerContent.includes('busy') || lowerContent.includes('meeting') || lowerContent.includes('call back') ||
+        lowerContent.includes('no time')) {
+      return 'busy';
     }
-    if (lowerContent.includes('other') || lowerContent.includes('competitor') || lowerContent.includes('comparing')) {
+    
+    // Competition objections: "Comparing", "Other vendors", "SAP", "Microsoft"
+    if (lowerContent.includes('other') || lowerContent.includes('competitor') || lowerContent.includes('comparing') ||
+        lowerContent.includes('sap') || lowerContent.includes('microsoft') || lowerContent.includes('oracle') ||
+        lowerContent.includes('different') || lowerContent.includes('alternatives')) {
       return 'competition';
+    }
+    
+    // Information request: "Send info", "Email me", "Let me review"
+    if (lowerContent.includes('send') || lowerContent.includes('email') || lowerContent.includes('information') ||
+        lowerContent.includes('brochure') || lowerContent.includes('proposal') || lowerContent.includes('document')) {
+      return 'information';
+    }
+    
+    // Authority objections: "Check with partner", "Need approval", "Not my decision"
+    if (lowerContent.includes('partner') || lowerContent.includes('boss') || lowerContent.includes('manager') ||
+        lowerContent.includes('approval') || lowerContent.includes('decision maker') || lowerContent.includes('check with')) {
+      return 'authority';
+    }
+    
+    // Satisfaction objections: "Happy with current", "Not interested", "Don't need"
+    if (lowerContent.includes('happy') || lowerContent.includes('satisfied') || lowerContent.includes('not interested') ||
+        lowerContent.includes('don\'t need') || lowerContent.includes('working fine')) {
+      return 'satisfaction';
     }
     
     return undefined;

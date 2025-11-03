@@ -30,11 +30,14 @@ export interface ProspectPersona {
   };
   preferredDestinations: string[];
   objectionLikelihood: {
-    cost: number;            // 0-1 probability
-    quality: number;
-    timeline: number;
-    visa: number;
-    competition: number;
+    cost: number;            // 0-1 probability - "Too expensive", "No budget"
+    quality: number;         // "Tried automation before", "Does it really work?"
+    timeline: number;        // "Too long", "Need it faster", "Can we start later?"
+    busy: number;            // "No time", "In a meeting", "Call me back"
+    competition: number;     // "Comparing with SAP/Microsoft/Others"
+    information: number;     // "Send me info first", "Let me think about it"
+    authority: number;       // "Need to check with partner/boss"
+    satisfaction: number;    // "Happy with current system", "Not interested"
   };
   responseStyle: string;      // Short description of how they talk
   difficulty: ConversationDifficulty;
