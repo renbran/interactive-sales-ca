@@ -16,120 +16,120 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
   'eager-student': {
     id: 'eager-1',
     type: 'eager-student',
-    name: 'Sarah Johnson',
-    age: 22,
-    background: 'Recent graduate looking to pursue Masters abroad',
-    goals: ['Study in top university', 'Build international career', 'Experience new culture'],
-    concerns: ['Application timeline', 'Visa process', 'Accommodation'],
-    budget: 'Moderate - Can invest $30-50k',
+    name: 'Ahmed Al Mansouri',
+    age: 35,
+    background: 'Growing retail business owner in Dubai looking to automate operations',
+    goals: ['Automate business processes', 'Scale operations efficiently', 'Reduce manual work'],
+    concerns: ['Implementation time', 'Cost vs ROI', 'Staff training', 'System integration'],
+    budget: 'Moderate - Willing to invest AED 50-80k for proven solution',
     personality: {
       talkative: 7,
       technical: 5,
-      emotional: 7,
-      skeptical: 3,
+      emotional: 6,
+      skeptical: 4,
       decisive: 8
     },
-    preferredDestinations: ['Canada', 'Australia', 'UK'],
+    preferredDestinations: ['Odoo ERP', 'AI Automation', 'CRM Solutions'],
     objectionLikelihood: {
       cost: 0.3,
       quality: 0.2,
       timeline: 0.5,
-      visa: 0.4,
-      competition: 0.1
+      visa: 0.1,
+      competition: 0.3
     },
-    responseStyle: 'Enthusiastic and quick to respond. Asks practical questions.',
+    responseStyle: 'Enthusiastic entrepreneur. Quick to see value but wants practical details.',
     difficulty: 'easy'
   },
   'skeptical-parent': {
     id: 'skeptical-1',
     type: 'skeptical-parent',
-    name: 'Mr. Rajesh Patel',
-    age: 48,
-    background: 'Father concerned about daughter\'s overseas education',
-    goals: ['Ensure daughter\'s safety', 'Get value for money', 'Secure good career'],
-    concerns: ['High costs', 'Safety abroad', 'Quality of education', 'Return on investment'],
-    budget: 'Limited - Needs to see clear value',
+    name: 'Rajesh Sharma',
+    age: 52,
+    background: 'CFO of trading company, burned by previous ERP implementation failure',
+    goals: ['Proven ROI', 'Minimal disruption', 'Reliable vendor', 'Clear implementation plan'],
+    concerns: ['High upfront costs', 'Implementation delays', 'System reliability', 'Hidden fees', 'Staff resistance'],
+    budget: 'Conservative - Needs strong business case and guarantees',
     personality: {
       talkative: 6,
-      technical: 7,
-      emotional: 5,
+      technical: 8,
+      emotional: 4,
       skeptical: 9,
       decisive: 4
     },
-    preferredDestinations: ['Canada', 'Germany', 'Ireland'],
+    preferredDestinations: ['Proven solutions', 'Case studies', 'References'],
     objectionLikelihood: {
       cost: 0.9,
       quality: 0.7,
-      timeline: 0.4,
-      visa: 0.6,
+      timeline: 0.6,
+      visa: 0.1,
       competition: 0.8
     },
-    responseStyle: 'Cautious, asks probing questions. Wants proof and guarantees.',
+    responseStyle: 'Highly analytical and skeptical. Demands data, proof, and case studies. Cautious decision-maker.',
     difficulty: 'hard'
   },
   'budget-conscious': {
     id: 'budget-1',
     type: 'budget-conscious',
-    name: 'Priya Sharma',
-    age: 24,
-    background: 'Working professional seeking affordable study options',
-    goals: ['Study abroad affordably', 'Get scholarships', 'Work while studying'],
-    concerns: ['Total costs', 'Hidden fees', 'Scholarship availability', 'Part-time work'],
-    budget: 'Tight - Looking for most affordable options',
+    name: 'Fatima Al Kaabi',
+    age: 29,
+    background: 'SME owner running a consulting firm, very cost-sensitive',
+    goals: ['Maximize ROI', 'Find most affordable solution', 'Avoid unnecessary features', 'Flexible payment terms'],
+    concerns: ['Total costs', 'Hidden fees', 'Maintenance costs', 'Training expenses', 'Long-term value'],
+    budget: 'Tight - Looking for best value, not premium solutions',
     personality: {
       talkative: 5,
-      technical: 8,
+      technical: 7,
       emotional: 4,
-      skeptical: 7,
+      skeptical: 8,
       decisive: 6
     },
-    preferredDestinations: ['Germany', 'Poland', 'Malta', 'Cyprus'],
+    preferredDestinations: ['Budget-friendly solutions', 'Phased implementation', 'Flexible pricing'],
     objectionLikelihood: {
       cost: 1.0,
       quality: 0.5,
       timeline: 0.3,
-      visa: 0.4,
+      visa: 0.1,
       competition: 0.7
     },
-    responseStyle: 'Direct and focused on numbers. Asks about costs repeatedly.',
+    responseStyle: 'Direct and focused on pricing. Asks about costs repeatedly and compares with competitors.',
     difficulty: 'medium'
   },
   'indecisive': {
     id: 'indecisive-1',
     type: 'indecisive',
-    name: 'Amit Kumar',
-    age: 21,
-    background: 'Student unsure about study abroad vs local options',
-    goals: ['Explore options', 'Understand benefits', 'Make right decision'],
-    concerns: ['Making wrong choice', 'Missing out on opportunities', 'Family expectations'],
-    budget: 'Flexible - But needs convincing',
+    name: 'Mohammed Hassan',
+    age: 38,
+    background: 'Operations Manager comparing multiple ERP vendors, can\'t decide',
+    goals: ['Find perfect solution', 'Avoid mistakes', 'Get management buy-in', 'Compare all options'],
+    concerns: ['Choosing wrong vendor', 'Missing better alternatives', 'Implementation risks', 'Budget approval'],
+    budget: 'Flexible - But needs strong justification for management',
     personality: {
       talkative: 8,
-      technical: 5,
+      technical: 6,
       emotional: 6,
       skeptical: 6,
       decisive: 2
     },
-    preferredDestinations: ['Not sure', 'USA', 'UK', 'Canada'],
+    preferredDestinations: ['Industry leaders', 'Best practices', 'Proven vendors'],
     objectionLikelihood: {
       cost: 0.6,
-      quality: 0.5,
+      quality: 0.6,
       timeline: 0.7,
-      visa: 0.5,
-      competition: 0.6
+      visa: 0.1,
+      competition: 0.8
     },
-    responseStyle: 'Asks many questions, circles back to same topics. Needs reassurance.',
+    responseStyle: 'Asks many questions, circles back to same topics. Compares everything. Needs constant reassurance.',
     difficulty: 'medium'
   },
   'experienced-researcher': {
     id: 'experienced-1',
     type: 'experienced-researcher',
-    name: 'Dr. Meera Reddy',
-    age: 29,
-    background: 'PhD holder looking for post-doctoral opportunities',
-    goals: ['Find best research programs', 'Maximize career growth', 'Network internationally'],
-    concerns: ['Program quality', 'Research funding', 'Visa for dependents'],
-    budget: 'Well-funded - Quality matters most',
+    name: 'Sarah Mitchell',
+    age: 42,
+    background: 'IT Director with deep technical knowledge, evaluating ERP systems',
+    goals: ['Find technically superior solution', 'Ensure scalability', 'Validate architecture', 'Test security'],
+    concerns: ['System architecture', 'Integration capabilities', 'Data security', 'API quality', 'Technical debt'],
+    budget: 'Well-funded - Technology excellence is priority',
     personality: {
       talkative: 6,
       technical: 10,
@@ -137,26 +137,26 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
       skeptical: 8,
       decisive: 7
     },
-    preferredDestinations: ['USA', 'UK', 'Germany', 'Switzerland'],
+    preferredDestinations: ['Enterprise-grade', 'Cloud-native', 'API-first solutions'],
     objectionLikelihood: {
       cost: 0.3,
       quality: 0.9,
       timeline: 0.5,
-      visa: 0.6,
+      visa: 0.1,
       competition: 0.7
     },
-    responseStyle: 'Very detailed questions. Wants specifics, rankings, and research data.',
+    responseStyle: 'Highly technical questions. Wants architecture diagrams, API docs, security protocols. Tests your knowledge.',
     difficulty: 'expert'
   },
   'competitive-shopper': {
     id: 'competitive-1',
     type: 'competitive-shopper',
-    name: 'Vikram Singh',
-    age: 26,
-    background: 'Comparing multiple study abroad consultants',
-    goals: ['Get best deal', 'Find most services', 'Negotiate price'],
-    concerns: ['Overpaying', 'Missing better offers', 'Service quality vs cost'],
-    budget: 'Flexible - But wants maximum value',
+    name: 'Khalid Ibrahim',
+    age: 33,
+    background: 'Procurement manager actively comparing multiple ERP vendors',
+    goals: ['Get best deal', 'Find most features', 'Negotiate aggressively', 'Benchmark prices'],
+    concerns: ['Overpaying', 'Missing better offers', 'Vendor lock-in', 'Better alternatives'],
+    budget: 'Flexible - But wants maximum value and discounts',
     personality: {
       talkative: 7,
       technical: 6,
@@ -164,69 +164,69 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
       skeptical: 9,
       decisive: 5
     },
-    preferredDestinations: ['Wherever best value', 'Canada', 'Australia'],
+    preferredDestinations: ['Best ROI', 'Competitive pricing', 'Value leaders'],
     objectionLikelihood: {
       cost: 0.8,
       quality: 0.6,
       timeline: 0.4,
-      visa: 0.3,
+      visa: 0.1,
       competition: 1.0
     },
-    responseStyle: 'Mentions competitors. Asks "what makes you different?" repeatedly.',
+    responseStyle: 'Constantly mentions competitors. Asks "what makes you different?" and seeks discounts. Negotiates hard.',
     difficulty: 'hard'
   },
   'career-focused': {
     id: 'career-1',
     type: 'career-focused',
-    name: 'Rohan Desai',
-    age: 25,
-    background: 'MBA aspirant focused on career outcomes',
-    goals: ['Top MBA program', 'High-paying job', 'Build executive career'],
-    concerns: ['ROI', 'Placement rates', 'Career services', 'Alumni network'],
-    budget: 'High - Willing to invest for returns',
+    name: 'Yusuf Al Hashemi',
+    age: 34,
+    background: 'Real estate company CEO focused on business growth and efficiency',
+    goals: ['Achieve business outcomes', 'Increase profitability', 'Scale operations', 'Competitive advantage'],
+    concerns: ['ROI timeline', 'Business disruption', 'Team productivity', 'Market advantage'],
+    budget: 'High - Willing to invest for measurable returns',
     personality: {
       talkative: 6,
-      technical: 8,
-      emotional: 4,
+      technical: 7,
+      emotional: 5,
       skeptical: 7,
       decisive: 8
     },
-    preferredDestinations: ['USA', 'UK', 'Singapore'],
+    preferredDestinations: ['UAE market leaders', 'Proven results', 'Fast deployment'],
     objectionLikelihood: {
       cost: 0.4,
       quality: 0.8,
-      timeline: 0.5,
-      visa: 0.4,
+      timeline: 0.6,
+      visa: 0.1,
       competition: 0.6
     },
-    responseStyle: 'Business-like. Wants data, ROI calculations, and success metrics.',
+    responseStyle: 'Business-focused and results-driven. Wants data, ROI calculations, case studies, and success metrics.',
     difficulty: 'hard'
   },
   'visa-worried': {
     id: 'visa-1',
     type: 'visa-worried',
-    name: 'Ananya Gupta',
-    age: 23,
-    background: 'Had previous visa rejection, now cautious',
-    goals: ['Study abroad successfully', 'Get visa approved', 'Avoid rejection'],
-    concerns: ['Visa rejection', 'Documentation', 'Interview', 'Past rejection impact'],
-    budget: 'Moderate - But visa is priority',
+    name: 'Mariam Abdullah',
+    age: 31,
+    background: 'Logistics company manager worried about implementation risks after failed project',
+    goals: ['Risk-free implementation', 'Avoid business disruption', 'Ensure support', 'Get guarantees'],
+    concerns: ['Implementation failure', 'Data migration risks', 'System downtime', 'Support quality', 'Past bad experience'],
+    budget: 'Moderate - But needs strong guarantees and support',
     personality: {
       talkative: 6,
       technical: 5,
-      emotional: 8,
+      emotional: 7,
       skeptical: 8,
       decisive: 5
     },
-    preferredDestinations: ['Countries with high visa success', 'Ireland', 'Malta'],
+    preferredDestinations: ['Proven vendors', 'Strong support', 'UAE references'],
     objectionLikelihood: {
       cost: 0.5,
-      quality: 0.4,
-      timeline: 0.4,
-      visa: 1.0,
-      competition: 0.3
+      quality: 0.7,
+      timeline: 0.6,
+      visa: 0.1,
+      competition: 0.5
     },
-    responseStyle: 'Anxious tone. Asks many visa-related questions. Needs reassurance.',
+    responseStyle: 'Cautious and risk-averse. Asks many implementation and support questions. Needs constant reassurance about guarantees.',
     difficulty: 'medium'
   }
 };
@@ -415,13 +415,25 @@ CONVERSATION PROGRESSION:
 - If Objection-Handling: Test their answers, ask follow-up questions
 - If Closing: Show hesitation, ask for time to think, or commit if truly convinced
 
+CONTEXT - SCHOLARIX GLOBAL:
+You are a potential client talking to a sales consultant from Scholarix Global, an AI + Odoo ERP consultancy based in Dubai, UAE. They offer:
+- Odoo ERP deployment (14-day implementation)
+- AI automation integration
+- Business process automation
+- CRM & sales intelligence systems
+- Consulting for UAE businesses
+- Pricing: 40% below market rate
+- Target: SMEs and enterprises in UAE (Real Estate, Retail, Trading, Consulting, Logistics)
+
 REALISTIC BEHAVIORS:
-- Don't agree too quickly - real people need convincing
-- Ask about competitors: "I'm talking to other consultants too"
-- Mention time constraints: "I'm at work, can this be quick?"
-- Request written information: "Can you email me the details?"
-- Show price sensitivity even if you can afford it
-- Question hidden costs: "Is that the final price? Any extra fees?"
+- Don't agree too quickly - real business people need convincing
+- Ask about competitors: "I'm talking to SAP, Microsoft Dynamics, other Odoo partners..."
+- Mention time constraints: "I'm in a meeting soon, can this be quick?"
+- Request written information: "Can you send me a proposal?"
+- Show price sensitivity: "What's included in that price? Any hidden costs?"
+- Question claims: "14 days sounds too fast. Is that realistic?"
+- Bring up real concerns: "We tried ERP before and it failed", "Our team won't adopt new systems"
+- Reference UAE context: "Does it work with UAE VAT?", "What about Zatca compliance?"
 
 DO NOT:
 - Sound like a robot or textbook response
@@ -772,40 +784,40 @@ Respond now as ${context.persona.name} would in a REAL phone conversation:`;
   generateInitialGreeting(persona: ProspectPersona): string {
     const greetings: Record<ProspectPersonaType, string[]> = {
       'eager-student': [
-        "Hi! I'm really excited about studying abroad and wanted to learn more about your services.",
-        "Hello! I've been researching study abroad options and came across your agency. Can you help me?"
+        "Hi! I heard about Scholarix from a business partner. I'm looking to automate our operations with Odoo and AI.",
+        "Hello! We're a growing retail business in Dubai and need better systems. Can you tell me about your services?"
       ],
       'skeptical-parent': [
-        "Hello. I'm calling about study abroad options for my daughter. I have many questions.",
-        "Good morning. I need information about sending my child abroad for studies. What can you offer?"
+        "Hello. I'm the CFO here. We've had bad experiences with ERP implementations before. I have a lot of questions.",
+        "Good morning. I need information about Odoo and AI automation, but I'm quite skeptical. Can you convince me?"
       ],
       'budget-conscious': [
-        "Hi, I'm interested in studying abroad but have a limited budget. Can you help?",
-        "Hello. I want to know about affordable study abroad options and any scholarships available."
+        "Hi, our consulting firm needs automation but we have a tight budget. Can you help?",
+        "Hello. I want to know about your Odoo services but need to keep costs down. What are the most affordable options?"
       ],
       'indecisive': [
-        "Hi... I'm not sure if studying abroad is right for me. Can we discuss the options?",
-        "Hello. I'm considering studying abroad but haven't decided yet. Can you tell me more?"
+        "Hi... We're looking at several ERP systems but haven't decided yet. Can we discuss Odoo?",
+        "Hello. I'm comparing Odoo with SAP and Microsoft Dynamics. Not sure which way to go. Can you help?"
       ],
       'experienced-researcher': [
-        "Good day. I'm looking for research opportunities abroad. I'd like to know about your services.",
-        "Hello. I need detailed information about post-doctoral programs. Do you specialize in research placements?"
+        "Good day. I'm our IT Director. I need detailed technical information about your Odoo architecture and AI integration.",
+        "Hello. I have technical questions about your implementation methodology, APIs, and system security. Do you have someone technical?"
       ],
       'competitive-shopper': [
-        "Hi. I'm comparing several study abroad consultants. What makes your services different?",
-        "Hello. I've been talking to other agencies. Why should I choose you?"
+        "Hi. I'm comparing several Odoo partners and consultancies. What makes Scholarix different from others?",
+        "Hello. I've been talking to other ERP vendors. Your prices seem lower. Why should I trust your quality?"
       ],
       'career-focused': [
-        "Hello. I'm looking for MBA programs with strong career outcomes. What can you offer?",
-        "Hi. I want to know about programs that offer the best ROI. Can we discuss this?"
+        "Hello. I'm the CEO of a real estate company. We need systems that will help us scale and beat competition. What can you offer?",
+        "Hi. I need solutions that deliver real business results - increased revenue, reduced costs. Can we discuss your ROI metrics?"
       ],
       'visa-worried': [
-        "Hi. I had a visa rejection before and I'm worried about applying again. Can you help?",
-        "Hello. I need help with visa guidance. My main concern is getting the visa approved."
+        "Hi. We had a failed ERP implementation last year that was a disaster. I'm very worried about going through that again. Can you help?",
+        "Hello. My main concern is implementation risk. We can't afford downtime or project failure. What guarantees do you offer?"
       ]
     };
 
-    const options = greetings[persona.type] || ['Hi, I want to know about studying abroad.'];
+    const options = greetings[persona.type] || ['Hi, I want to know about your Odoo and AI services.'];
     return options[Math.floor(Math.random() * options.length)];
   }
 }
