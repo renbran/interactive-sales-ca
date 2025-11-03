@@ -196,6 +196,143 @@ export class AudioRecordingManager {
   getAutoDownload(): boolean {
     return localStorage.getItem('scholarix-auto-download-recordings') === 'true';
   }
+
+  /**
+   * Save the full recording (blob + metadata) into IndexedDB and metadata into localStorage
+   * This method is a higher-level convenience used by callers that previously expected
+   * a `saveRecording` method.
+   */
+  async saveRecording(recordingData: AudioRecordingData, callId: string, prospectName?: string): Promise<void> {
+    try {
+      // Save metadata in localStorage for quick access
+      this.saveRecordingMetadata(recordingData, callId);
+
+      // Save blob into IndexedDB for playback/download/share
+      const dbOpen = indexedDB.open('scholarix-recordings-db', 1);
+
+      dbOpen.onupgradeneeded = (event: any) => {
+        const db = event.target.result as IDBDatabase;
+        if (!db.objectStoreNames.contains('recordings')) {
+          db.createObjectStore('recordings', { keyPath: 'callId' });
+        }
+      };
+
+      await new Promise<void>((resolve, reject) => {
+        dbOpen.onsuccess = (ev: any) => {
+          const db = ev.target.result as IDBDatabase;
+          const tx = db.transaction('recordings', 'readwrite');
+          const store = tx.objectStore('recordings');
+
+          const entry = {
+            callId,
+            blob: recordingData.blob,
+            filename: recordingData.filename,
+            duration: recordingData.duration,
+            timestamp: recordingData.timestamp,
+            prospectName: prospectName || ''
+          } as any;
+
+          const req = store.put(entry);
+          req.onsuccess = () => {
+            tx.oncomplete = () => {
+              db.close();
+              resolve();
+            };
+          };
+
+          req.onerror = (err) => {
+            console.error('Failed to store recording in IndexedDB', err);
+            db.close();
+            reject(err);
+          };
+        };
+
+        dbOpen.onerror = (e) => {
+          console.error('IndexedDB open failed', e);
+          reject(e);
+        };
+      });
+    } catch (error) {
+      console.error('saveRecording failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieve a recording blob + metadata from IndexedDB by callId
+   */
+  async getRecording(callId: string): Promise<AudioRecordingData | null> {
+    try {
+      const dbOpen = indexedDB.open('scholarix-recordings-db', 1);
+
+      const result = await new Promise<any>((resolve, reject) => {
+        dbOpen.onsuccess = (ev: any) => {
+          const db = ev.target.result as IDBDatabase;
+          const tx = db.transaction('recordings', 'readonly');
+          const store = tx.objectStore('recordings');
+          const req = store.get(callId);
+
+          req.onsuccess = () => {
+            const entry = req.result;
+            db.close();
+            resolve(entry || null);
+          };
+
+          req.onerror = (err) => {
+            db.close();
+            reject(err);
+          };
+        };
+
+        dbOpen.onerror = (e) => reject(e);
+      });
+
+      if (!result) return null;
+
+      const blob: Blob = result.blob;
+      const audioData: AudioRecordingData = {
+        blob,
+        url: URL.createObjectURL(blob),
+        duration: result.duration,
+        timestamp: result.timestamp,
+        filename: result.filename
+      };
+
+      return audioData;
+    } catch (error) {
+      console.error('getRecording failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Download a recording by its callId (convenience wrapper)
+   */
+  async downloadRecordingByCallId(callId: string): Promise<void> {
+    const recording = await this.getRecording(callId);
+    if (!recording) throw new Error('Recording not found');
+    this.downloadRecording(recording);
+  }
+
+  /**
+   * Share a recording using the Web Share API when available
+   */
+  async shareRecordingByCallId(callId: string): Promise<void> {
+    const recording = await this.getRecording(callId);
+    if (!recording) throw new Error('Recording not found');
+
+    if ((navigator as any).canShare && (navigator as any).canShare({ files: [] })) {
+      const file = new File([recording.blob], recording.filename, { type: recording.blob.type });
+      try {
+        await (navigator as any).share({ files: [file], title: recording.filename });
+      } catch (err) {
+        console.error('Share failed', err);
+        throw err;
+      }
+    } else {
+      throw new Error('Web Share API not supported on this device');
+    }
+  }
 }
 
 // Export singleton instance
