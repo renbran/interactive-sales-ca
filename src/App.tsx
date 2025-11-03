@@ -12,6 +12,7 @@ import CallApp from '@/components/CallApp';
 import LeadManager from '@/components/LeadManager';
 import AdminPanel from '@/pages/AdminPanel';
 import ScriptTestPage from '@/pages/ScriptTestPage';
+import RolePlayPage from '@/pages/RolePlayPage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +22,8 @@ import {
   Users,
   Shield,
   User as UserIcon,
-  Books
+  Books,
+  Robot
 } from '@phosphor-icons/react';
 
 // Loading component
@@ -145,7 +147,7 @@ function ProtectedLayout() {
       <div className="bg-white border-b border-gray-200">
         <div className="mobile-container max-w-7xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 h-12 sm:h-14 bg-transparent p-0">
+            <TabsList className="grid w-full grid-cols-4 md:grid-cols-5 h-12 sm:h-14 bg-transparent p-0">
               <TabsTrigger 
                 value="calls" 
                 className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600"
@@ -160,6 +162,15 @@ function ProtectedLayout() {
               >
                 <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Leads</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="roleplay" 
+                className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-green-50 data-[state=active]:text-green-600 data-[state=active]:border-b-2 data-[state=active]:border-green-600"
+              >
+                <Robot className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">AI Practice</span>
+                <span className="sm:hidden">AI</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -190,6 +201,10 @@ function ProtectedLayout() {
               
               <TabsContent value="leads" className="mt-0 h-full">
                 <LeadManager />
+              </TabsContent>
+              
+              <TabsContent value="roleplay" className="mt-0 h-full">
+                <RolePlayPage />
               </TabsContent>
               
               <TabsContent value="script-test" className="mt-0 h-full">
