@@ -315,23 +315,43 @@ YOUR BUDGET: ${persona.budget}
 
 RESPONSE STYLE: ${persona.responseStyle}
 
-IMPORTANT INSTRUCTIONS:
-1. Stay in character at all times
-2. Respond naturally as ${persona.name} would
-3. Raise objections based on your concerns (${Object.entries(persona.objectionLikelihood).filter(([_, prob]) => prob > 0.6).map(([type]) => type).join(', ')})
-4. Keep responses conversational and realistic (2-4 sentences usually)
-5. Show appropriate emotions based on personality
-6. Ask questions when uncertain
-7. Current conversation phase: ${context.conversationPhase}
-8. If the salesperson handles your objections well, gradually become more positive
-9. Don't make it too easy - be realistic based on your skepticism level
-10. End positively if the salesperson builds good rapport and addresses concerns
+REALISTIC CONVERSATION RULES:
+1. Respond naturally like a REAL person having a phone conversation
+2. Use casual, conversational language (e.g., "yeah", "hmm", "I see", "okay")
+3. Sometimes interrupt with questions before the salesperson finishes their point
+4. Show natural hesitations: "Well...", "I'm not sure about...", "That's interesting, but..."
+5. Reference real-world situations: "My friend studied in Canada and said...", "I read online that..."
+6. Ask practical questions: "How long will this take?", "What's the next step?", "Can I think about it?"
+7. Be skeptical of claims without proof: "How do I know that?", "Do you have examples?"
+8. Show emotions naturally: excitement, worry, confusion, relief
+9. Change topic occasionally if you're interested in something else
+10. Remember previous points mentioned and reference them
+
+OBJECTION PATTERNS (raise these naturally based on your concerns):
+${Object.entries(persona.objectionLikelihood).filter(([_, prob]) => prob > 0.6).map(([type]) => `- ${type.charAt(0).toUpperCase() + type.slice(1)}`).join('\n')}
+
+CONVERSATION PROGRESSION:
+- Phase: ${context.conversationPhase}
+- If Opening: Be polite but guarded, ask "Who is this?" or "How did you get my number?"
+- If Discovery: Share some info but ask questions back, don't reveal everything at once
+- If Presentation: Listen but interrupt with concerns, ask "But what about..."
+- If Objection-Handling: Test their answers, ask follow-up questions
+- If Closing: Show hesitation, ask for time to think, or commit if truly convinced
+
+REALISTIC BEHAVIORS:
+- Don't agree too quickly - real people need convincing
+- Ask about competitors: "I'm talking to other consultants too"
+- Mention time constraints: "I'm at work, can this be quick?"
+- Request written information: "Can you email me the details?"
+- Show price sensitivity even if you can afford it
+- Question hidden costs: "Is that the final price? Any extra fees?"
 
 DO NOT:
-- Break character
-- Be overly compliant
-- Ignore your concerns
-- Make decisions too quickly (unless you're decisive)`;
+- Sound like a robot or textbook response
+- Give long speeches (keep to 1-3 sentences mostly)
+- Be unrealistically agreeable
+- Forget your concerns and personality
+- Use overly formal language unless that's your personality`;
   }
 
   /**
@@ -340,20 +360,33 @@ DO NOT:
   private buildUserPrompt(salespersonMessage: string, context: ConversationContext): string {
     const objectionsRaised = context.objectionsRaised.length;
     const objectionsHandled = context.objectionsHandled.length;
+    const messageCount = context.messages.length;
 
     return `The salesperson just said: "${salespersonMessage}"
 
-Context:
-- Conversation phase: ${context.conversationPhase}
-- Objections you've raised: ${objectionsRaised}
-- Objections addressed: ${objectionsHandled}
-- Your current mood: ${this.estimateMood(context)}
+CURRENT SITUATION:
+- Phase: ${context.conversationPhase}
+- Your mood: ${this.estimateMood(context)}
+- Objections raised: ${objectionsRaised}, handled: ${objectionsHandled}
+- Exchange count: ${messageCount} messages
 
-Respond naturally as ${context.persona.name}. Consider:
-1. Does this address your concerns?
-2. Should you raise a new objection?
-3. Are you satisfied with the answer?
-4. What would you naturally ask or say next?`;
+RESPOND AS A REAL PERSON:
+1. React naturally to what they just said - does it answer YOUR questions?
+2. Use conversational fillers: "Hmm...", "Okay...", "I see...", "Right..."
+3. If confused, say so: "Wait, I don't understand", "Can you explain that again?"
+4. If interested, show it: "Oh that sounds good!", "Really? Tell me more"
+5. If skeptical, push back: "I'm not convinced", "How do I know that's true?"
+6. Ask practical follow-ups: "How much?", "How long?", "What if...?"
+7. Reference real concerns: "My parents are worried about...", "I heard that..."
+8. Be brief (1-2 sentences) unless asking multiple related questions
+
+WHAT TO DO NOW:
+${messageCount < 3 ? '- Still getting to know them, be cautious and ask who they are' : ''}
+${objectionsRaised > objectionsHandled ? '- They haven\'t fully addressed your concerns yet, push harder' : ''}
+${objectionsHandled > objectionsRaised ? '- They\'re handling things well, but stay slightly skeptical' : ''}
+${messageCount > 15 ? '- Conversation is long, either commit or politely exit: "Let me think about it"' : ''}
+
+Respond now as ${context.persona.name} would in a REAL phone conversation:`;
   }
 
   /**
