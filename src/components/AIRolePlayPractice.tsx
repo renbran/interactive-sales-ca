@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import {
   Play,
   Pause,
@@ -14,13 +15,16 @@ import {
   Lightning,
   TrendUp,
   CheckCircle,
-  WarningCircle
+  WarningCircle,
+  SpeakerHigh,
+  SpeakerSlash
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import {
   PROSPECT_PERSONAS,
   aiRolePlayService
 } from '@/lib/aiRolePlayService';
+import { ttsService } from '@/lib/ttsService';
 import type {
   ProspectPersona,
   ConversationContext,
@@ -41,6 +45,8 @@ export default function AIRolePlayPractice() {
   const [isListening, setIsListening] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showSetup, setShowSetup] = useState(true);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -48,6 +54,24 @@ export default function AIRolePlayPractice() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [context?.messages]);
+
+  // Initialize TTS service
+  useEffect(() => {
+    const initTTS = async () => {
+      if (ttsService.isSupported()) {
+        try {
+          await ttsService.initialize();
+          // Set up speaking state listener
+          ttsService.onStateChange((speaking) => {
+            setIsSpeaking(speaking);
+          });
+        } catch (error) {
+          console.error('Failed to initialize TTS:', error);
+        }
+      }
+    };
+    initTTS();
+  }, []);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -109,11 +133,13 @@ export default function AIRolePlayPractice() {
     setIsSessionActive(true);
     setShowSetup(false);
     
-    // Speak the greeting if speech synthesis is available
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(initialGreeting);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
+    // Speak the greeting with persona-specific voice
+    if (ttsEnabled && ttsService.isSupported()) {
+      try {
+        await ttsService.speak(initialGreeting, persona);
+      } catch (error) {
+        console.error('TTS error:', error);
+      }
     }
 
     toast.success('Practice session started!');
@@ -172,11 +198,13 @@ export default function AIRolePlayPractice() {
         setCoachingHints(prev => [...prev, ...aiResponse.coachingHints!].slice(-5));
       }
 
-      // Speak the AI response
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(aiResponse.content);
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
+      // Speak the AI response with persona-specific voice
+      if (ttsEnabled && ttsService.isSupported() && selectedPersona) {
+        try {
+          await ttsService.speak(aiResponse.content, selectedPersona);
+        } catch (error) {
+          console.error('TTS error:', error);
+        }
       }
 
       // Check if conversation should end
@@ -261,6 +289,27 @@ export default function AIRolePlayPractice() {
                 Your API key is stored locally and never sent anywhere except OpenAI
               </p>
             </div>
+            
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                {ttsEnabled ? (
+                  <SpeakerHigh className="h-5 w-5 text-blue-600" weight="fill" />
+                ) : (
+                  <SpeakerSlash className="h-5 w-5 text-gray-400" />
+                )}
+                <div>
+                  <p className="text-sm font-medium">Realistic Voice</p>
+                  <p className="text-xs text-muted-foreground">
+                    AI speaks with persona-specific voice
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={ttsEnabled}
+                onCheckedChange={setTtsEnabled}
+              />
+            </div>
+
             <Button 
               onClick={() => setShowSetup(false)} 
               disabled={!apiKey}
@@ -345,6 +394,22 @@ export default function AIRolePlayPractice() {
                     "{persona.responseStyle}"
                   </p>
                 </div>
+
+                {ttsEnabled && ttsService.isSupported() && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ttsService.previewVoice(persona);
+                      toast.success('Playing voice preview');
+                    }}
+                  >
+                    <SpeakerHigh className="h-4 w-4 mr-2" />
+                    Preview Voice
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -481,6 +546,32 @@ export default function AIRolePlayPractice() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {isSpeaking && (
+              <Badge variant="secondary" className="animate-pulse">
+                <SpeakerHigh className="h-3 w-3 mr-1" weight="fill" />
+                AI Speaking...
+              </Badge>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTtsEnabled(!ttsEnabled);
+                if (!ttsEnabled) {
+                  toast.success('Voice enabled');
+                } else {
+                  ttsService.stop();
+                  toast.success('Voice disabled');
+                }
+              }}
+            >
+              {ttsEnabled ? (
+                <SpeakerHigh className="h-4 w-4 mr-2" />
+              ) : (
+                <SpeakerSlash className="h-4 w-4 mr-2" />
+              )}
+              Voice
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -521,6 +612,13 @@ export default function AIRolePlayPractice() {
                       : 'bg-white border'
                   }`}
                 >
+                  {message.role === 'agent' && isSpeaking && 
+                   message === context.messages[context.messages.length - 1] && (
+                    <div className="flex items-center gap-2 mb-2 text-blue-600">
+                      <SpeakerHigh className="h-4 w-4 animate-pulse" weight="fill" />
+                      <span className="text-xs font-medium">Speaking...</span>
+                    </div>
+                  )}
                   <p className="text-sm">{message.content}</p>
                   {message.objectionType && (
                     <Badge variant="destructive" className="mt-2 text-xs">
