@@ -289,7 +289,7 @@ export default function AIRolePlayPractice() {
             <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               AI Role-Play Practice
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto">
+            <p className="text-base md:text-lg text-gray-800 font-semibold max-w-md mx-auto">
               Master your sales skills with realistic AI-powered prospect conversations
             </p>
           </div>
@@ -325,7 +325,7 @@ export default function AIRolePlayPractice() {
                         placeholder="http://localhost:11434 or https://xxxx.ngrok.io"
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                       />
-                      <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                      <p className="text-xs text-gray-800 font-semibold mt-2 flex items-start gap-1">
                         <span className="text-blue-600">💡</span>
                         <span>Use localhost for local setup or ngrok URL for cloud access</span>
                       </p>
@@ -347,7 +347,7 @@ export default function AIRolePlayPractice() {
                         <option value="phi3:medium">Phi-3 Medium</option>
                         <option value="gemma2:9b">Gemma 2 9B</option>
                       </select>
-                      <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                      <p className="text-xs text-gray-800 font-semibold mt-2 flex items-start gap-1">
                         <span className="text-green-600">✨</span>
                         <span>Make sure this model is pulled in your Ollama installation</span>
                       </p>
@@ -366,7 +366,7 @@ export default function AIRolePlayPractice() {
                         placeholder="sk-proj-..."
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                       />
-                      <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                      <p className="text-xs text-gray-800 font-semibold mt-2 flex items-start gap-1">
                         <span className="text-green-600">🔒</span>
                         <span>Your API key is stored locally in your browser and only sent to OpenAI</span>
                       </p>
@@ -384,7 +384,7 @@ export default function AIRolePlayPractice() {
                   )}
                   <div>
                     <p className="text-sm font-semibold text-gray-900">Realistic Voice</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-800 font-semibold">
                       Hear AI speak with unique persona voices
                     </p>
                   </div>
@@ -418,7 +418,7 @@ export default function AIRolePlayPractice() {
           </Card>
 
           <div className="text-center">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-800 font-semibold">
               💡 Tip: Choose different personas to practice handling various customer types
             </p>
           </div>
@@ -431,10 +431,10 @@ export default function AIRolePlayPractice() {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border-2">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Select a Prospect Persona</h1>
-              <p className="text-sm md:text-base text-muted-foreground mt-1">
+              <p className="text-sm md:text-base text-gray-700 mt-1 font-medium">
                 Choose a persona to practice your sales conversation
               </p>
             </div>
@@ -447,31 +447,31 @@ export default function AIRolePlayPractice() {
             {Object.values(PROSPECT_PERSONAS).map((persona) => (
               <Card 
                 key={persona.id}
-                className="cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-200 bg-white"
+                className="cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-200 bg-white border-2 hover:border-blue-500"
                 onClick={() => startSession(persona)}
               >
                 <CardHeader className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">{persona.name}</CardTitle>
-                      <CardDescription className="text-sm mt-1">
+                      <CardTitle className="text-lg font-bold text-gray-900">{persona.name}</CardTitle>
+                      <CardDescription className="text-sm mt-1 text-gray-700 font-semibold">
                         {persona.age} years old
                       </CardDescription>
                     </div>
-                    <Badge className={getDifficultyColor(persona.difficulty)}>
+                    <Badge className={getDifficultyColor(persona.difficulty) + ' font-bold'}>
                       {persona.difficulty}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm">{persona.background}</p>
+                  <p className="text-sm text-gray-800 font-medium leading-relaxed">{persona.background}</p>
                   
                   <div className="space-y-2">
                     <div>
-                      <p className="text-xs font-medium mb-1">Goals:</p>
+                      <p className="text-xs font-bold mb-1 text-gray-900">Goals:</p>
                       <div className="flex flex-wrap gap-1">
                         {persona.goals.slice(0, 2).map((goal, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
+                          <Badge key={idx} variant="outline" className="text-xs font-semibold border-2">
                             {goal}
                           </Badge>
                         ))}
@@ -479,10 +479,10 @@ export default function AIRolePlayPractice() {
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium mb-1">Main Concerns:</p>
+                      <p className="text-xs font-bold mb-1 text-gray-900">Main Concerns:</p>
                       <div className="flex flex-wrap gap-1">
                         {persona.concerns.slice(0, 2).map((concern, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
+                          <Badge key={idx} variant="secondary" className="text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
                             {concern}
                           </Badge>
                         ))}
@@ -490,12 +490,12 @@ export default function AIRolePlayPractice() {
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium">Budget: {persona.budget}</p>
+                      <p className="text-xs font-bold text-gray-900">Budget: <span className="text-green-700">{persona.budget}</span></p>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t">
-                    <p className="text-xs italic text-muted-foreground">
+                  <div className="pt-2 border-t-2">
+                    <p className="text-xs italic text-gray-700 font-medium">
                       "{persona.responseStyle}"
                     </p>
                   </div>
@@ -533,19 +533,19 @@ export default function AIRolePlayPractice() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mx-auto mb-2">
                 <CheckCircle className="h-10 w-10 text-white" weight="fill" />
               </div>
-              <CardTitle className="text-2xl md:text-3xl font-bold">Session Complete! 🎉</CardTitle>
-              <CardDescription className="text-base">
-                Practice session with <span className="font-semibold text-gray-700">{selectedPersona?.name}</span>
+              <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900">Session Complete! 🎉</CardTitle>
+              <CardDescription className="text-base text-gray-800 font-semibold">
+                Practice session with <span className="font-bold text-blue-700">{selectedPersona?.name}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Overall Score */}
-              <div className="text-center p-8 bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-100 shadow-md">
-                <p className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Overall Performance</p>
+              <div className="text-center p-8 bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-md">
+                <p className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Overall Performance</p>
                 <p className={`text-6xl md:text-7xl font-bold ${getScoreColor(sessionMetrics.overallScore)} mb-2`}>
                   {Math.round(sessionMetrics.overallScore)}%
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-base text-gray-800 font-semibold">
                   {sessionMetrics.overallScore >= 80 ? '🌟 Excellent!' : 
                    sessionMetrics.overallScore >= 60 ? '👍 Good job!' : 
                    '💪 Keep practicing!'}
@@ -554,15 +554,15 @@ export default function AIRolePlayPractice() {
 
             {/* Detailed Scores */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div className="p-4 bg-white rounded-xl border-2 border-gray-100 shadow-sm">
-                <p className="text-sm font-semibold mb-3 text-gray-700">📝 Script Adherence</p>
+              <div className="p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
+                <p className="text-sm font-bold mb-3 text-gray-900">📝 Script Adherence</p>
                 <Progress value={sessionMetrics.scriptAdherence} className="h-3 mb-2" />
                 <p className="text-lg font-bold text-gray-900">
                   {Math.round(sessionMetrics.scriptAdherence)}%
                 </p>
               </div>
-              <div className="p-4 bg-white rounded-xl border-2 border-gray-100 shadow-sm">
-                <p className="text-sm font-semibold mb-3 text-gray-700">🛡️ Objection Handling</p>
+              <div className="p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
+                <p className="text-sm font-bold mb-3 text-gray-900">🛡️ Objection Handling</p>
                 <Progress value={sessionMetrics.objectionHandling} className="h-3 mb-2" />
                 <p className="text-lg font-bold text-gray-900">
                   {Math.round(sessionMetrics.objectionHandling)}%
@@ -666,14 +666,14 @@ export default function AIRolePlayPractice() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="border-b bg-white shadow-sm p-3 md:p-4">
+      <div className="border-b-2 border-gray-300 bg-white shadow-sm p-3 md:p-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <h2 className="text-base md:text-lg font-bold truncate">
+              <h2 className="text-base md:text-lg font-bold truncate text-gray-900">
                 {selectedPersona?.name}
               </h2>
-              <p className="text-xs md:text-sm text-muted-foreground truncate">
+              <p className="text-xs md:text-sm text-gray-800 font-semibold truncate">
                 {selectedPersona?.background}
               </p>
             </div>
@@ -742,22 +742,22 @@ export default function AIRolePlayPractice() {
                 }`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[75%] md:max-w-[70%] rounded-2xl p-3 md:p-4 shadow-sm ${
+                  className={`max-w-[85%] sm:max-w-[75%] md:max-w-[70%] rounded-2xl p-3 md:p-4 shadow-md ${
                     message.role === 'salesperson'
-                      ? 'bg-blue-600 text-white rounded-br-md'
-                      : 'bg-white border-2 border-gray-100 rounded-bl-md'
+                      ? 'bg-blue-600 text-white rounded-br-md font-semibold'
+                      : 'bg-white border-2 border-gray-300 rounded-bl-md text-gray-900'
                   }`}
                 >
                   {message.role === 'agent' && isSpeaking && 
                    message === context.messages[context.messages.length - 1] && (
                     <div className="flex items-center gap-2 mb-2 text-blue-600">
                       <SpeakerHigh className="h-4 w-4 animate-pulse" weight="fill" />
-                      <span className="text-xs font-medium">Speaking...</span>
+                      <span className="text-xs font-bold">Speaking...</span>
                     </div>
                   )}
-                  <p className="text-sm md:text-base leading-relaxed">{message.content}</p>
+                  <p className="text-sm md:text-base leading-relaxed font-medium">{message.content}</p>
                   {message.objectionType && (
-                    <Badge variant="destructive" className="mt-2 text-xs">
+                    <Badge variant="destructive" className="mt-2 text-xs font-bold">
                       ⚠️ {message.objectionType}
                     </Badge>
                   )}
@@ -815,26 +815,26 @@ export default function AIRolePlayPractice() {
 
         {/* Coaching Sidebar - Desktop only */}
         {showCoaching && (
-          <div className="hidden lg:block w-80 xl:w-96 border-l bg-white p-4 overflow-y-auto">
-            <div className="sticky top-0 bg-white pb-4 border-b mb-4">
-              <h3 className="font-bold flex items-center gap-2 text-lg">
+          <div className="hidden lg:block w-80 xl:w-96 border-l-2 border-gray-300 bg-white p-4 overflow-y-auto">
+            <div className="sticky top-0 bg-white pb-4 border-b-2 border-gray-300 mb-4">
+              <h3 className="font-bold flex items-center gap-2 text-lg text-gray-900">
                 <Lightning className="text-yellow-600 h-5 w-5" weight="fill" />
                 Live Coaching
               </h3>
             </div>
 
             {/* Current Phase */}
-            <div className="mb-4 p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100">
-              <p className="text-xs font-semibold text-blue-900 mb-1 uppercase tracking-wide">Current Phase</p>
+            <div className="mb-4 p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
+              <p className="text-xs font-bold text-blue-900 mb-1 uppercase tracking-wide">CURRENT PHASE</p>
               <p className="text-base font-bold capitalize text-blue-700">{context?.conversationPhase?.replace('-', ' ')}</p>
             </div>
 
             {/* Coaching Hints */}
             <div className="space-y-3 mb-4">
-              <p className="text-sm font-semibold text-gray-900">💡 Active Hints</p>
+              <p className="text-sm font-bold text-gray-900">💡 Active Hints</p>
               {coachingHints.length === 0 ? (
-                <div className="p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                  <p className="text-xs text-muted-foreground text-center">
+                <div className="p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                  <p className="text-xs text-gray-800 font-semibold text-center">
                     No hints yet. Keep the conversation natural and authentic!
                   </p>
                 </div>
@@ -843,7 +843,7 @@ export default function AIRolePlayPractice() {
                   {coachingHints.slice(-3).reverse().map((hint) => (
                     <div
                       key={hint.id}
-                      className={`p-3 rounded-xl text-xs border-l-4 shadow-sm ${
+                      className={`p-3 rounded-xl text-xs border-l-4 shadow-sm font-semibold ${
                         hint.type === 'positive'
                           ? 'bg-green-50 border-green-500 text-green-900'
                           : hint.type === 'warning'
@@ -859,22 +859,22 @@ export default function AIRolePlayPractice() {
             </div>
 
             {/* Objections Tracker */}
-            <div className="p-4 border-2 rounded-xl bg-linear-to-br from-gray-50 to-white">
-              <p className="text-sm font-semibold mb-3 text-gray-900">📊 Objection Tracker</p>
+            <div className="p-4 border-2 rounded-xl bg-linear-to-br from-gray-50 to-white border-gray-300">
+              <p className="text-sm font-bold mb-3 text-gray-900">📊 Objection Tracker</p>
               <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 bg-white rounded-lg border">
-                  <span className="text-xs font-medium text-gray-600">Raised</span>
-                  <Badge variant="secondary" className="font-bold">
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg border-2 border-gray-200">
+                  <span className="text-xs font-bold text-gray-900">Raised</span>
+                  <Badge variant="secondary" className="font-bold bg-cyan-100 text-cyan-900 border border-cyan-300">
                     {context?.objectionsRaised.length || 0}
                   </Badge>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-white rounded-lg border">
-                  <span className="text-xs font-medium text-gray-600">Handled</span>
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg border-2 border-gray-200">
+                  <span className="text-xs font-bold text-gray-900">Handled</span>
                   <Badge variant={
                     (context?.objectionsHandled.length || 0) >= (context?.objectionsRaised.length || 0)
                       ? "default"
                       : "secondary"
-                  } className="font-bold">
+                  } className="font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
                     {context?.objectionsHandled.length || 0}
                   </Badge>
                 </div>
