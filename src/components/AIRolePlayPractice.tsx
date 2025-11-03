@@ -43,7 +43,13 @@ export default function AIRolePlayPractice() {
   const [showCoaching, setShowCoaching] = useState(true);
   const [sessionMetrics, setSessionMetrics] = useState<PerformanceMetrics | null>(null);
   const [isListening, setIsListening] = useState(false);
+  
+  // AI Provider Configuration
+  const [aiProvider, setAiProvider] = useState<'openai' | 'ollama'>('ollama');
   const [apiKey, setApiKey] = useState('');
+  const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
+  const [ollamaModel, setOllamaModel] = useState('llama3.1:8b');
+  
   const [showSetup, setShowSetup] = useState(true);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -99,12 +105,24 @@ export default function AIRolePlayPractice() {
   }, []);
 
   const startSession = async (persona: ProspectPersona) => {
-    if (!apiKey) {
-      toast.error('Please enter your OpenAI API key in the setup tab');
+    // Validate configuration based on provider
+    if (aiProvider === 'openai' && !apiKey) {
+      toast.error('Please enter your OpenAI API key');
+      return;
+    }
+    
+    if (aiProvider === 'ollama' && !ollamaUrl) {
+      toast.error('Please enter your Ollama URL');
       return;
     }
 
-    aiRolePlayService.setApiKey(apiKey);
+    // Configure AI service
+    aiRolePlayService.setConfig({
+      provider: aiProvider,
+      apiKey: apiKey || undefined,
+      ollamaUrl: ollamaUrl || undefined,
+      model: aiProvider === 'ollama' ? ollamaModel : 'gpt-4'
+    });
     
     const sessionId = `session-${Date.now()}`;
     const initialGreeting = aiRolePlayService.generateInitialGreeting(persona);
@@ -280,25 +298,81 @@ export default function AIRolePlayPractice() {
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl">Quick Setup</CardTitle>
               <CardDescription className="text-sm">
-                Enter your OpenAI API key to start practicing
+                Choose your AI provider and configure settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
+              {/* AI Provider Selection */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">
-                  OpenAI API Key
+                <label className="block text-sm font-semibold mb-3 text-gray-700">
+                  AI Provider
                 </label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-proj-..."
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-                />
-                <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
-                  <span className="text-green-600">🔒</span>
-                  <span>Your API key is stored locally in your browser and only sent to OpenAI</span>
-                </p>
+                <Tabs value={aiProvider} onValueChange={(v) => setAiProvider(v as 'openai' | 'ollama')}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="ollama">🦙 Ollama (Local)</TabsTrigger>
+                    <TabsTrigger value="openai">🤖 OpenAI</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="ollama" className="space-y-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-semibold mb-2 text-gray-700">
+                        Ollama API URL
+                      </label>
+                      <input
+                        type="text"
+                        value={ollamaUrl}
+                        onChange={(e) => setOllamaUrl(e.target.value)}
+                        placeholder="http://localhost:11434 or https://xxxx.ngrok.io"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                        <span className="text-blue-600">💡</span>
+                        <span>Use localhost for local setup or ngrok URL for cloud access</span>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="ollama-model" className="block text-sm font-semibold mb-2 text-gray-700">
+                        Model Name
+                      </label>
+                      <select
+                        id="ollama-model"
+                        value={ollamaModel}
+                        onChange={(e) => setOllamaModel(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                      >
+                        <option value="llama3.1:8b">Llama 3.1 8B (Recommended)</option>
+                        <option value="llama3.1:70b">Llama 3.1 70B (Better quality, slower)</option>
+                        <option value="mistral:7b">Mistral 7B</option>
+                        <option value="phi3:medium">Phi-3 Medium</option>
+                        <option value="gemma2:9b">Gemma 2 9B</option>
+                      </select>
+                      <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                        <span className="text-green-600">✨</span>
+                        <span>Make sure this model is pulled in your Ollama installation</span>
+                      </p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="openai" className="space-y-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-semibold mb-2 text-gray-700">
+                        OpenAI API Key
+                      </label>
+                      <input
+                        type="password"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="sk-proj-..."
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                        <span className="text-green-600">🔒</span>
+                        <span>Your API key is stored locally in your browser and only sent to OpenAI</span>
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
               
               <div className="flex items-center justify-between p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100">
@@ -323,11 +397,23 @@ export default function AIRolePlayPractice() {
 
               <Button 
                 onClick={() => setShowSetup(false)} 
-                disabled={!apiKey}
+                disabled={aiProvider === 'openai' ? !apiKey : !ollamaUrl}
                 className="w-full h-12 text-base font-semibold bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"
               >
                 Continue to Persona Selection →
               </Button>
+              
+              {aiProvider === 'ollama' && (
+                <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                  <p className="text-sm font-semibold text-yellow-900 mb-2">🚀 Quick Ollama Setup</p>
+                  <ol className="text-xs text-yellow-800 space-y-1 list-decimal list-inside">
+                    <li>Install Ollama: <code className="bg-yellow-100 px-1 rounded">curl -fsSL https://ollama.ai/install.sh | sh</code></li>
+                    <li>Pull model: <code className="bg-yellow-100 px-1 rounded">ollama pull {ollamaModel}</code></li>
+                    <li>For cloud access, run: <code className="bg-yellow-100 px-1 rounded">ngrok http 11434</code></li>
+                    <li>Copy ngrok URL and paste above</li>
+                  </ol>
+                </div>
+              )}
             </CardContent>
           </Card>
 

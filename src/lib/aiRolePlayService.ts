@@ -231,10 +231,22 @@ export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
   }
 };
 
+export type AIProvider = 'openai' | 'ollama';
+
+export interface AIConfig {
+  provider: AIProvider;
+  apiKey?: string; // For OpenAI
+  ollamaUrl?: string; // For Ollama (can be ngrok URL)
+  model?: string;
+}
+
 class AIRolePlayService {
   private static instance: AIRolePlayService;
-  private apiKey: string = '';
-  private apiEndpoint: string = 'https://api.openai.com/v1/chat/completions';
+  private config: AIConfig = {
+    provider: 'openai',
+    apiKey: '',
+    model: 'gpt-4'
+  };
 
   static getInstance(): AIRolePlayService {
     if (!AIRolePlayService.instance) {
@@ -243,8 +255,17 @@ class AIRolePlayService {
     return AIRolePlayService.instance;
   }
 
+  setConfig(config: Partial<AIConfig>) {
+    this.config = { ...this.config, ...config };
+  }
+
+  // Legacy method for backward compatibility
   setApiKey(key: string) {
-    this.apiKey = key;
+    this.config.apiKey = key;
+  }
+
+  getConfig(): AIConfig {
+    return { ...this.config };
   }
 
   /**
@@ -261,31 +282,15 @@ class AIRolePlayService {
     const userPrompt = this.buildUserPrompt(salespersonMessage, context);
 
     try {
-      // Call OpenAI API
-      const response = await fetch(this.apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...conversationHistory,
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.8,
-          max_tokens: 300
-        })
-      });
+      let aiContent: string;
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.statusText}`);
+      if (this.config.provider === 'ollama') {
+        // Call Ollama API (local or via ngrok)
+        aiContent = await this.callOllamaAPI(systemPrompt, conversationHistory, userPrompt);
+      } else {
+        // Call OpenAI API
+        aiContent = await this.callOpenAIAPI(systemPrompt, conversationHistory, userPrompt);
       }
-
-      const data = await response.json();
-      const aiContent = data.choices[0].message.content;
 
       // Parse response and extract metadata
       return this.parseAIResponse(aiContent, context);
@@ -294,6 +299,78 @@ class AIRolePlayService {
       // Return fallback response
       return this.getFallbackResponse(persona, context);
     }
+  }
+
+  /**
+   * Call OpenAI API
+   */
+  private async callOpenAIAPI(
+    systemPrompt: string,
+    conversationHistory: Array<{role: string, content: string}>,
+    userPrompt: string
+  ): Promise<string> {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.config.apiKey}`
+      },
+      body: JSON.stringify({
+        model: this.config.model || 'gpt-4',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...conversationHistory,
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 300
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  /**
+   * Call Ollama API (local or ngrok)
+   */
+  private async callOllamaAPI(
+    systemPrompt: string,
+    conversationHistory: Array<{role: string, content: string}>,
+    userPrompt: string
+  ): Promise<string> {
+    const ollamaUrl = this.config.ollamaUrl || 'http://localhost:11434';
+    
+    const response = await fetch(`${ollamaUrl}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.config.model || 'llama3.1:8b',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...conversationHistory,
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.8,
+        stream: false,
+        options: {
+          num_predict: 300,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.message.content;
   }
 
   /**
