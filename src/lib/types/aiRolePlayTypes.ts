@@ -1,14 +1,14 @@
 // AI Role-Play System Types for Sales Training
 
 export type ProspectPersonaType = 
-  | 'eager-student'           // Excited, ready to go, asks logistics questions
-  | 'skeptical-parent'        // Concerned about costs, safety, quality
-  | 'budget-conscious'        // Focused on affordability, scholarships
-  | 'indecisive'             // Unsure, needs guidance, asks many questions
-  | 'experienced-researcher'  // Well-informed, asks detailed questions
-  | 'competitive-shopper'     // Comparing multiple agencies
-  | 'career-focused'         // Interested in ROI, career outcomes
-  | 'visa-worried'           // Concerned about visa process, rejection rates;
+  | 'eager-student'           // Eager entrepreneur - Excited about automation, asks practical questions
+  | 'skeptical-parent'        // Skeptical CFO - Burned by past failures, demands proof
+  | 'budget-conscious'        // Budget-conscious SME - Tight budget, needs payment terms
+  | 'indecisive'             // Indecisive manager - Comparing multiple vendors, can't decide
+  | 'experienced-researcher'  // Technical IT director - Deep technical knowledge, asks architecture questions
+  | 'competitive-shopper'     // Competitive procurement - Negotiates hard, mentions competitors constantly
+  | 'career-focused'         // Results-driven CEO - Focused on ROI and business outcomes
+  | 'visa-worried'           // Risk-averse manager - Worried about implementation failure and risks;
 
 export type ConversationDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
