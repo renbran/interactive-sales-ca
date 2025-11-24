@@ -10,6 +10,7 @@ import {
   CoachingHint,
   ConversationDifficulty
 } from './types/aiRolePlayTypes';
+import { addNaturalSpeechPatterns, getProcessingIntensity } from './naturalSpeechProcessor';
 
 // Predefined prospect personas for different training scenarios
 export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
@@ -271,6 +272,7 @@ class AIRolePlayService {
     apiKey: '',
     model: 'gpt-4'
   };
+  private onTypingStateChange?: (isTyping: boolean) => void;
 
   static getInstance(): AIRolePlayService {
     if (!AIRolePlayService.instance) {
@@ -293,7 +295,42 @@ class AIRolePlayService {
   }
 
   /**
+   * Set callback for typing state changes
+   */
+  setTypingStateCallback(callback: (isTyping: boolean) => void): void {
+    this.onTypingStateChange = callback;
+  }
+
+  /**
+   * Calculate realistic response delay based on persona
+   */
+  private calculateHumanDelay(persona: ProspectPersona): number {
+    const baseDelay = 1500; // 1.5 seconds base
+    const variability = Math.random() * 1000; // ±1 second random variation
+
+    // Decisive personas respond faster
+    const decisivenessModifier = (10 - persona.personality.decisive) * 100;
+
+    // Skeptical personas take longer (analyzing)
+    const skepticalModifier = persona.personality.skeptical * 150;
+
+    // Talkative personas respond quicker
+    const talkativeModifier = -(persona.personality.talkative * 50);
+
+    const totalDelay = Math.max(
+      800, // Minimum 0.8 seconds
+      Math.min(
+        4000, // Maximum 4 seconds
+        baseDelay + variability + decisivenessModifier + skepticalModifier + talkativeModifier
+      )
+    );
+
+    return Math.round(totalDelay);
+  }
+
+  /**
    * Generate AI prospect response based on conversation context
+   * Now includes realistic thinking delays
    */
   async generateProspectResponse(
     context: ConversationContext,
@@ -306,6 +343,15 @@ class AIRolePlayService {
     const userPrompt = this.buildUserPrompt(salespersonMessage, context);
 
     try {
+      // Calculate realistic delay
+      const thinkingDelay = this.calculateHumanDelay(persona);
+
+      // Show typing indicator
+      this.onTypingStateChange?.(true);
+
+      // Wait for realistic delay (simulate human thinking time)
+      await new Promise(resolve => setTimeout(resolve, thinkingDelay));
+
       let aiContent: string;
 
       if (this.config.provider === 'ollama') {
@@ -316,10 +362,15 @@ class AIRolePlayService {
         aiContent = await this.callOpenAIAPI(systemPrompt, conversationHistory, userPrompt);
       }
 
+      // Hide typing indicator
+      this.onTypingStateChange?.(false);
+
       // Parse response and extract metadata
       return this.parseAIResponse(aiContent, context);
     } catch (error) {
       console.error('Failed to generate AI response:', error);
+      // Hide typing indicator on error
+      this.onTypingStateChange?.(false);
       // Return fallback response
       return this.getFallbackResponse(persona, context);
     }
@@ -524,11 +575,59 @@ ${Object.entries(persona.objectionLikelihood).filter(([_, prob]) => prob > 0.6).
 
 6. SHOW INTELLIGENCE: You're a successful business person. You can spot BS and ask smart follow-ups.
 
-Remember: You're ${persona.name}. You have a real business, real problems, and real skepticism. Act like it
+🚫 FORBIDDEN CORPORATE PHRASES (NEVER USE THESE):
+❌ "I appreciate your comprehensive explanation..."
+❌ "That's a valid point regarding..."
+❌ "I would be interested in learning more about..."
+❌ "Could you elaborate on the specifics of..."
+❌ "I understand your concern regarding the implementation..."
+❌ "That sounds quite promising, however..."
+❌ "I'm intrigued by your proposition..."
+❌ "Perhaps we could schedule a follow-up discussion..."
+❌ "I'd like to give this matter due consideration..."
+❌ "Your points are well-articulated..."
+
+✅ REQUIRED NATURAL SPEECH (USE THESE INSTEAD):
+✅ "Yeah, that makes sense, but..." → Natural agreement with skepticism
+✅ "Okay, I hear you. But what about..." → Acknowledging while pushing back
+✅ "Look, I'm just trying to understand..." → Direct and honest
+✅ "Wait, so you're saying..." → Seeking clarification naturally
+✅ "Honestly, I'm not sure about that..." → Genuine uncertainty
+✅ "I mean, we tried something similar and..." → Personal experience
+✅ "How does that actually work though?" → Practical curiosity
+✅ "That sounds good, but I need to see proof" → Skeptical but open
+✅ "Let me be straight with you..." → Direct communication
+✅ "I don't know, this feels..." → Emotional reaction
+
+💬 CONVERSATION STYLE EXAMPLES:
+
+BAD (Too formal/polished):
+"I appreciate your explanation of the implementation timeline. However, I have concerns about the scalability. Could you elaborate on how your solution handles enterprise-level requirements?"
+
+GOOD (Natural, authentic):
+"Okay, 14 days sounds fast. But wait, how does this actually work for a bigger company? Like, what if we have issues? I'm just trying to understand the support situation here."
+
+BAD (Overly agreeable):
+"That makes perfect sense. I can see how that would address our needs effectively."
+
+GOOD (Realistic skepticism):
+"Hmm, maybe. But I need to see some actual numbers. We got burned before by promises that didn't pan out, you know?"
+
+BAD (Textbook objection):
+"I appreciate the information, but I'll need to review this with my decision-making team before proceeding further."
+
+GOOD (Real person):
+"Look, this sounds interesting, but I can't just decide this on my own. My partner's going to have questions. Can you send me something I can show him?"
+
+Remember: You're ${persona.name}. You have a real business, real problems, and real skepticism. Act like it.
+
+DON'T:
 - Give long speeches (keep to 1-3 sentences mostly)
 - Be unrealistically agreeable
 - Forget your concerns and personality
-- Use overly formal language unless that's your personality`;
+- Use overly formal language unless that's your personality
+- Sound like you're reading from a script
+- Be too polite (business people are direct)`;
   }
 
   /**
@@ -647,22 +746,31 @@ Now respond as ${context.persona.name} would - authentic, brief, and human:`;
 
   /**
    * Parse AI response and extract metadata
+   * Now includes natural speech processing for realism
    */
   private parseAIResponse(content: string, context: ConversationContext): AIResponse {
-    // Analyze sentiment
-    const sentiment = this.analyzeSentiment(content);
-    
-    // Detect objection type
-    const objectionType = this.detectObjectionType(content);
-    
-    // Check if conversation should end
-    const shouldEndConversation = this.shouldEndConversation(content, context);
+    // STEP 1: Add natural speech patterns to make it sound human
+    const processingIntensity = getProcessingIntensity(context.persona);
+    const naturalContent = addNaturalSpeechPatterns(
+      content,
+      context.persona,
+      processingIntensity
+    );
 
-    // Generate coaching hints
-    const coachingHints = this.generateCoachingHints(content, context);
+    // STEP 2: Analyze sentiment (on processed content)
+    const sentiment = this.analyzeSentiment(naturalContent);
+
+    // STEP 3: Detect objection type
+    const objectionType = this.detectObjectionType(naturalContent);
+
+    // STEP 4: Check if conversation should end
+    const shouldEndConversation = this.shouldEndConversation(naturalContent, context);
+
+    // STEP 5: Generate coaching hints
+    const coachingHints = this.generateCoachingHints(naturalContent, context);
 
     return {
-      content,
+      content: naturalContent, // Return processed, natural-sounding content
       sentiment,
       objectionType,
       shouldEndConversation,

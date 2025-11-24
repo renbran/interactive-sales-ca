@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowRight, Lightbulb } from '@phosphor-icons/react';
 import { ScriptNode, ResponseType, ProspectInfo } from '@/lib/types';
 import { getIndustryPain } from '@/lib/scholarixScript';
+import { formatScriptWithRealism, removePlaceholderBrackets } from '@/lib/scriptRealism';
 import { cn } from '@/lib/utils';
 
 interface ScriptDisplayProps {
@@ -48,18 +49,22 @@ export default function ScriptDisplay({ currentNode, prospectInfo, onResponse }:
   };
 
   const formatScript = (text: string) => {
-    return text
-      .replace(/\[NAME\]/gi, prospectInfo.name || '[NAME]')
-      .replace(/\[COMPANY NAME\]/gi, prospectInfo.company || '[COMPANY]')
-      .replace(/\[THEIR INDUSTRY\]/gi, prospectInfo.industry?.replace('-', ' ') || '[INDUSTRY]')
-      .replace(/\[THEIR CORE OPERATION\]/gi, getIndustryPain(prospectInfo.industry))
-      .replace(/\[YOUR NAME\]/gi, '[YOUR NAME]')
-      .replace(/\[COMPANY\]/gi, prospectInfo.company || '[COMPANY]')
-      .replace(/\[DAY\]/gi, '[DAY]')
-      .replace(/\[DATE\]/gi, '[DATE]')
-      .replace(/\[TIME\]/gi, '[TIME]')
-      .replace(/\[TIME 1\]/gi, '[TIME 1]')
-      .replace(/\[TIME 2\]/gi, '[TIME 2]');
+    // Use the new realistic formatter that removes ALL placeholder brackets
+    const formatted = formatScriptWithRealism(
+      text,
+      {
+        prospectName: prospectInfo.name,
+        companyName: prospectInfo.company,
+        industry: prospectInfo.industry,
+      },
+      {
+        generateTimes: true,
+        generateDates: true,
+      }
+    );
+
+    // Final pass to ensure no brackets remain
+    return removePlaceholderBrackets(formatted);
   };
 
   const scriptText = formatScript(currentNode.text);
