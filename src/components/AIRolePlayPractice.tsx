@@ -25,6 +25,7 @@ import {
   aiRolePlayService
 } from '@/lib/aiRolePlayService';
 import { ttsService } from '@/lib/ttsService';
+import ProspectSpeakingIndicator from '@/components/ProspectSpeakingIndicator';
 import type {
   ProspectPersona,
   ConversationContext,
@@ -43,13 +44,14 @@ export default function AIRolePlayPractice() {
   const [showCoaching, setShowCoaching] = useState(true);
   const [sessionMetrics, setSessionMetrics] = useState<PerformanceMetrics | null>(null);
   const [isListening, setIsListening] = useState(false);
-  
+  const [isTyping, setIsTyping] = useState(false); // NEW: Typing indicator state
+
   // AI Provider Configuration
   const [aiProvider, setAiProvider] = useState<'openai' | 'ollama'>('ollama');
   const [apiKey, setApiKey] = useState('');
   const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
   const [ollamaModel, setOllamaModel] = useState('llama3.1:8b');
-  
+
   const [showSetup, setShowSetup] = useState(true);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -77,6 +79,13 @@ export default function AIRolePlayPractice() {
       }
     };
     initTTS();
+  }, []);
+
+  // Initialize AI typing state callback
+  useEffect(() => {
+    aiRolePlayService.setTypingStateCallback((typing) => {
+      setIsTyping(typing);
+    });
   }, []);
 
   // Initialize speech recognition
@@ -764,14 +773,14 @@ export default function AIRolePlayPractice() {
                 </div>
               </div>
             ))}
-            {isProcessing && (
+            {/* Realistic typing indicator */}
+            {isTyping && selectedPersona && (
               <div className="flex justify-start">
-                <div className="bg-white border-2 border-gray-100 rounded-2xl rounded-bl-md p-4 shadow-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-400 animate-bounce" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-400 animate-bounce [animation-delay:0.1s]" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-400 animate-bounce [animation-delay:0.2s]" />
-                  </div>
+                <div className="max-w-[85%] sm:max-w-[75%] md:max-w-[70%]">
+                  <ProspectSpeakingIndicator
+                    isThinking={isTyping}
+                    persona={selectedPersona}
+                  />
                 </div>
               </div>
             )}

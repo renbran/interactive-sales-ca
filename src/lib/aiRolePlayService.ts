@@ -10,6 +10,8 @@ import {
   CoachingHint,
   ConversationDifficulty
 } from './types/aiRolePlayTypes';
+import { addNaturalSpeechPatterns, getProcessingIntensity } from './naturalSpeechProcessor';
+import { updateConversationMemory, generateMemoryPrompt } from './conversationMemory';
 
 // Predefined prospect personas for different training scenarios
 export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
@@ -271,6 +273,7 @@ class AIRolePlayService {
     apiKey: '',
     model: 'gpt-4'
   };
+  private onTypingStateChange?: (isTyping: boolean) => void;
 
   static getInstance(): AIRolePlayService {
     if (!AIRolePlayService.instance) {
@@ -293,7 +296,112 @@ class AIRolePlayService {
   }
 
   /**
+   * Set callback for typing state changes
+   */
+  setTypingStateCallback(callback: (isTyping: boolean) => void): void {
+    this.onTypingStateChange = callback;
+  }
+
+  /**
+   * Calculate realistic response delay based on persona
+   */
+  private calculateHumanDelay(persona: ProspectPersona): number {
+    const baseDelay = 1500; // 1.5 seconds base
+    const variability = Math.random() * 1000; // ±1 second random variation
+
+    // Decisive personas respond faster
+    const decisivenessModifier = (10 - persona.personality.decisive) * 100;
+
+    // Skeptical personas take longer (analyzing)
+    const skepticalModifier = persona.personality.skeptical * 150;
+
+    // Talkative personas respond quicker
+    const talkativeModifier = -(persona.personality.talkative * 50);
+
+    const totalDelay = Math.max(
+      800, // Minimum 0.8 seconds
+      Math.min(
+        4000, // Maximum 4 seconds
+        baseDelay + variability + decisivenessModifier + skepticalModifier + talkativeModifier
+      )
+    );
+
+    return Math.round(totalDelay);
+  }
+
+  /**
+   * Check if we should inject an objection THIS turn (probabilistic)
+   */
+  private shouldInjectObjection(context: ConversationContext): boolean {
+    const messageCount = context.messages.length;
+
+    // Don't inject in first 2 messages (too early)
+    if (messageCount < 2) return false;
+
+    // Don't inject if already handling objection
+    if (context.conversationPhase === 'objection-handling') return false;
+
+    // Don't inject if last message was an objection
+    const lastMessage = context.messages[context.messages.length - 1];
+    if (lastMessage?.objectionType) return false;
+
+    // Base probability: 15% per message after opening
+    let probability = 0.15;
+
+    // Higher chance (30%) during presentation phase
+    if (context.conversationPhase === 'presentation') {
+      probability = 0.3;
+    }
+
+    // Higher chance if many messages without objections
+    const messagesSinceLastObjection = this.getMessagesSinceLastObjection(context);
+    if (messagesSinceLastObjection > 5) {
+      probability += 0.15;
+    }
+
+    return Math.random() < probability;
+  }
+
+  /**
+   * Get messages since last objection
+   */
+  private getMessagesSinceLastObjection(context: ConversationContext): number {
+    for (let i = context.messages.length - 1; i >= 0; i--) {
+      if (context.messages[i].objectionType) {
+        return context.messages.length - 1 - i;
+      }
+    }
+    return context.messages.length;
+  }
+
+  /**
+   * Select random objection based on likelihood
+   */
+  private selectRandomObjection(persona: ProspectPersona): string {
+    // Weight by objection likelihood
+    const weightedObjections = Object.entries(persona.objectionLikelihood)
+      .filter(([_, prob]) => prob > 0.4)
+      .map(([type, prob]) => ({ type, weight: prob }));
+
+    if (weightedObjections.length === 0) {
+      return 'cost'; // Fallback
+    }
+
+    // Weighted random selection
+    const totalWeight = weightedObjections.reduce((sum, obj) => sum + obj.weight, 0);
+    let random = Math.random() * totalWeight;
+
+    for (const obj of weightedObjections) {
+      random -= obj.weight;
+      if (random <= 0) return obj.type;
+    }
+
+    return weightedObjections[0].type;
+  }
+
+  /**
    * Generate AI prospect response based on conversation context
+   * Now includes realistic thinking delays and dynamic objection injection
    */
   async generateProspectResponse(
     context: ConversationContext,
@@ -303,9 +411,28 @@ class AIRolePlayService {
     const conversationHistory = this.formatConversationHistory(context.messages);
 
     const systemPrompt = this.buildSystemPrompt(persona, context);
-    const userPrompt = this.buildUserPrompt(salespersonMessage, context);
+    let userPrompt = this.buildUserPrompt(salespersonMessage, context);
+
+    // DYNAMIC OBJECTION INJECTION
+    // Check if we should inject an objection THIS turn
+    const shouldInject = this.shouldInjectObjection(context);
+    if (shouldInject) {
+      const objectionType = this.selectRandomObjection(persona);
+      userPrompt += `\n\n🚨 CRITICAL: Raise your "${objectionType}" objection RIGHT NOW, naturally interrupting if needed. Don't wait for a perfect moment - real people interrupt when concerns hit them. Be direct and authentic about this concern.`;
+
+      console.log(`💥 Dynamic objection injected: ${objectionType}`);
+    }
 
     try {
+      // Calculate realistic delay
+      const thinkingDelay = this.calculateHumanDelay(persona);
+
+      // Show typing indicator
+      this.onTypingStateChange?.(true);
+
+      // Wait for realistic delay (simulate human thinking time)
+      await new Promise(resolve => setTimeout(resolve, thinkingDelay));
+
       let aiContent: string;
 
       if (this.config.provider === 'ollama') {
@@ -316,10 +443,15 @@ class AIRolePlayService {
         aiContent = await this.callOpenAIAPI(systemPrompt, conversationHistory, userPrompt);
       }
 
+      // Hide typing indicator
+      this.onTypingStateChange?.(false);
+
       // Parse response and extract metadata
       return this.parseAIResponse(aiContent, context);
     } catch (error) {
       console.error('Failed to generate AI response:', error);
+      // Hide typing indicator on error
+      this.onTypingStateChange?.(false);
       // Return fallback response
       return this.getFallbackResponse(persona, context);
     }
@@ -524,11 +656,99 @@ ${Object.entries(persona.objectionLikelihood).filter(([_, prob]) => prob > 0.6).
 
 6. SHOW INTELLIGENCE: You're a successful business person. You can spot BS and ask smart follow-ups.
 
-Remember: You're ${persona.name}. You have a real business, real problems, and real skepticism. Act like it
+🚫 FORBIDDEN CORPORATE PHRASES (NEVER USE THESE):
+❌ "I appreciate your comprehensive explanation..."
+❌ "That's a valid point regarding..."
+❌ "I would be interested in learning more about..."
+❌ "Could you elaborate on the specifics of..."
+❌ "I understand your concern regarding the implementation..."
+❌ "That sounds quite promising, however..."
+❌ "I'm intrigued by your proposition..."
+❌ "Perhaps we could schedule a follow-up discussion..."
+❌ "I'd like to give this matter due consideration..."
+❌ "Your points are well-articulated..."
+
+✅ REQUIRED NATURAL SPEECH (USE THESE INSTEAD):
+✅ "Yeah, that makes sense, but..." → Natural agreement with skepticism
+✅ "Okay, I hear you. But what about..." → Acknowledging while pushing back
+✅ "Look, I'm just trying to understand..." → Direct and honest
+✅ "Wait, so you're saying..." → Seeking clarification naturally
+✅ "Honestly, I'm not sure about that..." → Genuine uncertainty
+✅ "I mean, we tried something similar and..." → Personal experience
+✅ "How does that actually work though?" → Practical curiosity
+✅ "That sounds good, but I need to see proof" → Skeptical but open
+✅ "Let me be straight with you..." → Direct communication
+✅ "I don't know, this feels..." → Emotional reaction
+
+💬 CONVERSATION STYLE EXAMPLES:
+
+BAD (Too formal/polished):
+"I appreciate your explanation of the implementation timeline. However, I have concerns about the scalability. Could you elaborate on how your solution handles enterprise-level requirements?"
+
+GOOD (Natural, authentic):
+"Okay, 14 days sounds fast. But wait, how does this actually work for a bigger company? Like, what if we have issues? I'm just trying to understand the support situation here."
+
+BAD (Overly agreeable):
+"That makes perfect sense. I can see how that would address our needs effectively."
+
+GOOD (Realistic skepticism):
+"Hmm, maybe. But I need to see some actual numbers. We got burned before by promises that didn't pan out, you know?"
+
+BAD (Textbook objection):
+"I appreciate the information, but I'll need to review this with my decision-making team before proceeding further."
+
+GOOD (Real person):
+"Look, this sounds interesting, but I can't just decide this on my own. My partner's going to have questions. Can you send me something I can show him?"
+
+🇦🇪 UAE BUSINESS CULTURE & LANGUAGE:
+
+You're a business person in Dubai/UAE. Mix Arabic phrases naturally:
+✅ "Inshallah" (God willing) - when committing to future actions: "Inshallah, we can meet next week"
+✅ "Mashallah" (God has willed it) - for positive outcomes: "Mashallah, business is growing"
+✅ "Yalla" (let's go/hurry) - when impatient: "Yalla, get to the point"
+✅ "Wallah" (I swear) - for emphasis: "Wallah, I tried ERP before and it was terrible"
+✅ "Habibi" (my friend) - casual familiarity after rapport
+✅ "Khalas" (enough/finished) - when done: "Khalas, send me the info"
+
+BUSINESS NORMS:
+- Relationship before transaction (don't rush decisions)
+- Respect hierarchy (mention needing CEO/partner approval even if you have authority)
+- Weekend is Friday-Saturday (not Sat-Sun): "Can we meet Saturday?" not "Sunday"
+- Direct but respectful communication
+- Time flexibility expected (meetings can run late)
+- VAT awareness (5% in UAE)
+
+CULTURAL CONTEXT EXAMPLES:
+❌ "Let me check with my team next week"
+✅ "Inshallah, I'll discuss with my partner and get back to you"
+
+❌ "This sounds expensive"
+✅ "Wallah, this is expensive. We need payment terms, you know?"
+
+❌ "I'm busy right now"
+✅ "Yalla, I'm in a meeting. Can this be quick?"
+
+❌ "That's impressive growth"
+✅ "Mashallah, that's good growth. But I need to see local UAE references"
+
+Remember: You're ${persona.name}. You have a real business, real problems, and real skepticism. Act like it.
+
+DON'T:
 - Give long speeches (keep to 1-3 sentences mostly)
 - Be unrealistically agreeable
 - Forget your concerns and personality
-- Use overly formal language unless that's your personality`;
+- Use overly formal language unless that's your personality
+- Sound like you're reading from a script
+- Be too polite (business people are direct)
+- Force Arabic phrases every message (use naturally, maybe 20-30% of messages)`;
+  }
+
+  /**
+   * Get conversation memory context for prompt
+   */
+  private getMemoryContextForPrompt(context: ConversationContext): string {
+    const memory = updateConversationMemory(context);
+    return generateMemoryPrompt(memory);
   }
 
   /**
@@ -632,6 +852,8 @@ Step 3: KEEP IT BRIEF - 1-2 sentences max unless asking multiple related questio
 - Remember your concerns (${context.persona.concerns.slice(0, 2).join(', ')})
 - Think: "Would I actually say this in real life?"
 
+${this.getMemoryContextForPrompt(context)}
+
 Now respond as ${context.persona.name} would - authentic, brief, and human:`;
   }
 
@@ -647,22 +869,31 @@ Now respond as ${context.persona.name} would - authentic, brief, and human:`;
 
   /**
    * Parse AI response and extract metadata
+   * Now includes natural speech processing for realism
    */
   private parseAIResponse(content: string, context: ConversationContext): AIResponse {
-    // Analyze sentiment
-    const sentiment = this.analyzeSentiment(content);
-    
-    // Detect objection type
-    const objectionType = this.detectObjectionType(content);
-    
-    // Check if conversation should end
-    const shouldEndConversation = this.shouldEndConversation(content, context);
+    // STEP 1: Add natural speech patterns to make it sound human
+    const processingIntensity = getProcessingIntensity(context.persona);
+    const naturalContent = addNaturalSpeechPatterns(
+      content,
+      context.persona,
+      processingIntensity
+    );
 
-    // Generate coaching hints
-    const coachingHints = this.generateCoachingHints(content, context);
+    // STEP 2: Analyze sentiment (on processed content)
+    const sentiment = this.analyzeSentiment(naturalContent);
+
+    // STEP 3: Detect objection type
+    const objectionType = this.detectObjectionType(naturalContent);
+
+    // STEP 4: Check if conversation should end
+    const shouldEndConversation = this.shouldEndConversation(naturalContent, context);
+
+    // STEP 5: Generate coaching hints
+    const coachingHints = this.generateCoachingHints(naturalContent, context);
 
     return {
-      content,
+      content: naturalContent, // Return processed, natural-sounding content
       sentiment,
       objectionType,
       shouldEndConversation,
@@ -746,13 +977,60 @@ Now respond as ${context.persona.name} would - authentic, brief, and human:`;
   }
 
   /**
+   * Check if prospect should hang up early (realism mechanic)
+   * Some personas hang up if not engaged quickly
+   */
+  private shouldProspectHangUp(context: ConversationContext): boolean {
+    const messageCount = context.messages.length;
+    const persona = context.persona;
+
+    // Don't hang up too early
+    if (messageCount < 5) return false;
+
+    // Get recent sentiment
+    const recentMessages = context.messages.slice(-4);
+    const agentMessages = recentMessages.filter(m => m.role === 'agent');
+    const negativeCount = agentMessages.filter(m => m.sentiment === 'negative').length;
+
+    // Very skeptical personas may hang up if not convinced (30% chance after 5 messages with negative sentiment)
+    if (persona.personality.skeptical > 8 && messageCount > 5) {
+      if (negativeCount >= 3) {
+        return Math.random() < 0.3;
+      }
+    }
+
+    // Career-focused personas are impatient (20% chance after 8 messages if no value shown)
+    if (persona.type === 'career-focused' && messageCount > 8) {
+      // If salesperson hasn't provided clear value
+      if (!context.conversationPhase.includes('demo') && !context.conversationPhase.includes('presentation')) {
+        return Math.random() < 0.2;
+      }
+    }
+
+    // Busy personas hang up if call is taking too long (15% chance after 12 messages)
+    if (messageCount > 12) {
+      const busyPersonas = ['eager-student', 'career-focused'];
+      if (busyPersonas.includes(persona.type)) {
+        return Math.random() < 0.15;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Check if conversation should end
    */
   private shouldEndConversation(content: string, context: ConversationContext): boolean {
     const lowerContent = content.toLowerCase();
     const endPhrases = ['let me think', 'call you back', 'not interested', 'proceed', 'sign up'];
-    
-    return endPhrases.some(phrase => lowerContent.includes(phrase)) || 
+
+    // Check for early hang-up
+    if (this.shouldProspectHangUp(context)) {
+      return true;
+    }
+
+    return endPhrases.some(phrase => lowerContent.includes(phrase)) ||
            context.messages.length > 30;
   }
 
