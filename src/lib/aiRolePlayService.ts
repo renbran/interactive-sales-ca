@@ -11,6 +11,7 @@ import {
   ConversationDifficulty
 } from './types/aiRolePlayTypes';
 import { addNaturalSpeechPatterns, getProcessingIntensity } from './naturalSpeechProcessor';
+import { updateConversationMemory, generateMemoryPrompt } from './conversationMemory';
 
 // Predefined prospect personas for different training scenarios
 export const PROSPECT_PERSONAS: Record<ProspectPersonaType, ProspectPersona> = {
@@ -329,8 +330,78 @@ class AIRolePlayService {
   }
 
   /**
+   * Check if we should inject an objection THIS turn (probabilistic)
+   */
+  private shouldInjectObjection(context: ConversationContext): boolean {
+    const messageCount = context.messages.length;
+
+    // Don't inject in first 2 messages (too early)
+    if (messageCount < 2) return false;
+
+    // Don't inject if already handling objection
+    if (context.conversationPhase === 'objection-handling') return false;
+
+    // Don't inject if last message was an objection
+    const lastMessage = context.messages[context.messages.length - 1];
+    if (lastMessage?.objectionType) return false;
+
+    // Base probability: 15% per message after opening
+    let probability = 0.15;
+
+    // Higher chance (30%) during presentation phase
+    if (context.conversationPhase === 'presentation') {
+      probability = 0.3;
+    }
+
+    // Higher chance if many messages without objections
+    const messagesSinceLastObjection = this.getMessagesSinceLastObjection(context);
+    if (messagesSinceLastObjection > 5) {
+      probability += 0.15;
+    }
+
+    return Math.random() < probability;
+  }
+
+  /**
+   * Get messages since last objection
+   */
+  private getMessagesSinceLastObjection(context: ConversationContext): number {
+    for (let i = context.messages.length - 1; i >= 0; i--) {
+      if (context.messages[i].objectionType) {
+        return context.messages.length - 1 - i;
+      }
+    }
+    return context.messages.length;
+  }
+
+  /**
+   * Select random objection based on likelihood
+   */
+  private selectRandomObjection(persona: ProspectPersona): string {
+    // Weight by objection likelihood
+    const weightedObjections = Object.entries(persona.objectionLikelihood)
+      .filter(([_, prob]) => prob > 0.4)
+      .map(([type, prob]) => ({ type, weight: prob }));
+
+    if (weightedObjections.length === 0) {
+      return 'cost'; // Fallback
+    }
+
+    // Weighted random selection
+    const totalWeight = weightedObjections.reduce((sum, obj) => sum + obj.weight, 0);
+    let random = Math.random() * totalWeight;
+
+    for (const obj of weightedObjections) {
+      random -= obj.weight;
+      if (random <= 0) return obj.type;
+    }
+
+    return weightedObjections[0].type;
+  }
+
+  /**
    * Generate AI prospect response based on conversation context
-   * Now includes realistic thinking delays
+   * Now includes realistic thinking delays and dynamic objection injection
    */
   async generateProspectResponse(
     context: ConversationContext,
@@ -340,7 +411,17 @@ class AIRolePlayService {
     const conversationHistory = this.formatConversationHistory(context.messages);
 
     const systemPrompt = this.buildSystemPrompt(persona, context);
-    const userPrompt = this.buildUserPrompt(salespersonMessage, context);
+    let userPrompt = this.buildUserPrompt(salespersonMessage, context);
+
+    // DYNAMIC OBJECTION INJECTION
+    // Check if we should inject an objection THIS turn
+    const shouldInject = this.shouldInjectObjection(context);
+    if (shouldInject) {
+      const objectionType = this.selectRandomObjection(persona);
+      userPrompt += `\n\n🚨 CRITICAL: Raise your "${objectionType}" objection RIGHT NOW, naturally interrupting if needed. Don't wait for a perfect moment - real people interrupt when concerns hit them. Be direct and authentic about this concern.`;
+
+      console.log(`💥 Dynamic objection injected: ${objectionType}`);
+    }
 
     try {
       // Calculate realistic delay
@@ -619,6 +700,37 @@ BAD (Textbook objection):
 GOOD (Real person):
 "Look, this sounds interesting, but I can't just decide this on my own. My partner's going to have questions. Can you send me something I can show him?"
 
+🇦🇪 UAE BUSINESS CULTURE & LANGUAGE:
+
+You're a business person in Dubai/UAE. Mix Arabic phrases naturally:
+✅ "Inshallah" (God willing) - when committing to future actions: "Inshallah, we can meet next week"
+✅ "Mashallah" (God has willed it) - for positive outcomes: "Mashallah, business is growing"
+✅ "Yalla" (let's go/hurry) - when impatient: "Yalla, get to the point"
+✅ "Wallah" (I swear) - for emphasis: "Wallah, I tried ERP before and it was terrible"
+✅ "Habibi" (my friend) - casual familiarity after rapport
+✅ "Khalas" (enough/finished) - when done: "Khalas, send me the info"
+
+BUSINESS NORMS:
+- Relationship before transaction (don't rush decisions)
+- Respect hierarchy (mention needing CEO/partner approval even if you have authority)
+- Weekend is Friday-Saturday (not Sat-Sun): "Can we meet Saturday?" not "Sunday"
+- Direct but respectful communication
+- Time flexibility expected (meetings can run late)
+- VAT awareness (5% in UAE)
+
+CULTURAL CONTEXT EXAMPLES:
+❌ "Let me check with my team next week"
+✅ "Inshallah, I'll discuss with my partner and get back to you"
+
+❌ "This sounds expensive"
+✅ "Wallah, this is expensive. We need payment terms, you know?"
+
+❌ "I'm busy right now"
+✅ "Yalla, I'm in a meeting. Can this be quick?"
+
+❌ "That's impressive growth"
+✅ "Mashallah, that's good growth. But I need to see local UAE references"
+
 Remember: You're ${persona.name}. You have a real business, real problems, and real skepticism. Act like it.
 
 DON'T:
@@ -627,7 +739,16 @@ DON'T:
 - Forget your concerns and personality
 - Use overly formal language unless that's your personality
 - Sound like you're reading from a script
-- Be too polite (business people are direct)`;
+- Be too polite (business people are direct)
+- Force Arabic phrases every message (use naturally, maybe 20-30% of messages)`;
+  }
+
+  /**
+   * Get conversation memory context for prompt
+   */
+  private getMemoryContextForPrompt(context: ConversationContext): string {
+    const memory = updateConversationMemory(context);
+    return generateMemoryPrompt(memory);
   }
 
   /**
@@ -730,6 +851,8 @@ Step 3: KEEP IT BRIEF - 1-2 sentences max unless asking multiple related questio
 - React authentically based on your personality
 - Remember your concerns (${context.persona.concerns.slice(0, 2).join(', ')})
 - Think: "Would I actually say this in real life?"
+
+${this.getMemoryContextForPrompt(context)}
 
 Now respond as ${context.persona.name} would - authentic, brief, and human:`;
   }
@@ -854,13 +977,60 @@ Now respond as ${context.persona.name} would - authentic, brief, and human:`;
   }
 
   /**
+   * Check if prospect should hang up early (realism mechanic)
+   * Some personas hang up if not engaged quickly
+   */
+  private shouldProspectHangUp(context: ConversationContext): boolean {
+    const messageCount = context.messages.length;
+    const persona = context.persona;
+
+    // Don't hang up too early
+    if (messageCount < 5) return false;
+
+    // Get recent sentiment
+    const recentMessages = context.messages.slice(-4);
+    const agentMessages = recentMessages.filter(m => m.role === 'agent');
+    const negativeCount = agentMessages.filter(m => m.sentiment === 'negative').length;
+
+    // Very skeptical personas may hang up if not convinced (30% chance after 5 messages with negative sentiment)
+    if (persona.personality.skeptical > 8 && messageCount > 5) {
+      if (negativeCount >= 3) {
+        return Math.random() < 0.3;
+      }
+    }
+
+    // Career-focused personas are impatient (20% chance after 8 messages if no value shown)
+    if (persona.type === 'career-focused' && messageCount > 8) {
+      // If salesperson hasn't provided clear value
+      if (!context.conversationPhase.includes('demo') && !context.conversationPhase.includes('presentation')) {
+        return Math.random() < 0.2;
+      }
+    }
+
+    // Busy personas hang up if call is taking too long (15% chance after 12 messages)
+    if (messageCount > 12) {
+      const busyPersonas = ['eager-student', 'career-focused'];
+      if (busyPersonas.includes(persona.type)) {
+        return Math.random() < 0.15;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Check if conversation should end
    */
   private shouldEndConversation(content: string, context: ConversationContext): boolean {
     const lowerContent = content.toLowerCase();
     const endPhrases = ['let me think', 'call you back', 'not interested', 'proceed', 'sign up'];
-    
-    return endPhrases.some(phrase => lowerContent.includes(phrase)) || 
+
+    // Check for early hang-up
+    if (this.shouldProspectHangUp(context)) {
+      return true;
+    }
+
+    return endPhrases.some(phrase => lowerContent.includes(phrase)) ||
            context.messages.length > 30;
   }
 
