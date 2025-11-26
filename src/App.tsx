@@ -21,7 +21,7 @@ import {
   Robot,
   ChartBar
 } from '@phosphor-icons/react';
-import { CallErrorBoundary, AIErrorBoundary, LeadErrorBoundary } from '@/components/ErrorBoundaries';
+import { CallErrorBoundary, AIErrorBoundary, LeadErrorBoundary, ComponentErrorBoundary } from '@/components/ErrorBoundaries';
 import { QueryProvider } from '@/lib/queryClient';
 
 // Lazy load heavy components for better performance

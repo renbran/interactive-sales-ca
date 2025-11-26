@@ -23,10 +23,10 @@ export function useWebSocket() {
 
     const initConnection = async () => {
       try {
-        const wsUrl = getEnv('VITE_WS_URL', 'ws://localhost:8787/ws');
+        const wsUrl = getEnv('VITE_WS_URL') || 'ws://localhost:8787/ws';
         const token = await getToken();
         
-        websocketManager.connect(wsUrl, token || undefined);
+        websocketManager.connect(wsUrl as string, token || undefined);
         isInitialized.current = true;
         
         logger.info('WebSocket connection initialized');
@@ -134,12 +134,12 @@ export function useTeamPresence() {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   useWebSocketMessages('user_joined', (payload: { userId: string; userName: string }) => {
-    logger.debug('User joined', payload);
+    logger.debug('User joined');
     setOnlineUsers(prev => [...new Set([...prev, payload.userId])]);
   });
 
   useWebSocketMessages('user_left', (payload: { userId: string }) => {
-    logger.debug('User left', payload);
+    logger.debug('User left');
     setOnlineUsers(prev => prev.filter(id => id !== payload.userId));
   });
 
@@ -191,7 +191,7 @@ export function useBroadcast() {
     return send({
       type: 'call_started',
       payload: callData,
-      userId,
+      userId: userId || undefined,
     });
   }, [send, isConnected, userId]);
 
@@ -200,7 +200,7 @@ export function useBroadcast() {
     return send({
       type: 'call_ended',
       payload: callData,
-      userId,
+      userId: userId || undefined,
     });
   }, [send, isConnected, userId]);
 
@@ -209,7 +209,7 @@ export function useBroadcast() {
     return send({
       type: 'lead_created',
       payload: leadData,
-      userId,
+      userId: userId || undefined,
     });
   }, [send, isConnected, userId]);
 
@@ -218,7 +218,7 @@ export function useBroadcast() {
     return send({
       type: 'lead_updated',
       payload: leadData,
-      userId,
+      userId: userId || undefined,
     });
   }, [send, isConnected, userId]);
 
