@@ -35,7 +35,6 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import { useAnalytics } from '@/hooks/useApi';
 import LiveActivityFeed from './LiveActivityFeed';
 
 // Chart colors
@@ -51,57 +50,8 @@ const COLORS = {
 const OUTCOME_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export default function AdvancedAnalyticsDashboard() {
-  const { data: analytics, isLoading, error } = useAnalytics();
-
-  if (isLoading) {
-    return (
-      <div className="p-4 md:p-6 space-y-6 animate-in fade-in duration-300">
-        {/* Header Skeleton */}
-        <div className="space-y-2">
-          <div className="h-8 w-48 bg-gray-200 rounded-md animate-pulse"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded-md animate-pulse"></div>
-        </div>
-
-        {/* Metric Cards Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-lg border bg-white p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-                <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-              <div className="h-8 w-20 bg-gray-200 rounded mb-2 animate-pulse"></div>
-              <div className="h-3 w-32 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Charts Skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="rounded-lg border bg-white p-6 space-y-4">
-              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-64 bg-gray-100 rounded animate-pulse"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <p className="text-center text-destructive">Failed to load analytics data</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Mock data for demonstration (replace with real analytics data)
+  // Note: Analytics API integration pending - using demo data for now
+  // TODO: Connect to /api/dashboard/stats once backend is ready
   const performanceData = [
     { month: 'Jan', calls: 65, demos: 45, conversions: 28 },
     { month: 'Feb', calls: 78, demos: 52, conversions: 35 },
