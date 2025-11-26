@@ -614,14 +614,66 @@ export interface LiveCallMetrics {
 // CLOUDFLARE TYPES (Conditional import for different environments)
 // =====================================================
 
+export interface D1Result<T = unknown> {
+  results: T[];
+  success: boolean;
+  meta: {
+    duration: number;
+    rows_read: number;
+    rows_written: number;
+  };
+}
+
+export interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first<T = unknown>(): Promise<T | null>;
+  run(): Promise<D1Result>;
+  all<T = unknown>(): Promise<D1Result<T>>;
+}
+
 declare global {
   interface D1Database {
-    prepare(sql: string): any;
-    exec(sql: string): any;
+    prepare(sql: string): D1PreparedStatement;
+    exec(sql: string): Promise<D1Result>;
+    batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
+  }
+  
+  interface R2Object {
+    key: string;
+    version: string;
+    size: number;
+    etag: string;
+    httpEtag: string;
+    uploaded: Date;
+    httpMetadata?: Record<string, string>;
+    customMetadata?: Record<string, string>;
+    body: ReadableStream;
+    bodyUsed: boolean;
+    arrayBuffer(): Promise<ArrayBuffer>;
+    text(): Promise<string>;
+    json<T = unknown>(): Promise<T>;
+    blob(): Promise<Blob>;
   }
   
   interface R2Bucket {
-    put(key: string, value: any): any;
-    get(key: string): any;
+    put(
+      key: string,
+      value: ReadableStream | ArrayBuffer | ArrayBufferView | string | Blob,
+      options?: {
+        httpMetadata?: Record<string, string>;
+        customMetadata?: Record<string, string>;
+      }
+    ): Promise<R2Object | null>;
+    get(key: string): Promise<R2Object | null>;
+    delete(keys: string | string[]): Promise<void>;
+    list(options?: {
+      prefix?: string;
+      limit?: number;
+      cursor?: string;
+    }): Promise<{
+      objects: R2Object[];
+      truncated: boolean;
+      cursor?: string;
+    }>;
   }
 }

@@ -4,27 +4,31 @@ import { ClerkProvider } from '@clerk/clerk-react';
 
 import App from './App.tsx'
 import { ErrorFallback } from './ErrorFallback.tsx'
+import { getEnv } from './lib/env';
+import { logger } from './lib/logger';
 
 import "./main.css"
 import "./styles/theme.css"
 import "./index.css"
 
-// Get Clerk publishable key from environment
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-console.log('Environment check:', {
-  clerkPubKey: clerkPubKey ? 'Found' : 'Missing',
-  environment: import.meta.env.VITE_ENVIRONMENT || 'development'
-});
-
-if (!clerkPubKey) {
-  console.error('Missing Clerk Publishable Key. Available env vars:', import.meta.env);
-  throw new Error('Missing Clerk Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY in your .env file.');
+// Validate environment variables on startup
+let env;
+try {
+  env = getEnv();
+  logger.info('Application starting', {
+    metadata: {
+      environment: env.ENVIRONMENT,
+      hasAI: !!(env.OPENAI_API_KEY || env.OLLAMA_BASE_URL),
+    }
+  });
+} catch (error) {
+  logger.error('Failed to validate environment', error);
+  throw error;
 }
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary FallbackComponent={ErrorFallback}>
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <ClerkProvider publishableKey={env.CLERK_PUBLISHABLE_KEY}>
       <App />
     </ClerkProvider>
    </ErrorBoundary>

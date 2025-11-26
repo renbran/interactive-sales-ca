@@ -1,5 +1,5 @@
 // Main application with routing and authentication using Clerk
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { 
   SignedIn, 
   SignedOut, 
@@ -8,11 +8,6 @@ import {
   useUser,
   RedirectToSignIn
 } from '@clerk/clerk-react';
-import CallApp from '@/components/CallApp';
-import LeadManager from '@/components/LeadManager';
-import AdminPanel from '@/pages/AdminPanel';
-import ScriptTestPage from '@/pages/ScriptTestPage';
-import RolePlayPage from '@/pages/RolePlayPage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,8 +18,19 @@ import {
   Shield,
   User as UserIcon,
   Books,
-  Robot
+  Robot,
+  ChartBar
 } from '@phosphor-icons/react';
+import { CallErrorBoundary, AIErrorBoundary, LeadErrorBoundary } from '@/components/ErrorBoundaries';
+import { QueryProvider } from '@/lib/queryClient';
+
+// Lazy load heavy components for better performance
+const CallApp = lazy(() => import('@/components/CallApp'));
+const LeadManager = lazy(() => import('@/components/LeadManager'));
+const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
+const ScriptTestPage = lazy(() => import('@/pages/ScriptTestPage'));
+const AdvancedAnalyticsDashboard = lazy(() => import('@/components/AdvancedAnalyticsDashboard'));
+const RolePlayPage = lazy(() => import('@/pages/RolePlayPage'));
 
 // Loading component
 function LoadingSpinner() {
@@ -33,6 +39,18 @@ function LoadingSpinner() {
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
         <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// Component loading fallback
+function ComponentLoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-3"></div>
+        <p className="text-sm text-gray-600">Loading component...</p>
       </div>
     </div>
   );
@@ -147,7 +165,7 @@ function ProtectedLayout() {
       <div className="bg-white border-b border-gray-200">
         <div className="mobile-container max-w-7xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 md:grid-cols-5 h-12 sm:h-14 bg-transparent p-0">
+            <TabsList className="grid w-full grid-cols-5 md:grid-cols-6 h-12 sm:h-14 bg-transparent p-0">
               <TabsTrigger 
                 value="calls" 
                 className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600"
@@ -162,6 +180,15 @@ function ProtectedLayout() {
               >
                 <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Leads</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center justify-center space-x-1 sm:space-x-2 h-full text-xs sm:text-sm touch-target data-[state=active]:bg-teal-50 data-[state=active]:text-teal-600 data-[state=active]:border-b-2 data-[state=active]:border-teal-600"
+              >
+                <ChartBar className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Analytics</span>
+                <span className="sm:hidden">Stats</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -196,24 +223,50 @@ function ProtectedLayout() {
             {/* Tab Content */}
             <div className="min-h-[calc(100vh-8rem)]">
               <TabsContent value="calls" className="mt-0 h-full">
-                <CallApp />
+                <CallErrorBoundary componentName="CallApp">
+                  <Suspense fallback={<ComponentLoadingFallback />}>
+                    <CallApp />
+                  </Suspense>
+                </CallErrorBoundary>
               </TabsContent>
               
               <TabsContent value="leads" className="mt-0 h-full">
-                <LeadManager />
+                <LeadErrorBoundary componentName="LeadManager">
+                  <Suspense fallback={<ComponentLoadingFallback />}>
+                    <LeadManager />
+                  </Suspense>
+                </LeadErrorBoundary>
+              </TabsContent>
+              
+              <TabsContent value="analytics" className="mt-0 h-full">
+                <ComponentErrorBoundary>
+                  <Suspense fallback={<ComponentLoadingFallback />}>
+                    <AdvancedAnalyticsDashboard />
+                  </Suspense>
+                </ComponentErrorBoundary>
               </TabsContent>
               
               <TabsContent value="roleplay" className="mt-0 h-full">
-                <RolePlayPage />
+                <AIErrorBoundary componentName="RolePlayPage">
+                  <Suspense fallback={<ComponentLoadingFallback />}>
+                    <RolePlayPage />
+                  </Suspense>
+                </AIErrorBoundary>
               </TabsContent>
               
               <TabsContent value="script-test" className="mt-0 h-full">
-                <ScriptTestPage />
+                <AIErrorBoundary componentName="ScriptTestPage">
+                  <Suspense fallback={<ComponentLoadingFallback />}>
+                    <ScriptTestPage />
+                  </Suspense>
+                </AIErrorBoundary>
               </TabsContent>
               
               {(userRole === 'admin' || userRole === 'manager') && (
                 <TabsContent value="admin" className="mt-0 h-full">
-                  <AdminPanel />
+                  <Suspense fallback={<ComponentLoadingFallback />}>
+                    <AdminPanel />
+                  </Suspense>
                 </TabsContent>
               )}
             </div>
@@ -235,13 +288,13 @@ function ProtectedLayout() {
 // Main App component
 export default function App() {
   return (
-    <>
+    <QueryProvider>
       <SignedOut>
         <SignInPage />
       </SignedOut>
       <SignedIn>
         <ProtectedLayout />
       </SignedIn>
-    </>
+    </QueryProvider>
   );
 }

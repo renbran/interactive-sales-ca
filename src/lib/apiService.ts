@@ -78,7 +78,17 @@ class ApiService {
     });
   }
 
-  async updateUser(userId: string, updates: any) {
+  async updateUser(
+    userId: string, 
+    updates: {
+      name?: string;
+      email?: string;
+      role?: string;
+      department?: string;
+      phone?: string;
+      is_active?: boolean;
+    }
+  ) {
     return this.request(`/admin/users/${userId}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
@@ -119,7 +129,22 @@ class ApiService {
     });
   }
 
-  async updateLead(leadId: string, updates: any) {
+  async updateLead(
+    leadId: string,
+    updates: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      country?: string;
+      industry?: string;
+      company_size?: string;
+      interest_level?: string;
+      source?: string;
+      status?: string;
+      assigned_to?: string;
+      notes?: string;
+    }
+  ) {
     return this.request(`/leads/${leadId}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),

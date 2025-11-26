@@ -98,10 +98,22 @@ class OpenAIService {
 
   // Generate call summary using AI
   async generateCallSummary(callData: {
-    prospectInfo: any;
+    prospectInfo: {
+      name: string;
+      company: string;
+      industry?: string;
+      role?: string;
+    };
     duration: number;
     outcome: string;
-    qualification: any;
+    qualification: {
+      usesManualProcess: boolean | null;
+      painPointIdentified: boolean | null;
+      painQuantified: boolean | null;
+      valueAcknowledged: boolean | null;
+      timeCommitted: boolean | null;
+      demoBooked: boolean | null;
+    };
     scriptPath: string[];
   }): Promise<string> {
     try {
