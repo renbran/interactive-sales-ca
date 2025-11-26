@@ -332,7 +332,7 @@ export default function AIRolePlayPractice() {
                         value={ollamaUrl}
                         onChange={(e) => setOllamaUrl(e.target.value)}
                         placeholder="http://localhost:11434 or https://xxxx.ngrok.io"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                        className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       />
                       <p className="text-xs text-gray-800 font-semibold mt-2 flex items-start gap-1">
                         <span className="text-blue-600">💡</span>
@@ -348,7 +348,7 @@ export default function AIRolePlayPractice() {
                         id="ollama-model"
                         value={ollamaModel}
                         onChange={(e) => setOllamaModel(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                        className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                       >
                         <option value="llama3.1:8b">Llama 3.1 8B (Recommended)</option>
                         <option value="llama3.1:70b">Llama 3.1 70B (Better quality, slower)</option>
@@ -373,7 +373,7 @@ export default function AIRolePlayPractice() {
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
                         placeholder="sk-proj-..."
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                        className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       />
                       <p className="text-xs text-gray-800 font-semibold mt-2 flex items-start gap-1">
                         <span className="text-green-600">🔒</span>
@@ -476,30 +476,30 @@ export default function AIRolePlayPractice() {
                   <p className="text-sm text-gray-800 font-medium leading-relaxed">{persona.background}</p>
                   
                   <div className="space-y-2">
-                    <div>
-                      <p className="text-xs font-bold mb-1 text-gray-900">Goals:</p>
-                      <div className="flex flex-wrap gap-1">
+                    <div className="bg-blue-50 dark:bg-blue-950 p-2 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+                      <p className="text-xs font-bold mb-2 text-blue-900 dark:text-blue-100">Goals:</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {persona.goals.slice(0, 2).map((goal, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs font-semibold border-2">
+                          <Badge key={idx} className="text-xs font-bold bg-blue-600 text-white dark:bg-blue-500 border-2 border-blue-700 dark:border-blue-400">
                             {goal}
                           </Badge>
                         ))}
                       </div>
                     </div>
 
-                    <div>
-                      <p className="text-xs font-bold mb-1 text-gray-900">Main Concerns:</p>
-                      <div className="flex flex-wrap gap-1">
+                    <div className="bg-orange-50 dark:bg-orange-950 p-2 rounded-lg border-2 border-orange-200 dark:border-orange-800">
+                      <p className="text-xs font-bold mb-2 text-orange-900 dark:text-orange-100">Main Concerns:</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {persona.concerns.slice(0, 2).map((concern, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+                          <Badge key={idx} className="text-xs font-bold bg-orange-600 text-white dark:bg-orange-500 border-2 border-orange-700 dark:border-orange-400">
                             {concern}
                           </Badge>
                         ))}
                       </div>
                     </div>
 
-                    <div>
-                      <p className="text-xs font-bold text-gray-900">Budget: <span className="text-green-700">{persona.budget}</span></p>
+                    <div className="bg-green-50 dark:bg-green-950 p-2 rounded-lg border-2 border-green-200 dark:border-green-800">
+                      <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Budget: <span className="text-green-700 dark:text-green-300 font-extrabold">{persona.budget}</span></p>
                     </div>
                   </div>
 
