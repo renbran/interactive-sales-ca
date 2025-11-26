@@ -93,22 +93,66 @@ export default function AIRolePlayPractice() {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
+      
+      // Configure recognition
       recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+      recognitionRef.current.interimResults = true; // Show interim results for better UX
+      recognitionRef.current.lang = 'en-US'; // Set language
+      recognitionRef.current.maxAlternatives = 1;
 
       recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setCurrentMessage(transcript);
-        setIsListening(false);
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        // Process all results
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // Update message with final or interim transcript
+        if (finalTranscript) {
+          setCurrentMessage(prev => prev + ' ' + finalTranscript.trim());
+          setIsListening(false);
+        } else if (interimTranscript) {
+          // Show interim results (you can display this differently if needed)
+          setCurrentMessage(prev => prev + interimTranscript);
+        }
       };
 
-      recognitionRef.current.onerror = () => {
+      recognitionRef.current.onerror = (event: any) => {
         setIsListening(false);
-        toast.error('Speech recognition error');
+        console.error('Speech recognition error:', event.error);
+        
+        switch (event.error) {
+          case 'no-speech':
+            toast.error('No speech detected. Please try again.');
+            break;
+          case 'audio-capture':
+            toast.error('Microphone not found. Please check your device.');
+            break;
+          case 'not-allowed':
+            toast.error('Microphone permission denied. Please allow microphone access.');
+            break;
+          case 'network':
+            toast.error('Network error. Please check your connection.');
+            break;
+          default:
+            toast.error(`Speech recognition error: ${event.error}`);
+        }
       };
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
+      };
+
+      recognitionRef.current.onstart = () => {
+        console.log('Speech recognition started');
+        toast.success('Listening... Speak now!');
       };
     }
   }, []);
@@ -256,9 +300,9 @@ export default function AIRolePlayPractice() {
     toast.success(`Session ended! Overall score: ${Math.round(metrics.overallScore)}%`);
   };
 
-  const toggleListening = () => {
+  const toggleListening = async () => {
     if (!recognitionRef.current) {
-      toast.error('Speech recognition not supported in this browser');
+      toast.error('Speech recognition not supported in this browser. Try Chrome, Edge, or Safari.');
       return;
     }
 
@@ -266,8 +310,27 @@ export default function AIRolePlayPractice() {
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
-      recognitionRef.current.start();
-      setIsListening(true);
+      try {
+        // Request microphone permission first
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // Clear previous message before starting new recording
+        setCurrentMessage('');
+        
+        // Start recognition
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error: any) {
+        console.error('Microphone access error:', error);
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          toast.error('Microphone permission denied. Please allow access in your browser settings.');
+        } else if (error.name === 'NotFoundError') {
+          toast.error('No microphone found. Please connect a microphone.');
+        } else {
+          toast.error('Failed to access microphone. Please check your device settings.');
+        }
+        setIsListening(false);
+      }
     }
   };
 
