@@ -44,13 +44,22 @@ function LoadingSpinner() {
   );
 }
 
-// Component loading fallback
+// Component loading fallback with skeleton
 function ComponentLoadingFallback() {
   return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-3"></div>
-        <p className="text-sm text-gray-600">Loading component...</p>
+    <div className="p-4 md:p-6 space-y-6 animate-in fade-in duration-300">
+      <div className="space-y-2">
+        <div className="h-8 w-48 bg-gray-200 rounded-md animate-pulse"></div>
+        <div className="h-4 w-64 bg-gray-200 rounded-md animate-pulse"></div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-lg border bg-white p-6 space-y-3">
+            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-3 w-32 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        ))}
       </div>
     </div>
   );
