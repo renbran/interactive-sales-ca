@@ -151,30 +151,30 @@ export default function ComprehensiveScriptDemo({
   const culturalVariation = currentSection.culturalVariations?.[culture];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-screen p-4">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-screen p-3">
       {/* Main Script Display - Left Column */}
-      <div className="lg:col-span-2 flex flex-col gap-4 overflow-hidden">
-        {/* Section Header */}
-        <Card className="p-6 border-2">
-          <div className="flex items-start justify-between mb-4">
+      <div className="lg:col-span-2 flex flex-col gap-3 overflow-hidden">
+        {/* Section Header - Compact */}
+        <Card className="p-3 border-2 bg-white dark:bg-gray-950">
+          <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <Badge className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5">
                   SECTION {currentSection.sectionNumber}: {currentSection.sectionName.toUpperCase()}
                 </Badge>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                   <Clock className="w-3 h-3 mr-1" />
                   {currentSection.duration}
                 </Badge>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Target className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                <Target className="w-3 h-3" />
                 <span>Goal: {currentSection.goal}</span>
               </div>
             </div>
             <Badge 
               variant="secondary" 
-              className="cursor-pointer"
+              className="cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600"
               onClick={() => setShowCulturalAdaptation(!showCulturalAdaptation)}
             >
               <User className="w-3 h-3 mr-1" />
@@ -184,14 +184,14 @@ export default function ComprehensiveScriptDemo({
 
           {/* Cultural Adaptation */}
           {showCulturalAdaptation && culturalVariation && (
-            <Alert className="bg-purple-50 border-purple-200 dark:bg-purple-950 dark:border-purple-800">
-              <Lightbulb className="w-4 h-4" />
-              <AlertTitle>Cultural Adaptation: {culture.charAt(0).toUpperCase() + culture.slice(1)}</AlertTitle>
-              <AlertDescription className="mt-2 space-y-2">
-                <p className="text-sm font-medium">{culturalVariation.tone}</p>
-                <div className="text-xs space-y-1">
-                  <p className="font-semibold">Key Phrases:</p>
-                  <ul className="list-disc pl-4 space-y-0.5">
+            <Alert className="bg-purple-100 border-purple-400 dark:bg-purple-950 dark:border-purple-600 mt-2">
+              <Lightbulb className="w-4 h-4 text-purple-700 dark:text-purple-300" />
+              <AlertTitle className="text-sm font-bold text-purple-900 dark:text-purple-100">Cultural Adaptation: {culture.charAt(0).toUpperCase() + culture.slice(1)}</AlertTitle>
+              <AlertDescription className="mt-1 space-y-1">
+                <p className="text-xs font-medium text-purple-800 dark:text-purple-200">{culturalVariation.tone}</p>
+                <div className="text-xs space-y-0.5">
+                  <p className="font-semibold text-purple-900 dark:text-purple-100">Key Phrases:</p>
+                  <ul className="list-disc pl-4 space-y-0.5 text-purple-800 dark:text-purple-200">
                     {culturalVariation.keyPhrases.slice(0, 3).map((phrase, idx) => (
                       <li key={idx}>{phrase}</li>
                     ))}
@@ -202,15 +202,15 @@ export default function ComprehensiveScriptDemo({
           )}
         </Card>
 
-        {/* Main Script */}
-        <Card className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full p-6">
-            <div className="space-y-6">
+        {/* Main Script - Maximized */}
+        <Card className="flex-1 overflow-hidden bg-white dark:bg-gray-950 border-2">
+          <ScrollArea className="h-full p-3">
+            <div className="space-y-3">
               {/* Agent Script */}
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-primary">What You Say:</h3>
-                <div className="bg-primary/5 p-4 rounded-lg border-l-4 border-primary">
-                  <p className="text-[17px] leading-relaxed whitespace-pre-line">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-blue-700 dark:text-blue-300">What You Say:</h3>
+                <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border-l-4 border-blue-600 dark:border-blue-400">
+                  <p className="text-sm leading-relaxed whitespace-pre-line text-gray-900 dark:text-gray-100">
                     {formatScript(
                       showCulturalAdaptation && culturalVariation 
                         ? culturalVariation.greeting 
@@ -220,58 +220,66 @@ export default function ComprehensiveScriptDemo({
                 </div>
                 
                 {currentSection.mainScript.pauseInstructions && (
-                  <Alert className="bg-yellow-50 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-700">
-                    <Warning className="w-4 h-4" weight="fill" />
-                    <AlertDescription className="font-medium">
+                  <Alert className="bg-yellow-100 border-yellow-400 dark:bg-yellow-950 dark:border-yellow-600 py-2">
+                    <Warning className="w-4 h-4 text-yellow-700 dark:text-yellow-300" weight="fill" />
+                    <AlertDescription className="font-medium text-xs text-yellow-900 dark:text-yellow-100">
                       {currentSection.mainScript.pauseInstructions}
                     </AlertDescription>
                   </Alert>
                 )}
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-300 dark:bg-gray-600" />
 
-              {/* Expected Client Responses */}
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Expected Client Responses:</h3>
-                <div className="space-y-2">
+              {/* Expected Client Responses - Compact */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Expected Client Responses:</h3>
+                <div className="space-y-1.5">
                   {currentSection.mainScript.expectedClientResponses.map((response, idx) => (
                     <Button
                       key={idx}
                       variant={response.type === 'objection' ? 'destructive' : response.type === 'positive' ? 'default' : 'outline'}
-                      className="w-full justify-between text-left h-auto py-3"
+                      className={cn(
+                        "w-full justify-between text-left h-auto py-2 text-xs",
+                        response.type === 'objection' && "bg-red-600 hover:bg-red-700 text-white",
+                        response.type === 'positive' && "bg-green-600 hover:bg-green-700 text-white",
+                        response.type === 'neutral' && "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      )}
                       onClick={() => handleClientResponse(response)}
                     >
                       <span className="flex-1">
                         {response.response}
                         {response.type === 'objection' && (
-                          <Badge variant="secondary" className="ml-2 text-xs">OBJECTION</Badge>
+                          <Badge variant="secondary" className="ml-2 text-xs bg-red-800 text-white">OBJECTION</Badge>
                         )}
                       </span>
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900">
                           {response.probability}%
                         </Badge>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3 h-3" />
                       </div>
                     </Button>
                   ))}
                 </div>
               </div>
 
-              {/* Tips Section */}
+              {/* Tips Section - Compact */}
               {currentSection.tips.length > 0 && (
                 <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-semibold">Quick Tips:</h3>
-                    <div className="space-y-3">
+                  <Separator className="bg-gray-300 dark:bg-gray-600" />
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Quick Tips:</h3>
+                    <div className="space-y-2">
                       {currentSection.tips.map((tip, idx) => (
-                        <Alert key={idx} className={getTipColor(tip.type)}>
+                        <Alert key={idx} className={cn(
+                          getTipColor(tip.type),
+                          "py-2 px-3"
+                        )}>
                           <div className="flex items-start gap-2">
                             {getTipIcon(tip.type)}
                             <div className="flex-1">
-                              <AlertTitle className="text-sm font-bold mb-1">
+                              <AlertTitle className="text-xs font-bold mb-0.5">
                                 {tip.icon} {tip.title}
                               </AlertTitle>
                               <AlertDescription className="text-xs">
@@ -291,46 +299,49 @@ export default function ComprehensiveScriptDemo({
       </div>
 
       {/* Embedded Objections - Right Column */}
-      <div className="flex flex-col gap-4 overflow-hidden">
-        {/* Objection Visibility Panel */}
-        <Card className="p-4 border-2 border-orange-200 dark:border-orange-800">
-          <div className="flex items-center gap-2 mb-3">
-            <Warning className="w-5 h-5 text-orange-600" weight="fill" />
-            <h3 className="font-bold text-sm">EMBEDDED OBJECTIONS ({currentSection.embeddedObjections.length})</h3>
+      <div className="flex flex-col gap-3 overflow-hidden">
+        {/* Objection Visibility Panel - Compact */}
+        <Card className="p-3 border-2 border-orange-500 dark:border-orange-600 bg-white dark:bg-gray-950">
+          <div className="flex items-center gap-2 mb-2">
+            <Warning className="w-4 h-4 text-orange-600 dark:text-orange-400" weight="fill" />
+            <h3 className="font-bold text-xs text-gray-900 dark:text-gray-100">EMBEDDED OBJECTIONS ({currentSection.embeddedObjections.length})</h3>
           </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            These objections are always visible and ready for instant response
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Always visible - ready for instant response
           </p>
           
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {currentSection.embeddedObjections.map((objection) => (
               <Card
                 key={objection.id}
                 className={cn(
-                  "p-3 cursor-pointer transition-all hover:shadow-md",
+                  "p-2 cursor-pointer transition-all hover:shadow-md",
                   activeObjection?.id === objection.id 
-                    ? "border-2 border-orange-500 bg-orange-50 dark:bg-orange-950" 
-                    : "hover:border-orange-300"
+                    ? "border-2 border-orange-600 bg-orange-100 dark:bg-orange-950 dark:border-orange-400" 
+                    : "bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-600"
                 )}
                 onClick={() => setActiveObjection(objection)}
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className="text-sm font-medium flex-1">{objection.trigger}</p>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-xs font-medium flex-1 text-gray-900 dark:text-gray-100">{objection.trigger}</p>
                   <Badge 
                     variant={objection.priority === 'high' ? 'destructive' : 'secondary'}
-                    className="text-xs"
+                    className={cn(
+                      "text-xs",
+                      objection.priority === 'high' ? "bg-red-600 text-white" : "bg-gray-600 text-white dark:bg-gray-400 dark:text-gray-900"
+                    )}
                   >
                     {objection.priority}
                   </Badge>
                 </div>
                 
                 {objection.statistics && (
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                       <TrendUp className="w-3 h-3" />
                       <span>{objection.statistics.conversionRate}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                       <Clock className="w-3 h-3" />
                       <span>{objection.statistics.averageTimeToHandle}</span>
                     </div>
@@ -343,10 +354,10 @@ export default function ComprehensiveScriptDemo({
 
         {/* Active Objection Handler */}
         {activeObjection && (
-          <Card className="flex-1 overflow-hidden border-2 border-orange-300 dark:border-orange-700">
-            <div className="bg-orange-100 dark:bg-orange-950 p-4 border-b">
-              <h3 className="font-bold text-sm mb-1">HANDLING OBJECTION</h3>
-              <p className="text-xs text-muted-foreground">
+          <Card className="flex-1 overflow-hidden border-2 border-orange-600 dark:border-orange-500 bg-white dark:bg-gray-950">
+            <div className="bg-orange-200 dark:bg-orange-950 p-3 border-b border-orange-300 dark:border-orange-700">
+              <h3 className="font-bold text-sm mb-1 text-gray-900 dark:text-gray-100">HANDLING OBJECTION</h3>
+              <p className="text-xs text-gray-700 dark:text-gray-300">
                 Frequency: {activeObjection.statistics?.frequency} | 
                 Success: {activeObjection.statistics?.conversionRate}
               </p>
@@ -443,14 +454,14 @@ export default function ComprehensiveScriptDemo({
           </Card>
         )}
 
-        {/* Conversation History */}
+        {/* Conversation History - High Contrast */}
         {conversationHistory.length > 0 && (
-          <Card className="p-3">
-            <h4 className="text-xs font-semibold mb-2">Conversation Flow:</h4>
+          <Card className="p-3 bg-white dark:bg-gray-950 border-2 border-gray-300 dark:border-gray-700">
+            <h4 className="text-xs font-bold mb-2 text-gray-900 dark:text-gray-100">Conversation Flow:</h4>
             <ScrollArea className="h-32">
               <div className="space-y-1">
                 {conversationHistory.map((item, idx) => (
-                  <p key={idx} className="text-xs text-muted-foreground">
+                  <p key={idx} className="text-xs text-gray-700 dark:text-gray-300 font-medium">
                     {item}
                   </p>
                 ))}

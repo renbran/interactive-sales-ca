@@ -111,6 +111,38 @@ export function useAudioRecorder() {
                     setRecordingTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
                 }
             }, 1000);
+            
+            // CRITICAL FIX: Prevent audio track from auto-stopping
+            // Keep the audio stream alive by preventing browser from suspending it
+            audioTrack.addEventListener('ended', () => {
+                console.warn('⚠️ Audio track ended unexpectedly!');
+                // Attempt to restart if still recording
+                if (isRecording && mediaRecorderRef.current?.state === 'recording') {
+                    console.log('🔄 Attempting to restart audio...');
+                    // Don't auto-restart to prevent infinite loops
+                    // Just log for debugging
+                }
+            });
+            
+            // Keep audio context alive with silent processing
+            // This prevents browser from suspending the audio stream
+            if (window.AudioContext || window.webkitAudioContext) {
+                try {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContextClass();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    // Connect to destination to keep context alive (silent)
+                    const gainNode = audioContext.createGain();
+                    gainNode.gain.value = 0; // Silent
+                    source.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    // Store context to prevent garbage collection
+                    window.__audioKeepAliveContext = audioContext;
+                    console.log('✅ Audio keep-alive context created');
+                } catch (err) {
+                    console.warn('⚠️ Could not create keep-alive context:', err);
+                }
+            }
             console.log('✅ Recording started successfully');
             console.log('   Format:', selectedFormat);
             console.log('   MIME:', mimeType || 'browser default');
@@ -199,6 +231,16 @@ export function useAudioRecorder() {
                 if (timerRef.current) {
                     clearInterval(timerRef.current);
                     timerRef.current = null;
+                }
+                // Clean up audio keep-alive context
+                if (window.__audioKeepAliveContext) {
+                    try {
+                        window.__audioKeepAliveContext.close();
+                        delete window.__audioKeepAliveContext;
+                        console.log('✅ Audio keep-alive context cleaned up');
+                    } catch (err) {
+                        console.warn('⚠️ Error closing audio context:', err);
+                    }
                 }
                 setIsRecording(false);
                 setIsPaused(false);
